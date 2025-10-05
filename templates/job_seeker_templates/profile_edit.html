@@ -1,0 +1,687 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit Profile - Professional Profile{% endblock %}
+
+{% block content %}
+<style>
+    /* Navigation Styles */
+    .navbar {
+        padding: 15px 0;
+        transition: all 0.3s ease;
+        background: white !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        width: 100%;
+        z-index: 1000;
+    }
+    
+    .navbar-brand {
+        font-weight: 700;
+        font-size: 1.8rem;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+    }
+    
+    .navbar-brand .logo {
+        height: 100px;
+        margin-right: 10px;
+    }
+    
+    .navbar-nav .nav-link {
+        color: var(--dark);
+        font-weight: 500;
+        margin: 0 10px;
+        transition: color 0.3s ease;
+        position: relative;
+    }
+    
+    .navbar-nav .nav-link::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: 0;
+        left: 0;
+        background-color: var(--primary);
+        transition: width 0.3s ease;
+    }
+    
+    .navbar-nav .nav-link:hover::after,
+    .navbar-nav .nav-link.active::after {
+        width: 100%;
+    }
+    
+    .navbar-nav .nav-link:hover,
+    .navbar-nav .nav-link.active {
+        color: var(--primary);
+    }
+    
+    .btn-primary {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        padding: 10px 25px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .btn-outline-primary {
+        border-color: var(--primary);
+        color: var(--primary);
+        padding: 10px 25px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Profile Hero Section */
+    .profile-hero {
+        background: linear-gradient(rgba(1, 12, 22, 0.8), rgba(2, 13, 23, 0.8)), url('https://images.unsplash.com/photo-1521791136064-7986c2920216?ixlib=rb-4.0.3&auto=format&fit=crop&w=1500&q=80');
+        background-size: cover;
+        background-position: center;
+        padding: 100px 0 60px;
+        color: white;
+    }
+    
+    .hero-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+    
+    .breadcrumb {
+        background: transparent;
+        margin-bottom: 0;
+        padding: 0;
+    }
+    
+    .breadcrumb-item a {
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item.active {
+        color: white;
+    }
+    
+    .breadcrumb-item + .breadcrumb-item::before {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Profile Content */
+    .profile-content {
+        padding: 80px 0;
+    }
+
+    .profile-card {
+        background: white;
+        border-radius: 12px;
+        padding: 40px;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+        margin-bottom: 30px;
+        border: 1px solid #f1f5f9;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .profile-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
+    }
+
+    .form-section {
+        margin-bottom: 40px;
+        padding-bottom: 30px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .form-section:last-of-type {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .section-title {
+        font-weight: 600;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid var(--light);
+        color: var(--dark);
+        position: relative;
+        font-size: 1.4rem;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        width: 50px;
+        height: 3px;
+        background: var(--primary);
+        bottom: -2px;
+        left: 0;
+        border-radius: 3px;
+    }
+
+    .section-title i {
+        color: var(--primary);
+        margin-right: 10px;
+    }
+
+    /* Form Styles */
+    .form-label {
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    .form-control, .form-select {
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background-color: #fff;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(37, 125, 212, 0.15);
+        background-color: #fff;
+    }
+
+    .form-control.is-invalid, .form-select.is-invalid {
+        border-color: #dc3545;
+    }
+
+    .form-control.is-valid, .form-select.is-valid {
+        border-color: #198754;
+    }
+
+    .form-text {
+        color: var(--secondary);
+        font-size: 0.85rem;
+        margin-top: 6px;
+    }
+
+    .invalid-feedback {
+        font-size: 0.85rem;
+        color: #dc3545;
+    }
+
+    .valid-feedback {
+        font-size: 0.85rem;
+        color: #198754;
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        padding: 12px 30px;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(37, 125, 212, 0.3);
+    }
+
+    .btn-outline-primary {
+        border-color: var(--primary);
+        color: var(--primary);
+        padding: 12px 30px;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(37, 125, 212, 0.2);
+    }
+
+    .btn-outline-secondary {
+        border-color: #94a3b8;
+        color: #64748b;
+        padding: 12px 30px;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #f8fafc;
+        border-color: #64748b;
+        color: #475569;
+        transform: translateY(-2px);
+    }
+
+    /* Form Actions */
+    .form-actions {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 30px;
+        margin-top: 40px;
+        border: 1px solid #e2e8f0;
+    }
+
+    /* Side Navigation */
+    .side-nav {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+        margin-bottom: 30px;
+        height: 100%;
+        border: 1px solid #f1f5f9;
+    }
+
+    .side-nav .nav-title {
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e2e8f0;
+        color: var(--dark);
+        position: relative;
+    }
+
+    .side-nav .nav-title::after {
+        content: '';
+        position: absolute;
+        width: 40px;
+        height: 3px;
+        background: var(--primary);
+        bottom: 0;
+        left: 0;
+        border-radius: 3px;
+    }
+
+    .side-nav .nav-link {
+        color: var(--secondary);
+        padding: 12px 15px;
+        border-radius: 8px;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+
+    .side-nav .nav-link i {
+        margin-right: 10px;
+        width: 20px;
+        text-align: center;
+    }
+
+    .side-nav .nav-link:hover,
+    .side-nav .nav-link.active {
+        background-color: var(--light);
+        color: var(--primary);
+    }
+
+    .side-nav .nav-link.active {
+        font-weight: 500;
+    }
+
+    /* Required field indicator */
+    .required::after {
+        content: " *";
+        color: #dc3545;
+    }
+
+    /* Character count for textareas */
+    .char-count {
+        font-size: 0.8rem;
+        color: var(--secondary);
+        text-align: right;
+        margin-top: 5px;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 992px) {
+        .hero-title {
+            font-size: 2.2rem;
+        }
+        
+        .profile-card {
+            padding: 30px 25px;
+        }
+        
+        .form-actions {
+            padding: 25px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 1.8rem;
+        }
+        
+        .profile-content {
+            padding: 60px 0;
+        }
+        
+        .profile-card {
+            padding: 25px 20px;
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+        }
+        
+        .btn-primary,
+        .btn-outline-primary,
+        .btn-outline-secondary {
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+        
+        .form-actions {
+            padding: 20px;
+        }
+        
+        .form-actions .d-flex {
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .form-actions .btn {
+            width: 100%;
+            text-align: center;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .profile-card {
+            padding: 20px 15px;
+            margin-left: -10px;
+            margin-right: -10px;
+            border-radius: 8px;
+        }
+        
+        .section-title {
+            font-size: 1.1rem;
+        }
+    }
+</style>
+
+<!-- Hero Section -->
+<section class="profile-hero">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <h1 class="hero-title">Edit Profile</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'jobseeker_dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'profile_view' %}">Profile</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Edit Profile</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Profile Content -->
+<section class="profile-content">
+    <div class="container">
+        <div class="row">
+            <!-- Side Navigation -->
+            {% include "include/job_seeker_sidenav.html" %}
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                <div class="profile-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="page-title mb-0">Edit Profile</h2>
+                        <a href="{% url 'profile_view' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-eye me-2"></i>View Profile
+                        </a>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Personal Information Section -->
+                        <div class="form-section">
+                            <h4 class="section-title">
+                                <i class="fas fa-user-circle"></i>Personal Information
+                            </h4>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.first_name.id_for_label }}" class="form-label required">First Name</label>
+                                    {{ form.first_name }}
+                                    {% if form.first_name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.first_name.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.last_name.id_for_label }}" class="form-label required">Last Name</label>
+                                    {{ form.last_name }}
+                                    {% if form.last_name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.last_name.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.email.id_for_label }}" class="form-label required">Email Address</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.email.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Contact Information Section -->
+                        <div class="form-section">
+                            <h4 class="section-title">
+                                <i class="fas fa-phone-alt"></i>Contact Information
+                            </h4>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.phone.id_for_label }}" class="form-label">Phone Number</label>
+                                    {{ form.phone }}
+                                    <div class="form-text">Format: +1234567890</div>
+                                    {% if form.phone.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.phone.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.preferred_contact_method.id_for_label }}" class="form-label">Preferred Contact Method</label>
+                                    {{ form.preferred_contact_method }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Career Information Section -->
+                        <div class="form-section">
+                            <h4 class="section-title">
+                                <i class="fas fa-briefcase"></i>Career Information
+                            </h4>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.years_of_experience.id_for_label }}" class="form-label required">Years of Experience</label>
+                                    {{ form.years_of_experience }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.highest_education.id_for_label }}" class="form-label required">Highest Education</label>
+                                    {{ form.highest_education }}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.location.id_for_label }}" class="form-label required">Location</label>
+                                {{ form.location }}
+                                {% if form.location.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.location.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Skills Section -->
+                        <div class="form-section">
+                            <h4 class="section-title">
+                                <i class="fas fa-tools"></i>Skills & Expertise
+                            </h4>
+                            <div class="mb-3">
+                                <label for="{{ form.key_skills.id_for_label }}" class="form-label">Key Skills</label>
+                                {{ form.key_skills }}
+                                <div class="form-text">Separate skills with commas (e.g., Python, Django, SQL, JavaScript)</div>
+                                {% if form.key_skills.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.key_skills.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Online Presence Section -->
+                        <div class="form-section">
+                            <h4 class="section-title">
+                                <i class="fas fa-globe"></i>Online Presence
+                            </h4>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.linkedin_url.id_for_label }}" class="form-label">LinkedIn URL</label>
+                                    {{ form.linkedin_url }}
+                                    {% if form.linkedin_url.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.linkedin_url.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.portfolio_url.id_for_label }}" class="form-label">Portfolio URL</label>
+                                    {{ form.portfolio_url }}
+                                    {% if form.portfolio_url.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.portfolio_url.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Information Section -->
+                        <div class="form-section">
+                            <h4 class="section-title">
+                                <i class="fas fa-file-alt"></i>Additional Information
+                            </h4>
+                            <div class="mb-4">
+                                <label for="{{ form.address.id_for_label }}" class="form-label">Address</label>
+                                {{ form.address }}
+                                {% if form.address.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.address.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.cover_letter.id_for_label }}" class="form-label">Professional Summary</label>
+                                {{ form.cover_letter }}
+                                <div class="form-text">Briefly describe your professional background, skills, and career objectives.</div>
+                                {% if form.cover_letter.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.cover_letter.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="{% url 'profile_view' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>Back to Profile
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Bootstrap form validation
+    (function () {
+        'use strict'
+        
+        var forms = document.querySelectorAll('.needs-validation')
+        
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+
+    // Add real-time validation styling
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('.form-control, .form-select');
+        
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.checkValidity()) {
+                    this.classList.add('is-valid');
+                    this.classList.remove('is-invalid');
+                } else {
+                    this.classList.add('is-invalid');
+                    this.classList.remove('is-valid');
+                }
+            });
+            
+            input.addEventListener('input', function() {
+                if (this.checkValidity()) {
+                    this.classList.add('is-valid');
+                    this.classList.remove('is-invalid');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

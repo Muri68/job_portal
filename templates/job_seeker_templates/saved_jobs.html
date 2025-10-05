@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Saved Jobs{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h2 mb-1">My Saved Jobs</h1>
+                    <p class="text-muted">{{ total_saved }} saved job{{ total_saved|pluralize }}</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'job_listings' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-search me-2"></i>Browse More Jobs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Sidebar with categories -->
+        <div class="col-lg-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Categories</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="{% url 'saved_jobs' %}" 
+                           class="list-group-item list-group-item-action {% if not category_filter %}active{% endif %}">
+                            All Saved Jobs
+                            <span class="badge bg-primary float-end">{{ total_saved }}</span>
+                        </a>
+                        {% for category_code, category_name in categories %}
+                        <a href="{% url 'saved_jobs' %}?category={{ category_code }}" 
+                           class="list-group-item list-group-item-action {% if category_filter == category_code %}active{% endif %}">
+                            {{ category_name }}
+                            <span class="badge bg-secondary float-end">{{ category_counts.category_code }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Saved Jobs List -->
+        <div class="col-lg-9">
+            {% if saved_jobs %}
+                {% for saved_job in saved_jobs %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h5 class="card-title">
+                                    <a href="{% url 'job_detail_frontend' saved_job.job.id %}" class="text-decoration-none">
+                                        {{ saved_job.job.title }}
+                                    </a>
+                                </h5>
+                                <p class="card-text text-muted mb-2">
+                                    <i class="fas fa-map-marker-alt me-1"></i>{{ saved_job.job.location }}
+                                    • {{ saved_job.job.get_workplace_type_display }}
+                                </p>
+                                <div class="d-flex align-items-center gap-3 mb-2">
+                                    <span class="badge bg-{{ saved_job.get_category_display|lower }}">
+                                        {{ saved_job.get_category_display }}
+                                    </span>
+                                    <small class="text-muted">
+                                        Saved {{ saved_job.saved_at|timesince }} ago
+                                    </small>
+                                </div>
+                                {% if saved_job.notes %}
+                                <div class="mt-2 p-2 bg-light rounded">
+                                    <small class="text-muted"><strong>Your notes:</strong> {{ saved_job.notes }}</small>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="d-flex flex-column gap-2">
+                                <button class="btn btn-outline-danger btn-sm" 
+                                        onclick="unsaveJob({{ saved_job.job.id }})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                <a href="{% url 'job_detail_frontend' saved_job.job.id %}" 
+                                   class="btn btn-primary btn-sm">
+                                    View Job
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-bookmark fa-3x text-muted mb-3"></i>
+                    <h3>No saved jobs yet</h3>
+                    <p class="text-muted mb-4">
+                        {% if category_filter %}
+                            No jobs found in this category.
+                        {% else %}
+                            Start saving jobs that interest you to keep track of opportunities.
+                        {% endif %}
+                    </p>
+                    <a href="{% url 'job_listings' %}" class="btn btn-primary">
+                        <i class="fas fa-search me-2"></i>Browse Jobs
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,729 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Hugo 0.84.0">
+    <title>{% block title %}Company Dashboard · Bootstrap v5.0{% endblock %}</title>
+
+    <link rel="canonical" href="https://getbootstrap.com/docs/5.0/examples/dashboard/">
+
+    <!-- Bootstrap core CSS -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Bootstrap Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/45.0.0/ckeditor5.css" />
+     <style>
+      .ck-editor__editable {
+          min-height: 200px;
+          border: 1px solid #ced4da;
+          border-radius: 0.375rem;
+      }
+      .ck.ck-editor {
+          margin-top: 0.5rem;
+      }
+      .django-ckeditor5-widget {
+          width: 100% !important;
+      }
+    </style>
+
+
+    {% comment %} <!-- Favicons -->
+    <link rel="apple-touch-icon" href="/docs/5.0/assets/img/favicons/apple-touch-icon.png" sizes="180x180">
+    <link rel="icon" href="/docs/5.0/assets/img/favicons/favicon-32x32.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="/docs/5.0/assets/img/favicons/favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="manifest" href="/docs/5.0/assets/img/favicons/manifest.json">
+    <link rel="mask-icon" href="/docs/5.0/assets/img/favicons/safari-pinned-tab.svg" color="#257dd4">
+    <link rel="icon" href="/docs/5.0/assets/img/favicons/favicon.ico">
+    <meta name="theme-color" content="#257dd4"> {% endcomment %}
+
+    <style>
+
+      :root {
+          --primary: #257dd4;
+          --primary-light: #257cd491;
+          --primary-dark: #257dd4;
+          --secondary: #546E7A;
+          --accent: #FF9800;
+          --light: #E3F2FD;
+          --dark: #257dd4;
+          --gradient-start: #257dd4;
+          --gradient-end: #257dd4;
+          --sidebar-width: 280px;
+      }
+      
+      body {
+        font-size: .875rem;
+        background-color: #f5f7fb;
+        color: #333;
+        overflow-x: hidden;
+      }
+
+      /* Toast positioning */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+        
+        /* Custom toast styles */
+        .toast {
+            background-color: white;
+            border: none;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .toast-success {
+            border-left: 4px solid #198754;
+        }
+        
+        .toast-error {
+            border-left: 4px solid #dc3545;
+        }
+        
+        .toast-warning {
+            border-left: 4px solid #ffc107;
+        }
+        
+        .toast-info {
+            border-left: 4px solid #0dcaf0;
+        }
+        
+        .toast-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 0.5rem 0.75rem;
+        }
+        
+        .toast-body {
+            padding: 0.75rem;
+        }
+
+      .feather {
+        width: 16px;
+        height: 16px;
+        vertical-align: text-bottom;
+      }
+
+      /* Sidebar */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1000;
+        width: var(--sidebar-width);
+        padding: 78px 0 0;
+        box-shadow: 0 0 35px 0 rgba(49, 57, 66, 0.1);
+        background-color: #fff;
+        transition: all 0.3s ease;
+        transform: translateX(-100%);
+      }
+
+      @media (min-width: 768px) {
+        .sidebar {
+          transform: translateX(0);
+          padding: 120px 0 0; /* Adjusted for larger logo */
+        }
+      }
+
+      .sidebar.show {
+        transform: translateX(0);
+      }
+
+      .sidebar-sticky {
+        position: relative;
+        top: 0;
+        height: calc(100vh - 78px);
+        padding-top: .5rem;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+
+      @media (min-width: 768px) {
+        .sidebar-sticky {
+          height: calc(100vh - 120px); /* Adjusted for larger logo */
+        }
+      }
+
+      .sidebar .nav-link {
+        font-weight: 500;
+        color: #4a5568;
+        padding: 0.75rem 1.5rem;
+        border-left: 3px solid transparent;
+        transition: all 0.3s;
+      }
+
+      .sidebar .nav-link:hover {
+        color: var(--primary);
+        background-color: rgba(67, 97, 238, 0.05);
+        border-left-color: var(--primary);
+      }
+
+      .sidebar .nav-link.active {
+        color: var(--primary);
+        background-color: rgba(67, 97, 238, 0.1);
+        border-left-color: var(--primary);
+      }
+
+      .sidebar .nav-link i {
+        margin-right: 12px;
+        font-size: 18px;
+        width: 24px;
+        text-align: center;
+      }
+
+      .sidebar-heading {
+        font-size: .75rem;
+        text-transform: uppercase;
+        padding: 0 1.5rem;
+        margin-top: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: #718096;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+
+      /* Company Logo Styles */
+      .company-logo {
+        padding: 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        background-color: #fff;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: var(--sidebar-width);
+        z-index: 1001;
+        height: 78px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+      }
+
+      .logo-img {
+        max-height: 60px;
+        width: auto;
+        object-fit: contain;
+      }
+
+      /* For larger screens */
+      @media (min-width: 768px) {
+        .logo-img {
+          max-height: 100px; /* At least 100px on larger screens */
+          min-height: 100px;
+        }
+        
+        .company-logo {
+          height: 120px; /* Increase container height to accommodate larger logo */
+        }
+      }
+
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+      
+      .main-content {
+        padding: 20px 15px;
+        transition: all 0.3s;
+        width: 100%;
+      }
+      
+      @media (min-width: 768px) {
+        .main-content {
+          margin-left: var(--sidebar-width);
+          width: calc(100% - var(--sidebar-width));
+        }
+      }
+      
+      /* Navbar */
+      .navbar {
+        background: linear-gradient(120deg, var(--primary), var(--secondary));
+        box-shadow: 0 2px 10px rgba(67, 97, 238, 0.15);
+        height: 78px;
+        position: sticky;
+        top: 0;
+        z-index: 999;
+      }
+      
+      .navbar-brand {
+        color: white !important;
+        font-weight: 600;
+      }
+      
+      /* User profile in sidebar */
+      .user-profile {
+        padding: 1.5rem;
+        border-top: 1px solid #e2e8f0;
+        margin-top: auto;
+        background-color: #f8fafc;
+      }
+      
+      .user-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #fff;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      
+      .user-name {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.25rem;
+      }
+      
+      .user-email {
+        color: #718096;
+        font-size: 0.8rem;
+        margin-bottom: 0.25rem;
+      }
+      
+      .user-role {
+        display: inline-block;
+        background-color: rgba(67, 97, 238, 0.1);
+        color: var(--primary);
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+      
+      /* Cards */
+      .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+      
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      }
+      
+      .card-header {
+        background-color: white;
+        border-bottom: 1px solid #e2e8f0;
+        font-weight: 600;
+        padding: 1.25rem;
+        border-radius: 10px 10px 0 0 !important;
+      }
+      
+      /* Toggle button */
+      #sidebarToggle {
+        color: white;
+        border: none;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1050;
+        transition: all 0.3s ease;
+      }
+      
+      #sidebarToggle:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+      
+      /* Overlay for mobile */
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+      }
+      
+      .sidebar-overlay.active {
+        display: block;
+      }
+      
+      /* Chart container */
+      .chart-container {
+        position: relative;
+        height: 300px;
+      }
+      
+      @media (min-width: 992px) {
+        .chart-container {
+          height: 380px;
+        }
+      }
+      
+      /* Table improvements */
+      .table th {
+        border-top: none;
+        font-weight: 600;
+        color: #4a5568;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+      }
+      
+      .table-hover tbody tr:hover {
+        background-color: rgba(67, 97, 238, 0.03);
+      }
+      
+      /* Main header */
+      .main-header {
+        background-color: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+      }
+      
+      /* Stats card design */      
+      .stats-card .text-primary {
+        color: #4361ee !important;
+      }
+      
+      .stats-card .text-success {
+        color: #4cc9f0 !important;
+      }
+      
+      .stats-card .text-warning {
+        color: #ffc107 !important;
+      }
+      
+      .stats-card .text-info {
+        color: #17a2b8 !important;
+      }
+      
+      .stats-card .badge {
+        font-size: 0.9rem;
+        font-weight: 500;
+        padding: 0.5rem;
+      }
+      
+      /* Responsive adjustments */
+      @media (max-width: 767.98px) {
+        .company-logo {
+          width: 100%;
+        }
+        
+        .table-responsive {
+          font-size: 0.8rem;
+        }
+        
+        .btn-group .btn {
+          font-size: 0.75rem;
+          padding: 0.25rem 0.5rem;
+        }
+        
+        .main-header {
+          padding: 1rem;
+        }
+        
+        .card-body {
+          padding: 1rem;
+        }
+        
+        .user-profile {
+          padding: 1rem;
+        }
+        
+        .user-avatar {
+          width: 40px;
+          height: 40px;
+        }
+        
+        .stats-card .flex-grow-1,
+        .stats-card .flex-shrink-0 {
+          flex: 0 0 50%;
+          max-width: 50%;
+        }
+      }
+      
+      /* Stats cards responsive */
+      .stats-card {
+        margin-bottom: 1rem;
+      }
+      
+      @media (max-width: 575.98px) {
+        .stats-card .d-flex {
+          flex-direction: column;
+          text-align: center;
+        }
+        
+        .stats-card .flex-shrink-0 {
+          margin-top: 1rem;
+        }
+      }
+      
+      /* Toggle button animation */
+      #sidebarToggle .bi-list {
+        transition: transform 0.3s ease;
+      }
+      
+      #sidebarToggle .bi-x {
+        opacity: 0;
+        transform: scale(0.5);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        position: absolute;
+      }
+      
+      #sidebarToggle.active .bi-list {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+      
+      #sidebarToggle.active .bi-x {
+        opacity: 1;
+        transform: scale(1);
+      }
+      
+      @media (min-width: 768px) {
+        #sidebarToggle {
+          display: none;
+        }
+      }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body>
+    <!-- Floating Sidebar Toggle Button -->
+    <button id="sidebarToggle" 
+            class="btn btn-light rounded-circle shadow position-fixed"
+            style="z-index: 1050;">
+      <i class="bi bi-list fs-4"></i>
+      <i class="bi bi-x fs-2"></i>
+    </button>
+
+    <!-- Overlay for mobile sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="container-fluid">
+      
+      <div class="row">
+        <!-- Sidebar -->
+        {% include "job/include/sidebar.html" %}
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+          {% block content %}
+          <!-- Default content that can be overridden by child templates -->
+          
+          {% endblock %}
+        </main>
+      </div>
+    </div>
+
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js" integrity="sha384-uO3SXW5IuS1ZpFPKugNNWqTZRRglnUJK6UAZ/gxOX80nxEkN9NcGZTftn6RzhGWE" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js" integrity="sha384-zNy6FEbO50N+Cg5wap8IKA4M/ZnLJgzc6w2NqACZaK0u0FXfOWRRJOnQtpZun8ha" crossorigin="anonymous"></script>
+    <!-- CKEditor 5 JS -->
+    <script src="{% static 'ckeditor5/ckeditor5.js' %}"></script>
+    <script>
+      // Toggle sidebar on mobile
+      document.getElementById('sidebarToggle').addEventListener('click', function() {
+        const sidebar = document.getElementById('sidebarMenu');
+        const overlay = document.getElementById('sidebarOverlay');
+        const toggleBtn = document.getElementById('sidebarToggle');
+        
+        sidebar.classList.toggle('show');
+        overlay.classList.toggle('active');
+        toggleBtn.classList.toggle('active');
+        
+        // Adjust button position when sidebar is open
+        if (sidebar.classList.contains('show')) {
+          toggleBtn.style.left = 'calc(var(--sidebar-width) + 20px)';
+        } else {
+          toggleBtn.style.left = '20px';
+        }
+      });
+
+      // Close sidebar when clicking on overlay
+      document.getElementById('sidebarOverlay').addEventListener('click', function() {
+        const sidebar = document.getElementById('sidebarMenu');
+        const overlay = document.getElementById('sidebarOverlay');
+        const toggleBtn = document.getElementById('sidebarToggle');
+        
+        sidebar.classList.remove('show');
+        overlay.classList.remove('active');
+        toggleBtn.classList.remove('active');
+        toggleBtn.style.left = '20px';
+      });
+
+      // Reset button position on window resize
+      window.addEventListener('resize', function() {
+        const sidebar = document.getElementById('sidebarMenu');
+        const toggleBtn = document.getElementById('sidebarToggle');
+        
+        if (window.innerWidth >= 768) {
+          // Desktop view - reset button position
+          toggleBtn.style.left = '20px';
+          toggleBtn.classList.remove('active');
+        } else if (sidebar.classList.contains('show')) {
+          // Mobile view with sidebar open
+          toggleBtn.style.left = 'calc(var(--sidebar-width) + 20px)';
+          toggleBtn.classList.add('active');
+        } else {
+          // Mobile view with sidebar closed
+          toggleBtn.style.left = '20px';
+          toggleBtn.classList.remove('active');
+        }
+      });
+
+      // Initialize Feather Icons
+      feather.replace({ 'aria-hidden': 'true' });
+      
+      // Graphs
+      var ctx = document.getElementById('myChart');
+      if (ctx) {
+        var myChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: [
+              'Monday',
+              'Tuesday',
+              'Wednesday',
+              'Thursday',
+              'Friday',
+              'Saturday',
+              'Sunday'
+            ],
+            datasets: [{
+              label: 'Applications',
+              data: [34, 45, 52, 38, 49, 15, 8],
+              lineTension: 0.3,
+              backgroundColor: 'rgba(67, 97, 238, 0.05)',
+              borderColor: '#4361ee',
+              borderWidth: 2,
+              pointBackgroundColor: '#4361ee',
+              pointRadius: 3,
+              pointHoverRadius: 5
+            }, {
+              label: 'Interviews',
+              data: [12, 18, 15, 22, 19, 5, 2],
+              lineTension: 0.3,
+              backgroundColor: 'rgba(76, 201, 240, 0.05)',
+              borderColor: '#4cc9f0',
+              borderWidth: 2,
+              pointBackgroundColor: '#4cc9f0',
+              pointRadius: 3,
+              pointHoverRadius: 5
+            }]
+          },
+          options: {
+            scales: {
+              yAxes: [{
+                ticks: {
+                  beginAtZero: true
+                }
+              }]
+            },
+            legend: {
+              display: true,
+              position: 'bottom'
+            },
+            maintainAspectRatio: false
+          }
+        });
+      }
+
+      // Adjust chart on window resize
+      window.addEventListener('resize', function() {
+        if (myChart) {
+          myChart.resize();
+        }
+      });
+    </script>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999">
+        {% for message in messages %}
+            <div class="toast" 
+                role="alert" 
+                aria-live="assertive" 
+                aria-atomic="true"
+                data-bs-delay="5000">
+                <div class="toast-header {% if message.tags == 'success' %}bg-success text-white{% elif message.tags == 'error' %}bg-danger text-white{% elif message.tags == 'warning' %}bg-warning text-dark{% else %}bg-info text-white{% endif %}">
+                    {% if message.tags == 'success' %}
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                    {% elif message.tags == 'error' %}
+                        <i class="bi bi-exclamation-circle-fill me-2"></i>
+                    {% elif message.tags == 'warning' %}
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    {% else %}
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                    {% endif %}
+                    <strong class="me-auto">
+                        {% if message.tags == 'success' %}
+                            Success
+                        {% elif message.tags == 'error' %}
+                            Error
+                        {% elif message.tags == 'warning' %}
+                            Warning
+                        {% else %}
+                            Info
+                        {% endif %}
+                    </strong>
+                    <small>just now</small>
+                    <button type="button" class="btn-close {% if message.tags == 'warning' %}btn-close-dark{% else %}btn-close-white{% endif %} ms-2" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    {{ message }}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        // Initialize toasts when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+            var toastList = toastElList.map(function(toastEl) {
+                var toast = new bootstrap.Toast(toastEl, {
+                    autohide: true,
+                    delay: 5000
+                });
+                toast.show();
+                
+                // Remove toast from DOM after it's hidden
+                toastEl.addEventListener('hidden.bs.toast', function() {
+                    this.remove();
+                });
+                
+                return toast;
+            });
+        });
+    </script>
+
+    {% include "job/include/modals.html" %}
+    
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>

@@ -1,0 +1,26 @@
+{% extends "job/base.html" %}
+{% block content %}
+<div class="container my-4">
+  <h3>Interview Details</h3>
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title">{{ interview.get_interview_type_display }}</h5>
+      <p><strong>Description:</strong> {{ interview.description }}</p>
+      <p><strong>Date & Time:</strong> {{ interview.date_time|date:"M d, Y H:i" }}</p>
+      {% if interview.interview_type == 'onsite' %}
+        <p><strong>Location:</strong> {{ interview.location }}</p>
+      {% elif interview.interview_type == 'online' %}
+        <p><strong>Meeting Link:</strong> <a href="{{ interview.meeting_link }}" target="_blank">{{ interview.meeting_link }}</a></p>
+      {% endif %}
+      <p><strong>Assigned To:</strong> {{ interview.assigned_to }}</p>
+    </div>
+    <div class="card-footer d-flex justify-content-between">
+      <a href="{% url 'interview_update' interview.id %}" class="btn btn-outline-warning">Edit</a>
+      <form method="post" action="{% url 'interview_delete' interview.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-danger">Delete</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

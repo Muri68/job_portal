@@ -1,0 +1,46 @@
+<!-- Application Section -->
+<div class="application-section mt-5">
+    {% if user.is_authenticated %}
+        {% if has_applied %}
+            <div class="alert alert-info">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Application Submitted!</strong> 
+                You applied on {{ application.applied_at|date:"F j, Y" }}. 
+                <a href="{% url 'application_detail' application.id %}" class="alert-link">View Application</a>
+            </div>
+        {% else %}
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a href="{% url 'apply_for_job' job.id %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-paper-plane me-2"></i>Apply Now
+                </a>
+                <button class="btn btn-outline-primary btn-lg" data-bs-toggle="modal" data-bs-target="#quickApplyModal">
+                    <i class="fas fa-bolt me-2"></i>Quick Apply  NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+                </button>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Please <a href="{% url 'login' %}?next={% url 'job_detail_frontend' job.id %}" class="alert-link">log in</a> 
+            to apply for this position.
+        </div>
+    {% endif %}
+</div>
+
+<!-- Quick Apply Modal -->
+<div class="modal fade" id="quickApplyModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Quick Apply</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Apply with your profile information. You can upload your resume later.</p>
+                <button type="button" class="btn btn-primary w-100" onclick="quickApply({{ job.id }})">
+                    Confirm Quick Apply
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

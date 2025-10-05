@@ -1,0 +1,196 @@
+{% extends "job/base.html" %}
+{% load static %}
+
+{% block title %}Disable Two-Factor Authentication - Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    .security-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(37, 125, 212, 0.1), 0 2px 4px -1px rgba(37, 125, 212, 0.06);
+        border: 1px solid #e2e8f0;
+    }
+    
+    .warning-card {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        border: 1px solid #ffc107;
+        border-radius: 12px;
+        padding: 25px;
+    }
+    
+    .btn-warning {
+        background: #ffc107;
+        border-color: #ffc107;
+        color: #000;
+    }
+    
+    .btn-warning:hover {
+        background: #e0a800;
+        border-color: #e0a800;
+        color: #000;
+    }
+</style>
+
+<div class="main-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h3 mb-2">Disable Two-Factor Authentication</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'admin-dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'user_profile' %}">Profile</a></li>
+                    <li class="breadcrumb-item active">Disable 2FA</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="btn-group">
+            <a href="{% url 'user_profile' %}" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-person me-1"></i>Profile
+            </a>
+            <a href="{% url 'change_password' %}" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-shield-lock me-1"></i>Password
+            </a>
+            <a href="{% url 'accounts:otp_setup' %}" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-shield-check me-1"></i>2FA
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card security-card">
+            <div class="card-header bg-white border-bottom-0 pb-0">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                            <i class="bi bi-exclamation-triangle text-warning fs-2"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h4 class="card-title mb-1 text-warning">Disable Two-Factor Authentication</h4>
+                        <p class="text-muted mb-0">Remove extra security from your account</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body p-4">
+                <!-- Django Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                            <i class="bi {% if message.tags == 'success' %}bi-check-circle{% elif message.tags == 'error' %}bi-exclamation-circle{% else %}bi-info-circle{% endif %} me-2"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div class="warning-card mb-4">
+                    <div class="text-center">
+                        <i class="bi bi-exclamation-triangle-fill text-warning display-4 mb-3"></i>
+                        <h5 class="text-warning">Security Warning</h5>
+                        <p class="mb-0">
+                            Disabling two-factor authentication will remove an important security layer from your account. 
+                            This makes your account more vulnerable to unauthorized access.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="alert alert-info border-0" style="background: var(--light); border-left: 4px solid var(--primary);">
+                    <div class="d-flex">
+                        <i class="bi bi-info-circle text-primary me-2 mt-1"></i>
+                        <div>
+                            <strong>Before you proceed:</strong> Consider keeping 2FA enabled for better account security. 
+                            If you're having issues with your authenticator app, you can set up a new device instead.
+                        </div>
+                    </div>
+                </div>
+
+                <form method="post" action="{% url 'accounts:otp_disable' %}">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <label for="passwordInput" class="form-label text-primary">
+                            <strong>Confirm Your Password</strong>
+                        </label>
+                        <input type="password" 
+                               name="password" 
+                               id="passwordInput"
+                               class="form-control form-control-lg" 
+                               placeholder="Enter your password" 
+                               required>
+                        <div class="form-text">
+                            For security reasons, please enter your password to disable 2FA
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-warning btn-lg">
+                            <i class="bi bi-shield-slash me-2"></i>
+                            Disable Two-Factor Authentication
+                        </button>
+                        <a href="{% url 'user_profile' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-arrow-left me-2"></i>
+                            Keep 2FA Enabled
+                        </a>
+                    </div>
+                </form>
+
+                <!-- Security Considerations -->
+                <div class="mt-4 pt-3 border-top">
+                    <h6 class="text-primary mb-3">Security Considerations</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="bi bi-shield-exclamation text-warning me-2"></i>
+                            Your account will rely solely on password protection
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-key text-warning me-2"></i>
+                            Use a strong, unique password
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-arrow-clockwise text-warning me-2"></i>
+                            You can re-enable 2FA anytime from your profile
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordInput = document.getElementById('passwordInput');
+        const form = document.querySelector('form');
+        
+        // Auto-focus on password input
+        if (passwordInput) {
+            passwordInput.focus();
+        }
+        
+        // Add confirmation dialog for extra safety
+        form.addEventListener('submit', function(e) {
+            const password = passwordInput.value;
+            if (!password) {
+                e.preventDefault();
+                alert('Please enter your password to disable 2FA.');
+                return;
+            }
+            
+            if (!confirm('⚠️ Are you sure you want to disable two-factor authentication?\n\nThis will reduce your account security.')) {
+                e.preventDefault();
+                return;
+            }
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="bi bi-arrow-repeat spinner-border spinner-border-sm me-2"></i> Disabling...';
+                submitBtn.disabled = true;
+            }
+        });
+    });
+</script>
+{% endblock %}

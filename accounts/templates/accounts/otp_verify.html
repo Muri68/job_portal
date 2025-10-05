@@ -1,0 +1,26 @@
+{% extends "accounts/base.html" %}
+{% block title %}Verify 2FA{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-5">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h1 class="h4 mb-3">Two-Factor Authentication</h1>
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Authenticator code</label>
+            {{ form.token }}
+            {% for e in form.token.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="form-check mb-3">
+            {{ form.trust_device }}
+            <label class="form-check-label">Trust this device for 30 days</label>
+          </div>
+          <button class="btn btn-primary w-100" type="submit">Verify</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

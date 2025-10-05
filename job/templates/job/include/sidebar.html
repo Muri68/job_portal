@@ -1,0 +1,93 @@
+{% load static %}
+
+
+<nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar">
+    <div class="company-logo">
+    <img src="{% static 'img/logo-removebg-preview.png' %}" alt="Company Logo" class="logo-img">
+    </div>
+    <div class="sidebar-sticky pt-3 d-flex flex-column">
+    <div>
+        <h6 class="sidebar-heading">
+        <span>MENU</span>
+        </h6>
+        <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'admin-dashboard' %}active{% endif %}" aria-current="page" href="{% url 'admin-dashboard' %}">
+            <i class="bi bi-speedometer2"></i>
+            Dashboard
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'job_list' %}active{% endif %}" href="{% url 'job_list' %}">
+            <i class="bi bi-briefcase-fill"></i>
+            Jobs
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'applicants_list' %}active{% endif %}" href="{% url "applicants_list" %}">
+            <i class="bi bi-people-fill"></i>
+            Applicants
+            </a>
+        </li>
+        </ul>
+
+        <h6 class="sidebar-heading mt-4">
+        <span>Users Management</span>
+        </h6>
+        <ul class="nav flex-column mb-2">
+        <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'admin_users_list' %}active{% endif %}" href="{% url 'admin_users_list' %}">
+            <i class="bi bi-person-badge"></i>
+            Users
+            </a>
+        </li>
+        </ul>
+
+        <h6 class="sidebar-heading mt-4">
+        <span>Users Management</span>
+        </h6>
+        <ul class="nav flex-column mb-2">
+        <li class="nav-item">
+            
+        <a class="nav-link" href="{% url 'user_profile' %}">
+            <i class="bi bi-person"></i>
+            My Profile
+        </a>
+        </li>
+        </ul>
+    </div>
+    
+    <!-- User Profile Section at the bottom -->
+    <div class="user-profile">
+        <div class="d-flex align-items-center">
+            <img src="https://ui-avatars.com/api/?name={{ user.get_full_name|urlencode }}&background=257dd4&color=fff" 
+                        alt="{{ user.get_full_name }}" 
+                        class="user-avatar me-3">
+            <div>
+                <div class="user-name">
+                    {% if user.get_full_name %}
+                        {{ user.get_full_name }}
+                    {% else %}
+                        {{ user.email }}
+                    {% endif %}
+                </div>
+                <div class="user-email">{{ user.email }}</div>
+                <span class="user-role">
+                    {% if user.is_superuser %}
+                        Super Administrator
+                    {% elif user.role == 'site_admin' %}
+                        Administrator
+                    {% else %}
+                        Job Seeker
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+        <div class="mt-3">
+        <a href="{% url "accounts:logout" %}" class="btn btn-outline-primary btn-sm w-100">
+            <i class="bi bi-box-arrow-right me-1"></i> Sign Out
+        </a>
+        </div>
+    </div>
+    </div>
+</nav>

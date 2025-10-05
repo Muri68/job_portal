@@ -1,0 +1,270 @@
+{% comment %} Delete User Modal {% endcomment %}
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-danger" id="deleteUserModalLabel">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    Confirm User Deletion
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-person-x-fill text-danger fs-1"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-1" id="deleteUserName">User Name</h6>
+                        <p class="text-muted mb-0" id="deleteUserEmail">user@example.com</p>
+                    </div>
+                </div>
+                <div class="alert alert-warning">
+                    <h6 class="alert-heading mb-2">Warning!</h6>
+                    <ul class="mb-0 ps-3">
+                        <li>This action cannot be undone</li>
+                        <li>All user data will be permanently deleted</li>
+                        <li>Associated records may be affected</li>
+                    </ul>
+                </div>
+                <p class="mb-0">Are you sure you want to permanently delete this user?</p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> Cancel
+                </button>
+                <a href="#" id="confirmDeleteBtn" class="btn btn-danger">
+                    <i class="bi bi-trash me-1"></i> Delete User
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% comment %} Toggle User Status Modal {% endcomment %}
+<div class="modal fade" id="toggleStatusModal" tabindex="-1" aria-labelledby="toggleStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="toggleStatusModalLabel">
+                    <i class="bi bi-person-check me-2"></i>
+                    Confirm Status Change
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-person-gear text-warning fs-1" id="statusModalIcon"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-1" id="toggleStatusUserName">User Name</h6>
+                        <p class="text-muted mb-0" id="toggleStatusUserEmail">user@example.com</p>
+                        <span class="badge" id="currentStatusBadge">Active</span>
+                    </div>
+                </div>
+                <div class="alert" id="statusAlert">
+                    <h6 class="alert-heading mb-2" id="statusActionTitle">Deactivate User</h6>
+                    <p class="mb-0" id="statusActionMessage">
+                        This user will no longer be able to access the system.
+                    </p>
+                </div>
+                <p class="mb-0">Are you sure you want to change this user's status?</p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> Cancel
+                </button>
+                <a href="#" id="confirmToggleStatusBtn" class="btn btn-warning">
+                    <i class="bi bi-check-circle me-1"></i> Confirm
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% comment %} Last Superuser Protection Modal {% endcomment %}
+<div class="modal fade" id="lastSuperuserModal" tabindex="-1" aria-labelledby="lastSuperuserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 bg-warning text-dark">
+                <h5 class="modal-title" id="lastSuperuserModalLabel">
+                    <i class="bi bi-shield-exclamation me-2"></i>
+                    Security Restriction
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <i class="bi bi-shield-lock text-warning fs-1"></i>
+                </div>
+                <h6 class="text-center mb-3">Cannot Modify Last Superuser</h6>
+                <p class="text-muted text-center">
+                    This action cannot be performed because this user is the last active superuser in the system. 
+                    There must be at least one active superuser to maintain system administration.
+                </p>
+                <div class="alert alert-info">
+                    <small>
+                        <i class="bi bi-info-circle me-1"></i>
+                        To perform this action, first create another superuser account or activate an existing superuser.
+                    </small>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    <i class="bi bi-check-circle me-1"></i> Understand
+                </button>
+                <a href="{% url 'add_admin_user' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-person-plus me-1"></i> Create New Admin
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% comment %} Delete Job Modal {% endcomment %}
+<div class="modal fade" id="deleteJobModal" tabindex="-1" aria-labelledby="deleteJobModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-danger" id="deleteJobModalLabel">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    Confirm Job Deletion
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-briefcase text-danger fs-1"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-1" id="deleteJobTitle">Job Title</h6>
+                        <p class="text-muted mb-1" id="deleteJobLocation">Location</p>
+                        <p class="text-muted mb-0" id="deleteJobType">Job Type</p>
+                    </div>
+                </div>
+                <div class="alert alert-warning">
+                    <h6 class="alert-heading mb-2">Warning!</h6>
+                    <ul class="mb-0 ps-3">
+                        <li>This action cannot be undone</li>
+                        <li>All job data will be permanently deleted</li>
+                        <li>Associated applications will be affected</li>
+                    </ul>
+                </div>
+                <p class="mb-0">Are you sure you want to permanently delete this job?</p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> Cancel
+                </button>
+                <form method="post" action="" id="confirmDeleteForm" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i> Delete Job
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% comment %} Disable 2FA Modal {% endcomment %}
+<div class="modal fade" id="disable2FAModal" tabindex="-1" aria-labelledby="disable2FAModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-danger" id="disable2FAModalLabel">
+                    <i class="bi bi-shield-exclamation me-2"></i>
+                    Disable Two-Factor Authentication
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="flex-shrink-0">
+                        <div class="bg-danger bg-opacity-10 rounded-circle p-3">
+                            <i class="bi bi-shield-slash text-danger fs-2"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-1">{{ user.get_display_name }}</h6>
+                        <p class="text-muted mb-0">{{ user.email }}</p>
+                    </div>
+                </div>
+                
+                <div class="alert alert-primary border-primary">
+                    <h6 class="alert-heading mb-2">
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        Security Warning
+                    </h6>
+                    <ul class="mb-0 ps-3">
+                        <li>Removing 2FA reduces your account security</li>
+                        <li>Your account will rely solely on password protection</li>
+                        <li>Consider keeping 2FA enabled for better security</li>
+                    </ul>
+                </div>
+
+                <form method="post" action="{% url 'accounts:otp_disable' %}" id="disable2FAForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="disablePassword" class="form-label text-primary">
+                            <strong>Confirm Your Password</strong>
+                        </label>
+                        <input type="password" 
+                               name="password" 
+                               id="disablePassword"
+                               class="form-control" 
+                               placeholder="Enter your password" 
+                               required>
+                        <div class="form-text">
+                            For security reasons, please enter your password to disable 2FA
+                        </div>
+                    </div>
+                </form>
+                
+                <p class="text-muted small mb-0">
+                    <i class="bi bi-info-circle me-1"></i>
+                    You can re-enable 2FA anytime from your profile settings.
+                </p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> Keep 2FA Enabled
+                </button>
+                <button type="submit" form="disable2FAForm" class="btn btn-danger">
+                    <i class="bi bi-shield-slash me-1"></i> Disable 2FA
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Delete Job Modal
+        const deleteJobModal = document.getElementById('deleteJobModal');
+        if (deleteJobModal) {
+            deleteJobModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const jobId = button.getAttribute('data-job-id');
+                const jobTitle = button.getAttribute('data-job-title');
+                const jobLocation = button.getAttribute('data-job-location');
+                const jobType = button.getAttribute('data-job-type');
+                
+                // Update modal content
+                document.getElementById('deleteJobTitle').textContent = jobTitle;
+                document.getElementById('deleteJobLocation').textContent = jobLocation;
+                document.getElementById('deleteJobType').textContent = jobType;
+                
+                // Update form action
+                const form = document.getElementById('confirmDeleteForm');
+                form.action = "{% url 'job_delete' 0 %}".replace('0', jobId);
+            });
+        }
+    });
+</script>
+{% endblock %}

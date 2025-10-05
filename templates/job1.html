@@ -1,0 +1,863 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <style>
+        
+        /* Navigation Styles */
+        .navbar {
+            padding: 15px 0;
+            transition: all 0.3s ease;
+            background: white !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .navbar-brand .logo {
+            height: 100px;
+            margin-right: 10px;
+        }
+        
+        .navbar-nav .nav-link {
+            color: var(--dark);
+            font-weight: 500;
+            margin: 0 10px;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+        
+        .navbar-nav .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        .navbar-nav .nav-link:hover::after,
+        .navbar-nav .nav-link.active::after {
+            width: 100%;
+        }
+        
+        .navbar-nav .nav-link:hover,
+        .navbar-nav .nav-link.active {
+            color: var(--primary);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            padding: 12px 30px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-outline-primary {
+            border-color: var(--primary);
+            color: var(--primary);
+            padding: 10px 25px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Hero Section */
+        .job-hero {
+            background: linear-gradient(rgba(3, 19, 19, 0.9), rgba(3, 15, 15, 0.8)), url('https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-4.0.3&auto=format&fit=crop&w=1500&q=80');
+            background-size: cover;
+            background-position: center;
+            padding: 100px 0 60px;
+            color: white;
+        }
+        
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .breadcrumb {
+            background: transparent;
+            margin-bottom: 0;
+            padding: 0;
+        }
+        
+        .breadcrumb-item a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: white;
+        }
+        
+        .breadcrumb-item + .breadcrumb-item::before {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Job Details Section */
+        .job-details-section {
+            padding: 80px 0;
+        }
+        
+        .job-header {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .job-header:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .company-logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-right: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            transition: transform 0.3s ease;
+        }
+        
+        .job-header:hover .company-logo {
+            transform: scale(1.05);
+        }
+        
+        .job-type {
+            background: var(--light);
+            color: var(--primary);
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        
+        .job-title {
+            font-weight: 700;
+            margin-bottom: 5px;
+            font-size: 1.8rem;
+            color: var(--dark);
+        }
+        
+        .company-name {
+            color: var(--secondary);
+            margin-bottom: 15px;
+            display: block;
+            font-size: 1.2rem;
+        }
+        
+        .job-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .job-meta-item {
+            display: flex;
+            align-items: center;
+            color: var(--secondary);
+        }
+        
+        .job-meta-item i {
+            margin-right: 8px;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+        
+        .job-salary {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .job-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        /* Content Box */
+        .content-box {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            transition: transform 0.3s ease;
+        }
+        
+        .content-box:hover {
+            transform: translateY(-3px);
+        }
+        
+        .content-title {
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            color: var(--dark);
+            position: relative;
+        }
+        
+        .content-title::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 3px;
+            background: var(--primary);
+            bottom: 0;
+            left: 0;
+            border-radius: 3px;
+        }
+        
+        /* Job Description */
+        .job-description ul {
+            padding-left: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .job-description li {
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .job-description li::before {
+            content: '•';
+            color: var(--primary);
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+        }
+        
+        /* Company Info */
+        .company-info {
+            text-align: center;
+        }
+        
+        .company-info-logo {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            margin: 0 auto 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            transition: transform 0.3s ease;
+        }
+        
+        .company-info:hover .company-info-logo {
+            transform: scale(1.05);
+        }
+        
+        .company-social {
+            margin-top: 20px;
+        }
+        
+        .company-social a {
+            color: var(--secondary);
+            margin: 0 8px;
+            font-size: 1.2rem;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+        
+        .company-social a:hover {
+            color: var(--primary);
+            transform: translateY(-3px);
+        }
+        
+        /* Application Form */
+        .application-form .form-control {
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .application-form .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(0, 80, 83, 0.15);
+        }
+        
+        .file-upload {
+            border: 2px dashed #e2e8f0;
+            border-radius: 6px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+        
+        .file-upload:hover {
+            border-color: var(--primary);
+            background-color: rgba(0, 80, 83, 0.05);
+        }
+        
+        .file-upload i {
+            font-size: 2rem;
+            color: var(--secondary);
+            margin-bottom: 10px;
+            transition: color 0.3s ease;
+        }
+        
+        .file-upload:hover i {
+            color: var(--primary);
+        }
+        
+        /* Related Jobs */
+        .related-jobs-section {
+            background: var(--light);
+            padding: 80px 0;
+        }
+        
+        .section-title {
+            margin-bottom: 50px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .section-title h2 {
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 15px;
+        }
+        
+        .section-title p {
+            color: var(--secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 4px;
+            background: var(--primary);
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+        
+        .related-job-card {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-top: 3px solid transparent;
+        }
+        
+        .related-job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-top-color: var(--primary);
+        }
+        
+        .related-job-type {
+            background: var(--light);
+            color: var(--primary);
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        
+        .related-company-logo {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            margin-right: 15px;
+            background: white;
+            padding: 5px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            transition: transform 0.3s ease;
+        }
+        
+        .related-job-card:hover .related-company-logo {
+            transform: scale(1.1);
+        }
+        
+        .related-job-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+            color: var(--dark);
+        }
+        
+        .related-company-name {
+            color: var(--secondary);
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        .related-job-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .related-job-detail {
+            display: flex;
+            align-items: center;
+            color: var(--secondary);
+            font-size: 0.9rem;
+        }
+        
+        .related-job-detail i {
+            margin-right: 5px;
+            color: var(--primary);
+        }
+        
+        .related-job-salary {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 70px 0 30px;
+        }
+        
+        .footer-title {
+            font-weight: 600;
+            margin-bottom: 25px;
+            font-size: 1.2rem;
+        }
+        
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: white;
+        }
+        
+        .social-icons a {
+            color: white;
+            font-size: 1.2rem;
+            margin-right: 15px;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+        
+        .social-icons a:hover {
+            color: var(--primary-light);
+            transform: translateY(-3px);
+        }
+        
+        .copyright {
+            border-top: 1px solid #334155;
+            padding-top: 20px;
+            margin-top: 50px;
+            color: #94a3b8;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .hero-title {
+                font-size: 2.2rem;
+            }
+            
+            .job-actions {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 1.8rem;
+            }
+            
+            .job-details-section, .related-jobs-section {
+                padding: 60px 0;
+            }
+            
+            .job-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .job-title {
+                font-size: 1.5rem;
+            }
+            
+            .navbar-brand .logo {
+                height: 30px;
+            }
+        }
+    </style>
+{% endblock extra_css %}
+
+{% block content %}
+
+    <!-- Hero Section -->
+    <section class="job-hero">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h1 class="hero-title">Senior UI/UX Designer</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="#">Home</a></li>
+                            <li class="breadcrumb-item"><a href="#">Jobs</a></li>
+                            <li class="breadcrumb-item"><a href="#">Design</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Senior UI/UX Designer</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Job Details Section -->
+    <section class="job-details-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <!-- Job Header -->
+                    <div class="job-header">
+                        <div class="d-flex align-items-center">
+                            {% comment %} <img src="https://logo.clearbit.com/google.com" alt="Google" class="company-logo"> {% endcomment %}
+                            <div>
+                                <span class="job-type">Full Time</span>
+                                <h2 class="job-title">Senior UI/UX Designer</h2>
+                                <span class="company-name">Google Inc.</span>
+                                <div class="job-meta">
+                                    <div class="job-meta-item">
+                                        <i class="fas fa-map-marker-alt"></i> Mountain View, CA
+                                    </div>
+                                    <div class="job-meta-item">
+                                        <i class="fas fa-clock"></i> 5 days ago
+                                    </div>
+                                    <div class="job-meta-item">
+                                        <i class="fas fa-dollar-sign"></i> <span class="job-salary">$50K - $80K</span>
+                                    </div>
+                                    <div class="job-meta-item">
+                                        <i class="fas fa-briefcase"></i> 5+ Years Experience
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="job-actions">
+                            <a href="#" class="btn btn-primary"><i class="far fa-paper-plane me-2"></i>Apply Now</a>
+                            <a href="#" class="btn btn-outline-primary"><i class="far fa-bookmark me-2"></i>Save Job</a>
+                            <a href="#" class="btn btn-outline-primary"><i class="fas fa-share-alt me-2"></i>Share</a>
+                        </div>
+                    </div>
+
+                    <!-- Job Description -->
+                    <div class="content-box job-description">
+                        <h3 class="content-title">Job Description</h3>
+                        <p>Google is looking for a Senior UI/UX Designer to join our team. You will be responsible for creating amazing user experiences and should have an eye for clean and artful design, possess superior UI skills and be able to translate high-level requirements into interaction flows and artifacts, and transform them into beautiful, intuitive, and functional user interfaces.</p>
+                        
+                        <h5>Key Responsibilities:</h5>
+                        <ul>
+                            <li>Collaborate with product management and engineering to define and implement innovative solutions for the product direction, visuals and experience</li>
+                            <li>Execute all visual design stages from concept to final hand-off to engineering</li>
+                            <li>Conceptualize original ideas that bring simplicity and user friendliness to complex design roadblocks</li>
+                            <li>Create wireframes, storyboards, user flows, process flows and site maps to effectively communicate interaction and design ideas</li>
+                            <li>Present and defend designs and key milestone deliverables to peers and executive level stakeholders</li>
+                            <li>Establish and promote design guidelines, best practices and standards</li>
+                        </ul>
+                        
+                        <h5>Requirements:</h5>
+                        <ul>
+                            <li>5+ years of experience as a UI/UX Designer or similar role</li>
+                            <li>Portfolio of design projects demonstrating strong visual design and UX skills</li>
+                            <li>Knowledge of wireframe tools (Figma, Sketch, Adobe XD, etc)</li>
+                            <li>Team spirit; strong communication skills to collaborate with various stakeholders</li>
+                            <li>Good time-management skills</li>
+                            <li>BSc in Design, Computer Science or relevant field</li>
+                        </ul>
+                        
+                        <h5>Benefits:</h5>
+                        <ul>
+                            <li>Competitive salary and performance bonuses</li>
+                            <li>Comprehensive health, dental, and vision insurance</li>
+                            <li>401(k) matching</li>
+                            <li>Flexible working hours and remote work options</li>
+                            <li>Professional development opportunities</li>
+                            <li>Free meals and snacks</li>
+                        </ul>
+                    </div>
+
+                    <!-- Application Form -->
+                    <div class="content-box application-form">
+                        <h3 class="content-title">Apply for this Position</h3>
+                        <form>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control" placeholder="Your Name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="email" class="form-control" placeholder="Your Email" required>
+                                </div>
+                            </div>
+                            <input type="text" class="form-control" placeholder="Phone Number">
+                            <textarea class="form-control" placeholder="Cover Letter" rows="5" required></textarea>
+                            
+                            <div class="file-upload">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <h5>Upload Your Resume</h5>
+                                <p>Drop your file here or click to browse</p>
+                                <input type="file" style="display: none;" id="resume-upload">
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100">Submit Application</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <!-- Company Info -->
+                    {% comment %} <div class="content-box company-info">
+                        <img src="https://logo.clearbit.com/google.com" alt="Google" class="company-info-logo">
+                        <h4>Google Inc.</h4>
+                        <p>Google's mission is to organize the world's information and make it universally accessible and useful.</p>
+                        <div class="job-meta">
+                            <div class="job-meta-item">
+                                <i class="fas fa-globe"></i> google.com
+                            </div>
+                            <div class="job-meta-item">
+                                <i class="fas fa-map-marker-alt"></i> Mountain View, CA
+                            </div>
+                            <div class="job-meta-item">
+                                <i class="fas fa-users"></i> 10000+ Employees
+                            </div>
+                        </div>
+                        <div class="company-social">
+                            <a href="#"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div> {% endcomment %}
+
+                    <!-- Job Overview -->
+                    <div class="content-box">
+                        <h3 class="content-title">Job Overview</h3>
+                        <div class="job-meta">
+                            <div class="job-meta-item">
+                                <i class="far fa-calendar"></i> <strong>Date Posted:</strong> 5 days ago
+                            </div>
+                            <div class="job-meta-item">
+                                <i class="fas fa-map-marker-alt"></i> <strong>Location:</strong> Mountain View, CA
+                            </div>
+                            <div class="job-meta-item">
+                                <i class="fas fa-tag"></i> <strong>Job Title:</strong> Senior UI/UX Designer
+                            </div>
+                            <div class="job-meta-item">
+                                <i class="far fa-clock"></i> <strong>Hours:</strong> Full Time
+                            </div>
+                            <div class="job-meta-item">
+                                <i class="fas fa-dollar-sign"></i> <strong>Salary:</strong> $50K - $80K
+                            </div>
+                            <div class="job-meta-item">
+                                <i class="fas fa-briefcase"></i> <strong>Experience:</strong> 5+ Years
+                            </div>
+                            <div class="job-meta-item">
+                                <i class="fas fa-graduation-cap"></i> <strong>Education:</strong> Bachelor's Degree
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Share This Job -->
+                    <div class="content-box">
+                        <h3 class="content-title">Share This Job</h3>
+                        <div class="company-social">
+                            <a href="#" class="btn btn-outline-secondary me-2"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="btn btn-outline-secondary me-2"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="btn btn-outline-secondary me-2"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" class="btn btn-outline-secondary"><i class="fas fa-envelope"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Related Jobs Section -->
+    <section class="related-jobs-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Related Jobs</h2>
+                <p>Explore other opportunities that might interest you</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="related-job-card">
+                        <span class="related-job-type">Remote</span>
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://logo.clearbit.com/shopify.com" alt="Shopify" class="related-company-logo">
+                            <div>
+                                <h4 class="related-job-title">Frontend Developer</h4>
+                                <span class="related-company-name">Shopify</span>
+                            </div>
+                        </div>
+                        <div class="related-job-details">
+                            <div class="related-job-detail">
+                                <i class="fas fa-map-marker-alt"></i> Remote
+                            </div>
+                            <div class="related-job-detail">
+                                <i class="fas fa-clock"></i> Full Time
+                            </div>
+                            <div class="related-job-detail related-job-salary">
+                                <i class="fas fa-dollar-sign"></i> $60K - $90K
+                            </div>
+                        </div>
+                        <a href="#" class="btn btn-outline-primary btn-sm">View Details</a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6 mb-4">
+                    <div class="related-job-card">
+                        <span class="related-job-type">Part Time</span>
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://logo.clearbit.com/airbnb.com" alt="Airbnb" class="related-company-logo">
+                            <div>
+                                <h4 class="related-job-title">Product Manager</h4>
+                                <span class="related-company-name">Airbnb</span>
+                            </div>
+                        </div>
+                        <div class="related-job-details">
+                            <div class="related-job-detail">
+                                <i class="fas fa-map-marker-alt"></i> San Francisco, CA
+                            </div>
+                            <div class="related-job-detail">
+                                <i class="fas fa-clock"></i> Part Time
+                            </div>
+                            <div class="related-job-detail related-job-salary">
+                                <i class="fas fa-dollar-sign"></i> $40K - $60K
+                            </div>
+                        </div>
+                        <a href="#" class="btn btn-outline-primary btn-sm">View Details</a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6 mb-4">
+                    <div class="related-job-card">
+                        <span class="related-job-type">Contract</span>
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://logo.clearbit.com/microsoft.com" alt="Microsoft" class="related-company-logo">
+                            <div>
+                                <h4 class="related-job-title">DevOps Engineer</h4>
+                                <span class="related-company-name">Microsoft</span>
+                            </div>
+                        </div>
+                        <div class="related-job-details">
+                            <div class="related-job-detail">
+                                <i class="fas fa-map-marker-alt"></i> Redmond, WA
+                            </div>
+                            <div class="related-job-detail">
+                                <i class="fas fa-clock"></i> Contract
+                            </div>
+                            <div class="related-job-detail related-job-salary">
+                                <i class="fas fa-dollar-sign"></i> $70K - $100K
+                            </div>
+                        </div>
+                        <a href="#" class="btn btn-outline-primary btn-sm">View Details</a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6 mb-4">
+                    <div class="related-job-card">
+                        <span class="related-job-type">Full Time</span>
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://logo.clearbit.com/amazon.com" alt="Amazon" class="related-company-logo">
+                            <div>
+                                <h4 class="related-job-title">Marketing Manager</h4>
+                                <span class="related-company-name">Amazon</span>
+                            </div>
+                        </div>
+                        <div class="related-job-details">
+                            <div class="related-job-detail">
+                                <i class="fas fa-map-marker-alt"></i> Seattle, WA
+                            </div>
+                            <div class="related-job-detail">
+                                <i class="fas fa-clock"></i> Full Time
+                            </div>
+                            <div class="related-job-detail related-job-salary">
+                                <i class="fas fa-dollar-sign"></i> $55K - $85K
+                            </div>
+                        </div>
+                        <a href="#" class="btn btn-outline-primary btn-sm">View Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock content %}
+
+    
+{% block extra_js %}
+    <script>
+        // File upload functionality
+        document.querySelector('.file-upload').addEventListener('click', function() {
+            document.getElementById('resume-upload').click();
+        });
+        
+        document.getElementById('resume-upload').addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                document.querySelector('.file-upload h5').textContent = 'File selected: ' + e.target.files[0].name;
+            }
+        });
+    </script>
+{% endblock extra_js %}

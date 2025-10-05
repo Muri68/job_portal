@@ -1,0 +1,409 @@
+{% extends "job/base.html" %}
+{% load static %}
+
+{% block title %}Compose Email - {{ application.applicant_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .email-compose-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+    }
+    
+    .email-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+    }
+    
+    .compose-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        margin-top: -60px;
+        position: relative;
+        z-index: 10;
+        background: white;
+    }
+    
+    .recipient-info {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border-radius: 12px 12px 0 0;
+        padding: 1.5rem;
+    }
+    
+    .template-card {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        background: white;
+    }
+    
+    .template-card:hover {
+        border-color: #4361ee;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(67, 97, 238, 0.15);
+    }
+    
+    .template-card.active {
+        border-color: #4361ee;
+        background: rgba(67, 97, 238, 0.05);
+    }
+    
+    .email-preview {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        white-space: pre-line;
+        line-height: 1.6;
+        font-family: inherit;
+    }
+    
+    .attachment-item {
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .compose-actions {
+        background: white;
+        border-top: 1px solid #e9ecef;
+        padding: 1.5rem;
+        border-radius: 0 0 16px 16px;
+    }
+    
+    .template-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+    }
+    
+    .email-textarea {
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 1rem;
+        min-height: 300px;
+        resize: vertical;
+        width: 100%;
+        font-family: inherit;
+        line-height: 1.6;
+    }
+    
+    .email-textarea:focus {
+        outline: none;
+        border-color: #4361ee;
+        box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+    }
+
+    @media (max-width: 768px) {
+        .compose-card {
+            margin-top: -30px;
+        }
+        
+        .template-card {
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="email-compose-container">
+    <!-- Header -->
+    <div class="email-header">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb breadcrumb-dark mb-2">
+                    <li class="breadcrumb-item"><a href="{% url 'admin-dashboard' %}" class="text-white-50">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="#" class="text-white-50">Applicants</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'applicant_detail' application.id %}" class="text-white-50">{{ application.applicant_name }}</a></li>
+                    <li class="breadcrumb-item active text-white">Compose Email</li>
+                </ol>
+            </nav>
+            
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="h2 mb-2">Compose Email</h1>
+                    <p class="mb-0 opacity-75">Send a professional email to the applicant</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <div class="d-flex align-items-center justify-content-md-end">
+                        <div class="bg-white bg-opacity-20 rounded-circle p-2 me-3">
+                            <i class="fas fa-paper-plane fs-4"></i>
+                        </div>
+                        <div>
+                            <div class="h4 mb-0">Email</div>
+                            <small class="opacity-75">Ready to send</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compose Form -->
+    <div class="container py-4">
+        <form method="post" id="emailForm">
+            {% csrf_token %}
+            
+            <div class="compose-card">
+                <!-- Recipient Info -->
+                <div class="recipient-info">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-white bg-opacity-20 rounded-circle p-2 me-3">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-1">{{ application.applicant_name }}</h5>
+                                    <p class="mb-0 opacity-75">
+                                        <i class="fas fa-envelope me-1"></i>{{ application.applicant_email }}
+                                        {% if application.applicant_phone %}
+                                        <span class="ms-3">
+                                            <i class="fas fa-phone me-1"></i>{{ application.applicant_phone }}
+                                        </span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <span class="badge bg-white bg-opacity-20 text-white fs-6">
+                                <i class="fas fa-briefcase me-1"></i>{{ application.job.title }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email Templates -->
+                <div class="card-body border-bottom">
+                    <h6 class="fw-bold mb-3 text-dark">
+                        <i class="fas fa-magic me-2 text-primary"></i>Quick Templates
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="template-card p-3" data-template="interview_invite">
+                                <div class="d-flex align-items-center">
+                                    <div class="template-icon bg-success bg-opacity-10 text-success">
+                                        <i class="fas fa-handshake"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">Interview Invite</h6>
+                                        <small class="text-muted">Invite for interview</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="template-card p-3" data-template="application_received">
+                                <div class="d-flex align-items-center">
+                                    <div class="template-icon bg-info bg-opacity-10 text-info">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">Application Received</h6>
+                                        <small class="text-muted">Confirm receipt</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="template-card p-3" data-template="rejection">
+                                <div class="d-flex align-items-center">
+                                    <div class="template-icon bg-warning bg-opacity-10 text-warning">
+                                        <i class="fas fa-times-circle"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">Rejection</h6>
+                                        <small class="text-muted">Politely decline</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email Form -->
+                <div class="card-body">
+                    <!-- Subject -->
+                    <div class="mb-4">
+                        <label for="subject" class="form-label fw-bold text-dark">
+                            <i class="fas fa-tag me-2 text-primary"></i>Subject
+                        </label>
+                        <input type="text" 
+                               class="form-control form-control-lg border-0 bg-light rounded-3" 
+                               id="subject" 
+                               name="subject" 
+                               placeholder="Enter email subject..."
+                               value="{{ default_subject }}"
+                               required>
+                    </div>
+
+                    <!-- Email Type -->
+                    <input type="hidden" name="email_type" id="emailType" value="custom">
+
+                    <!-- Message Editor -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-dark">
+                            <i class="fas fa-edit me-2 text-primary"></i>Message
+                        </label>
+                        <textarea name="message" id="message" class="email-textarea" placeholder="Write your email message here..." required>Dear {{ application.applicant_name }},
+
+Best regards,
+{{ request.user.get_full_name|default:request.user.email }}</textarea>
+                    </div>
+
+                    <!-- Attachments -->
+                    {% if application.resume %}
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-dark">
+                            <i class="fas fa-paperclip me-2 text-primary"></i>Attachments
+                        </label>
+                        <div class="attachment-item">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="attach_resume" id="attachResume" checked>
+                                <label class="form-check-label d-flex align-items-center" for="attachResume">
+                                    <i class="fas fa-file-pdf text-danger me-2"></i>
+                                    <div>
+                                        <strong>{{ application.resume.name }}</strong>
+                                        <small class="text-muted d-block">Applicant's Resume</small>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Actions -->
+                <div class="compose-actions">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div>
+                            <button type="button" id="previewBtn" class="btn btn-outline-primary rounded-pill px-4">
+                                <i class="fas fa-eye me-2"></i>Preview
+                            </button>
+                        </div>
+                        <div>
+                            <a href="{% url 'applicant_detail' application.id %}" class="btn btn-outline-danger rounded-pill px-4 me-2">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary rounded-pill px-4">
+                                <i class="fas fa-paper-plane me-2"></i>Send Email
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Email Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <strong>To:</strong> {{ application.applicant_name }} &lt;{{ application.applicant_email }}&gt;
+                </div>
+                <div class="mb-3">
+                    <strong>Subject:</strong> <span id="previewSubject"></span>
+                </div>
+                <div class="email-preview" id="emailPreview">
+                    <!-- Preview content will be inserted here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" form="emailForm" class="btn btn-primary">
+                    <i class="fas fa-paper-plane me-2"></i>Send Now
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Template selection
+        document.querySelectorAll('.template-card').forEach(card => {
+            card.addEventListener('click', function() {
+                // Remove active class from all cards
+                document.querySelectorAll('.template-card').forEach(c => {
+                    c.classList.remove('active');
+                });
+                
+                // Add active class to clicked card
+                this.classList.add('active');
+                
+                const templateType = this.getAttribute('data-template');
+                document.getElementById('emailType').value = templateType;
+                
+                // Load template content
+                loadTemplate(templateType);
+            });
+        });
+
+        // Load template function
+        function loadTemplate(templateType) {
+            const templates = {
+                interview_invite: {
+                    subject: `Interview Invitation - {{ application.job.title }}`,
+                    message: `{{ email_templates.interview_invite.message|escapejs }}`
+                },
+                application_received: {
+                    subject: `Application Received - {{ application.job.title }}`,
+                    message: `{{ email_templates.application_received.message|escapejs }}`
+                },
+                rejection: {
+                    subject: `Update on Your Application - {{ application.job.title }}`,
+                    message: `{{ email_templates.rejection.message|escapejs }}`
+                }
+            };
+
+            if (templates[templateType]) {
+                document.getElementById('subject').value = templates[templateType].subject;
+                document.getElementById('message').value = templates[templateType].message;
+            }
+        }
+
+        // Preview functionality
+        document.getElementById('previewBtn').addEventListener('click', function() {
+            const messageContent = document.getElementById('message').value;
+            const subjectContent = document.getElementById('subject').value;
+            
+            // Set preview content
+            document.getElementById('previewSubject').textContent = subjectContent;
+            document.getElementById('emailPreview').textContent = messageContent;
+            
+            // Show modal
+            new bootstrap.Modal(document.getElementById('previewModal')).show();
+        });
+
+        // Form submission loading state
+        document.getElementById('emailForm').addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
+            submitBtn.disabled = true;
+            
+            // Allow form to submit normally
+        });
+    });
+</script>
+{% endblock %}

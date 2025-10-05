@@ -1,0 +1,30 @@
+{% extends "job/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="h4 mb-0">Confirm Delete</h2>
+                </div>
+                <div class="card-body">
+                    <p>Are you sure you want to delete the job "<strong>{{ job.title }}</strong>"?</p>
+                    <p class="text-danger">This action cannot be undone.</p>
+                    
+                    <div class="mt-4">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="d-flex justify-content-between">
+                                <a href="{% url 'job_list' %}" class="btn btn-secondary">Cancel</a>
+                                <button type="submit" class="btn btn-danger">Delete Job</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

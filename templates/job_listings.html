@@ -1,0 +1,602 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block extra_css %}
+    <style>
+        
+        /* Navigation Styles */
+        .navbar {
+            padding: 15px 0;
+            transition: all 0.3s ease;
+            background: white !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .navbar-brand .logo {
+            height: 100px;
+            margin-right: 10px;
+        }
+        
+        .navbar-nav .nav-link {
+            color: var(--dark);
+            font-weight: 500;
+            margin: 0 10px;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+        
+        .navbar-nav .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        .navbar-nav .nav-link:hover::after,
+        .navbar-nav .nav-link.active::after {
+            width: 100%;
+        }
+        
+        .navbar-nav .nav-link:hover,
+        .navbar-nav .nav-link.active {
+            color: var(--primary);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            padding: 10px 25px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-outline-primary {
+            border-color: var(--primary);
+            color: var(--primary);
+            padding: 10px 25px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Hero Section */
+        .job-hero {
+            background: linear-gradient(rgba(1, 12, 22, 0.8),   /* #257dd4 with 80% opacity */
+              rgba(2, 13, 23, 0.8)), url('https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-4.0.3&auto=format&fit=crop&w=1500&q=80');
+            background-size: cover;
+            background-position: center;
+            padding: 100px 0 60px;
+            color: white;
+        }
+        
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .breadcrumb {
+            background: transparent;
+            margin-bottom: 0;
+            padding: 0;
+        }
+        
+        .breadcrumb-item a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: white;
+        }
+        
+        .breadcrumb-item + .breadcrumb-item::before {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Filter Section */
+        .filter-section {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-top: -30px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* Job Listings */
+        .job-listings {
+            padding: 80px 0;
+        }
+        
+        .job-card {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        
+        .job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-left-color: var(--primary);
+        }
+        
+        .job-type {
+            background: var(--light);
+            color: var(--primary);
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        
+        .job-featured {
+            background: rgba(249, 115, 22, 0.1);
+            color: var(--accent);
+        }
+        
+        .company-logo {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            margin-right: 15px;
+            background: white;
+            padding: 5px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .job-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 1.2rem;
+            color: var(--dark);
+        }
+        
+        .company-name {
+            color: var(--secondary);
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        .job-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .job-detail {
+            display: flex;
+            align-items: center;
+            color: var(--secondary);
+            font-size: 0.9rem;
+        }
+        
+        .job-detail i {
+            margin-right: 5px;
+            color: var(--primary);
+        }
+        
+        .job-currency i {
+            margin-right: -2px;
+        }
+        
+        .job-salary {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .job-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+            margin-top: 15px;
+        }
+        
+        .job-posted {
+            color: var(--secondary);
+            font-size: 0.9rem;
+        }
+        
+        /* Sidebar */
+        .sidebar-widget {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar-widget:hover {
+            transform: translateY(-3px);
+        }
+        
+        .widget-title {
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            color: var(--dark);
+            position: relative;
+        }
+        
+        .widget-title::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 3px;
+            background: var(--primary);
+            bottom: 0;
+            left: 0;
+            border-radius: 3px;
+        }
+        
+        .category-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .category-list li {
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            transition: transform 0.2s ease;
+        }
+        
+        .category-list li:hover {
+            transform: translateX(5px);
+        }
+        
+        .category-list a {
+            color: var(--dark);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .category-list a:hover {
+            color: var(--primary);
+        }
+        
+        .category-count {
+            background: var(--light);
+            color: var(--primary);
+            padding: 2px 10px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+        }
+        
+        /* Pagination */
+        .pagination-container {
+            margin-top: 40px;
+        }
+        
+        .page-link {
+            color: var(--dark);
+            border: 1px solid #e2e8f0;
+            padding: 10px 18px;
+            transition: all 0.3s ease;
+        }
+        
+        .page-link:hover {
+            color: var(--primary);
+            background: var(--light);
+            border-color: #e2e8f0;
+        }
+        
+        .page-item.active .page-link {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        /* Badge styles */
+        .badge-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .hero-title {
+                font-size: 2.2rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 1.8rem;
+            }
+            
+            .job-listings {
+                padding: 60px 0;
+            }
+            
+            .job-actions {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .job-actions .btn {
+                width: 100%;
+            }
+            
+            .navbar-brand .logo {
+                height: 30px;
+            }
+        }
+    </style>
+{% endblock extra_css %}
+
+{% block content %}
+    <section class="job-hero">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h1 class="hero-title">Find Your Dream Job</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url "index" %}">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Job Listings</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filter Section -->
+    <div class="container">
+        <div class="filter-section">
+            <form method="GET" action="{% url 'job_listings' %}">
+                <div class="row g-3">
+                    <div class="col-lg-5">
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent"><i class="fas fa-search text-muted"></i></span>
+                            <input type="text" name="search" class="form-control form-control-lg border-start-0" 
+                                placeholder="Job Title or Keywords" value="{{ search_query }}">
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent"><i class="fas fa-map-marker-alt text-muted"></i></span>
+                            <select name="location" class="form-select form-control-lg border-start-0">
+                                <option value="">All Locations</option>
+                                {% for location in locations %}
+                                <option value="{{ location }}" {% if selected_location == location %}selected{% endif %}>
+                                    {{ location }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent"><i class="fas fa-briefcase text-muted"></i></span>
+                            <select name="category" class="form-select form-control-lg border-start-0">
+                                <option value="">All Categories</option>
+                                {% for category in categories %}
+                                <option value="{{ category.name }}" {% if selected_category == category.name %}selected{% endif %}>
+                                    {{ category.name }} ({{ category.job_count }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-1">
+                        <button type="submit" class="btn btn-primary w-100 btn-lg"><i class="fas fa-search"></i></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Job Listings -->
+    <section class="job-listings">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="mb-0">Showing {{ jobs.start_index }}-{{ jobs.end_index }} of {{ total_jobs_count }} Jobs</h4>
+                        <div class="d-flex align-items-center">
+                            <span class="me-2 text-muted">Sort by:</span>
+                            <select class="form-select form-select-sm" onchange="location = this.value;">
+                                <option value="?sort=newest{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_location %}&location={{ selected_location }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}" 
+                                        {% if selected_sort == 'newest' %}selected{% endif %}>Newest</option>
+                                <option value="?sort=salary_high_low{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_location %}&location={{ selected_location }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}" 
+                                        {% if selected_sort == 'salary_high_low' %}selected{% endif %}>Salary: High to Low</option>
+                                <option value="?sort=salary_low_high{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_location %}&location={{ selected_location }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}" 
+                                        {% if selected_sort == 'salary_low_high' %}selected{% endif %}>Salary: Low to High</option>
+                                <option value="?sort=relevant{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_location %}&location={{ selected_location }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}" 
+                                        {% if selected_sort == 'relevant' %}selected{% endif %}>Most Relevant</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    {% for job in jobs %}
+                    <div class="job-card">
+                        {% if job.is_featured %}
+                        <span class="job-type job-featured"><i class="fas fa-star me-1"></i> Featured</span>
+                        {% else %}
+                        <span class="job-type">{{ job.workplace_type }}</span>
+                        {% endif %}
+                        
+                        <div class="d-flex align-items-center mb-3">
+                            {% if job.company and job.company.logo %}
+                            <img src="{{ job.company.logo.url }}" alt="{{ job.company.name }}" class="company-logo">
+                            {% endif %}
+                            <div>
+                                <a href="{% url 'job_detail_frontend' job.id %}">
+                                    <h3 class="job-title">{{ job.title }}</h3>
+                                </a>
+                                {% if job.company %}
+                                <span class="company-name">{{ job.company.name }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="job-details">
+                            <div class="job-detail">
+                                <i class="fas fa-map-marker-alt"></i> {{ job.location }}
+                            </div>
+                            <div class="job-detail">
+                                <i class="fas fa-clock"></i> {{ job.workplace_type }}
+                            </div>
+                            {% if job.salary_start %}
+                            <div class="job-detail job-currency job-salary">
+                                Salary starting from <i class="bi bi-currency-pound" style"margin-right: -3px;"></i>{{ job.salary_start|intcomma }} per annum
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if job.short_description %}
+                        <p class="text-muted">{{ job.short_description }}</p>
+                        {% else %}
+                        <p class="text-muted">{{ job.description|safe|striptags|truncatewords:30 }}</p>
+                        {% endif %}
+                        
+                        <div class="job-actions">
+                            <span class="job-posted"><i class="far fa-clock"></i> Posted {{ job.created_at|timesince }} ago</span>
+                            <div>
+                                <a href="#" class="btn btn-outline-primary me-2"><i class="far fa-bookmark"></i> Save</a>
+                                <a href="{% url 'job_detail_frontend' job.id %}" class="btn btn-primary">Apply Now</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="job-card">
+                        <div class="text-center py-5">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h4>No jobs found</h4>
+                            <p class="text-muted">Try adjusting your search filters</p>
+                            <a href="{% url 'job_listings' %}" class="btn btn-primary">Clear Filters</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <!-- Pagination -->
+                    <nav aria-label="Page navigation" class="pagination-container">
+                        <ul class="pagination justify-content-center">
+                            {% if jobs.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_location %}&location={{ selected_location }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}" aria-label="First">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ jobs.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_location %}&location={{ selected_location }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}" aria-label="Previous">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+
+                            {% for num in jobs.paginator.page_range %}
+                                {% if jobs.number == num %}
+                                <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                                {% elif num > jobs.number|add:'-3' and num < jobs.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_location %}&location={{ selected_location }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">{{ num }}</a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if jobs.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ jobs.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_location %}&location={{ selected_location }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}" aria-label="Next">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ jobs.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_location %}&location={{ selected_location }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}" aria-label="Last">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="col-lg-4">
+                    <!-- Categories Widget -->
+                    <div class="sidebar-widget">
+                        <h4 class="widget-title">Job Categories</h4>
+                        <ul class="category-list">
+                            {% for category in categories %}
+                            <li>
+                                <a href="?category={{ category.name }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_location %}&location={{ selected_location }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">
+                                    <i class="fas fa-briefcase me-2"></i> {{ category.name }}
+                                </a>
+                                <span class="category-count">{{ category.job_count }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <!-- Newsletter Widget -->
+                    <div class="sidebar-widget">
+                        <h4 class="widget-title">Get Job Alerts</h4>
+                        <p class="text-muted">Enter your email address and get notified about new jobs</p>
+                        <form>
+                            <div class="mb-3">
+                                <input type="email" class="form-control" placeholder="Your email address">
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Subscribe</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock content %}

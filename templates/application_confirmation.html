@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Application Submitted | {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.confirmation-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.confirmation-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.confirmation-icon {
+    font-size: 4rem;
+    color: #28a745;
+}
+
+.next-steps {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.step-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.step-number {
+    background: #007bff;
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container confirmation-container py-5">
+    <div class="confirmation-card card">
+        <div class="card-body text-center p-5">
+            <div class="confirmation-icon mb-4">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            
+            <h1 class="display-5 fw-bold text-success mb-3">Application Submitted!</h1>
+            <p class="lead mb-4">Your application for <strong>{{ job.title }}</strong> has been successfully submitted.</p>
+            
+            <div class="application-details bg-light rounded p-4 mb-4 text-start">
+                <h5 class="mb-3">Application Details</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Application ID:</strong><br>#{{ application.id|stringformat:"06d" }}</p>
+                        <p><strong>Submitted:</strong><br>{{ application.applied_at|date:"F j, Y \\a\\t g:i A" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Position:</strong><br>{{ job.title }}</p>
+                        <p><strong>Location:</strong><br>{{ job.location }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="next-steps mb-4">
+                <h5 class="mb-3">What's Next?</h5>
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <div>
+                        <strong>Application Review</strong><br>
+                        Our team will review your application within 3-5 business days
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <div>
+                        <strong>Status Updates</strong><br>
+                        You'll receive email updates about your application status
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <div>
+                        <strong>Next Steps</strong><br>
+                        If selected, we'll contact you for the interview process
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-center">
+                <a href="{% url 'my_applications' %}" class="btn btn-primary me-md-2">
+                    <i class="fas fa-list me-2"></i>View My Applications
+                </a>
+                <a href="{% url 'job_detail_frontend' job.id %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-briefcase me-2"></i>Back to Job
+                </a>
+                <a href="{% url 'job_listings' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-search me-2"></i>Browse More Jobs
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

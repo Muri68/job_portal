@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - JobBoard</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #257dd4;
+            --primary-light: #257cd491;
+            --primary-dark: #257dd4;
+            --secondary: #546E7A;
+            --accent: #FF9800;
+            --light: #E3F2FD;
+            --dark: #257dd4;
+            --gradient-start: #257dd4;
+            --gradient-end: #257dd4;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: #334155;
+            overflow-x: hidden;
+            background-color: #f9fafb;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Login Content */
+        .login-content {
+            padding: 40px 0;
+            flex: 1;
+        }
+        
+        .login-card {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            max-width: 450px;
+            margin: 0 auto;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-icon {
+            width: 70px;
+            height: 70px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 28px;
+        }
+        
+        .login-title {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+        
+        .login-subtitle {
+            color: var(--secondary);
+            margin-bottom: 0;
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+        
+        .form-control {
+            padding: 12px 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(0, 80, 83, 0.15);
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 46px;
+            color: var(--secondary);
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .password-toggle:hover {
+            color: var(--primary);
+        }
+        
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .forgot-link {
+            color: var(--primary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .forgot-link:hover {
+            color: var(--primary-dark);
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 25px 0;
+            color: var(--secondary);
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .divider:not(:empty)::before {
+            margin-right: .5em;
+        }
+        
+        .divider:not(:empty)::after {
+            margin-left: .5em;
+        }
+        
+        .social-login {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .social-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .social-btn:hover {
+            background: #f8fafc;
+            transform: translateY(-2px);
+        }
+        
+        .social-icon {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--secondary);
+        }
+        
+        .register-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        
+        .register-link a:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+        
+        /* Alert Styles */
+        .alert {
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .alert-danger {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+        }
+        
+        .alert-info {
+            background-color: #f0f9ff;
+            border: 1px solid #bae6fd;
+            color: #0369a1;
+        }
+        
+        .alert-icon {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .hero-title {
+                font-size: 2.2rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 1.8rem;
+            }
+            
+            .login-content {
+                padding: 60px 0;
+            }
+            
+            .navbar-brand .logo {
+                height: 30px;
+            }
+            
+            .login-card {
+                padding: 30px 25px;
+            }
+            
+            .social-login {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .form-options {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .login-card {
+                padding: 25px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <!--<nav class="navbar navbar-expand-lg navbar-light bg-white">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM=" alt="JobBoard Logo" class="logo">
+                JobBoard
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Jobs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Candidates</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Employers</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Pages</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Login</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <a href="#" class="btn btn-outline-primary me-2">Sign Up</a>
+                    <a href="#" class="btn btn-primary">Post a Job</a>
+                </div>
+            </div>
+        </div>
+    </nav> -->
+
+    <!-- Hero Section -->
+    <!--<section class="login-hero">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <h1 class="hero-title">Welcome Back</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="#">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Login</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </section> -->
+
+    <!-- Login Content -->
+    <section class="login-content">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="login-card">
+                        <div class="login-header">
+                            <div class="login-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <h2 class="login-title">Account Login</h2>
+                            <p class="login-subtitle">Sign in to your TECH RECRUITMENT UK account</p>
+                        </div>
+
+                        <div class="alert alert-danger" role="alert" id="errorAlert" style="display: none;">
+                            <i class="fas fa-exclamation-circle alert-icon"></i>
+                            <span id="errorMessage">Invalid email or password</span>
+                        </div>
+
+                        <form id="loginForm">
+                            <div class="form-group">
+                                <label for="email" class="form-label">Email Address</label>
+                                <input type="email" class="form-control" id="email" placeholder="Enter your email" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password" placeholder="Enter your password" required>
+                                <span class="password-toggle" id="togglePassword">
+                                    <i class="far fa-eye"></i>
+                                </span>
+                            </div>
+                            
+                            <div class="form-options">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="rememberMe">
+                                    <label class="form-check-label" for="rememberMe">Remember me</label>
+                                </div>
+                                <a href="#" class="forgot-link">Forgot Password?</a>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary login-btn">Sign In</button>
+                        </form>
+
+                        <!-- <div class="divider">Or continue with</div>
+                        
+                        <div class="social-login">
+                            <button class="social-btn">
+                                <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
+                                    <path fill="#1877F2" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"/>
+                                </svg>
+                            </button>
+                            <button class="social-btn">
+                                <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
+                                    <path fill="#DB4437" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"/>
+                                </svg>
+                            </button>
+                            <button class="social-btn">
+                                <svg class="social-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+                                    <path fill="#1DA1F2" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"/>
+                                </svg>
+                            </button>
+                        </div> -->
+                        
+                        <div class="register-link">
+                            Don't have an account? <a href="#">Create Account</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Password toggle functionality
+            const togglePassword = document.getElementById('togglePassword');
+            const password = document.getElementById('password');
+            
+            togglePassword.addEventListener('click', function() {
+                const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                password.setAttribute('type', type);
+                
+                // Toggle eye icon
+                const eyeIcon = this.querySelector('i');
+                if (type === 'password') {
+                    eyeIcon.classList.remove('fa-eye-slash');
+                    eyeIcon.classList.add('fa-eye');
+                } else {
+                    eyeIcon.classList.remove('fa-eye');
+                    eyeIcon.classList.add('fa-eye-slash');
+                }
+            });
+            
+            // Form validation
+            const loginForm = document.getElementById('loginForm');
+            const errorAlert = document.getElementById('errorAlert');
+            
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                
+                // Simple validation
+                if (!email || !password) {
+                    showError('Please fill in all fields');
+                    return;
+                }
+                
+                // Email validation
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    showError('Please enter a valid email address');
+                    return;
+                }
+                
+                // Demo validation - in a real application, this would be a server-side check
+                if (email === 'admin@example.com' && password === 'password123') {
+                    // Success - redirect to dashboard or home page
+                    alert('Login successful! Redirecting to dashboard...');
+                    // In a real application: window.location.href = '/dashboard';
+                } else {
+                    showError('Invalid email or password');
+                }
+            });
+            
+            function showError(message) {
+                document.getElementById('errorMessage').textContent = message;
+                errorAlert.style.display = 'flex';
+                
+                // Hide error after 5 seconds
+                setTimeout(() => {
+                    errorAlert.style.display = 'none';
+                }, 5000);
+            }
+        });
+    </script>
+</body>
+</html>

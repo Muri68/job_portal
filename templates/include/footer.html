@@ -1,0 +1,47 @@
+{% load static %}
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-5 mb-5 mb-lg-0">
+                <h4 class="footer-title">TECH RECRUITMENT UK</h4>
+                <p>Find your dream job with our powerful job search platform. Connect with top employers worldwide.</p>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 mb-5 mb-md-0">
+                <h4 class="footer-title">For Candidates</h4>
+                <ul class="footer-links">
+                    <li><a href="{% url "job_listings" %}">Browse Jobs</a></li>
+                    <li><a href="#">Browse Categories</a></li>
+                    {% if request.user.is_authenticated %}
+                        {% if is_site_admin %}
+                        {% else %}
+                            <li><a href="{% url "jobseeker_dashboard" %}">Candidate Dashboard</a></li>
+                            <li><a href="#">Job Alerts</a></li>
+                            <li><a href="{% url "saved_jobs" %}">My Bookmarks</a></li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="col-lg-4 col-md-4">
+                <h4 class="footer-title">Subscribe to Our Newsletter</h4>
+                <p class="mb-4">Get the latest news and updates on new job listings</p>
+                <form>
+                    <div class="input-group mb-3">
+                        <input type="email" class="form-control" placeholder="Your email address">
+                        <button class="btn btn-outline-light" type="button">Subscribe</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="text-center copyright">
+            <p>&copy; {% now "Y" %} TECH RECRUITMENT UK. All Rights Reserved.</p>
+        </div>
+    </div>
+</footer>

@@ -1,0 +1,316 @@
+{% extends "job/base.html" %}
+
+{% block title %}Admin Users - Dashboard{% endblock %}
+
+{% block content %}
+<div class="main-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h3 mb-2">Admin Users Management</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'admin-dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Admin Users</li>
+                </ol>
+            </nav>
+        </div>
+        <a href="{% url 'add_admin_user' %}" class="btn btn-primary">
+            <i class="bi bi-person-plus me-1"></i> Add Admin
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">Admin Users ({{ page_obj.paginator.count }})</h5>
+        <div class="d-flex align-items-center">
+            <input type="text" class="form-control form-control-sm me-2" placeholder="Search admins..." style="width: 200px;">
+            <button class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-filter"></i>
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Admin User</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Date Joined</th>
+                        <th>Last Login</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for admin in page_obj %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="https://ui-avatars.com/api/?name={{ admin.get_full_name|urlencode }}&background=257dd4&color=fff" 
+                                     class="rounded-circle me-2" width="32" height="32" alt="">
+                                <div>
+                                    <div class="fw-medium">{{ admin.get_full_name|default:admin.email }}</div>
+                                    <small class="text-muted">{{ admin.email }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary">{{ admin.get_role_display }}</span>
+                            {% if admin.is_superuser %}
+                            <span class="badge bg-warning ms-1">Superuser</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge {% if admin.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                                {% if admin.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </td>
+                        <td>{{ admin.date_joined|date:"M d, Y" }}</td>
+                        <td>
+                            {% if admin.last_login %}
+                                {{ admin.last_login|date:"M d, Y" }}
+                            {% else %}
+                                <span class="text-muted">Never</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                {% comment %} Toggle Active/Inactive Button {% endcomment %}
+                                {% if admin != request.user %}
+                                    <button type="button" 
+                                            class="btn btn-sm {% if admin.is_active %}btn-warning{% else %}btn-success{% endif %}"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#toggleStatusModal"
+                                            data-user-id="{{ admin.id }}"
+                                            data-user-name="{{ admin.get_display_name }}"
+                                            data-user-email="{{ admin.email }}"
+                                            data-user-status="{{ admin.is_active|yesno:'active,inactive' }}"
+                                            data-action-url="{% url 'toggle_admin_status' admin.id %}"
+                                            {% if admin.is_superuser and admin.is_active and active_superusers_count <= 1 %}
+                                            onclick="showLastSuperuserModal()"
+                                            {% endif %}>
+                                        <i class="bi bi-{% if admin.is_active %}person-x{% else %}person-check{% endif %}"></i>
+                                    </button>
+                                {% else %}
+                                    <button class="btn btn-sm btn-outline-secondary" disabled title="Cannot modify your own account">
+                                        <i class="bi bi-person-lock"></i>
+                                    </button>
+                                {% endif %}
+                                
+                                {% comment %} Delete User Button {% endcomment %}
+                                {% if admin != request.user %}
+                                    <button type="button" 
+                                            class="btn btn-sm btn-outline-danger"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#deleteUserModal"
+                                            data-user-id="{{ admin.id }}"
+                                            data-user-name="{{ admin.get_display_name }}"
+                                            data-user-email="{{ admin.email }}"
+                                            data-action-url="{% url 'delete_admin_user' admin.id %}"
+                                            {% if admin.is_superuser and admin.is_active and active_superusers_count <= 1 %}
+                                            onclick="showLastSuperuserModal()"
+                                            {% endif %}>
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4">
+                            <i class="bi bi-people display-4 text-muted d-block mb-2"></i>
+                            <h5 class="text-muted">No Admin Users Found</h5>
+                            <p class="text-muted">Get started by adding your first admin user.</p>
+                            <a href="{% url 'add_admin_user' %}" class="btn">
+                                <i class="bi bi-person-plus me-1"></i> Add Admin User
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Admin users pagination">
+            <ul class="pagination justify-content-center mb-0">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Delete User Modal
+        const deleteUserModal = document.getElementById('deleteUserModal');
+        if (deleteUserModal) {
+            deleteUserModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const userName = button.getAttribute('data-user-name');
+                const userEmail = button.getAttribute('data-user-email');
+                const actionUrl = button.getAttribute('data-action-url');
+                
+                // Update modal content
+                document.getElementById('deleteUserName').textContent = userName;
+                document.getElementById('deleteUserEmail').textContent = userEmail;
+                document.getElementById('confirmDeleteBtn').href = actionUrl;
+            });
+        }
+        
+        // Toggle Status Modal
+        const toggleStatusModal = document.getElementById('toggleStatusModal');
+        if (toggleStatusModal) {
+            toggleStatusModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const userName = button.getAttribute('data-user-name');
+                const userEmail = button.getAttribute('data-user-email');
+                const userStatus = button.getAttribute('data-user-status');
+                const actionUrl = button.getAttribute('data-action-url');
+                const isActive = userStatus === 'active';
+                
+                // Update modal content based on current status
+                const statusModalIcon = document.getElementById('statusModalIcon');
+                const statusAlert = document.getElementById('statusAlert');
+                const statusActionTitle = document.getElementById('statusActionTitle');
+                const statusActionMessage = document.getElementById('statusActionMessage');
+                const currentStatusBadge = document.getElementById('currentStatusBadge');
+                const confirmToggleStatusBtn = document.getElementById('confirmToggleStatusBtn');
+                
+                // Set user info
+                document.getElementById('toggleStatusUserName').textContent = userName;
+                document.getElementById('toggleStatusUserEmail').textContent = userEmail;
+                
+                if (isActive) {
+                    // Deactivating user
+                    statusModalIcon.className = 'bi bi-person-x text-warning fs-1';
+                    statusAlert.className = 'alert alert-warning';
+                    statusActionTitle.textContent = 'Deactivate User';
+                    statusActionMessage.textContent = 'This user will no longer be able to access the system. They can be reactivated later if needed.';
+                    currentStatusBadge.className = 'badge bg-success';
+                    currentStatusBadge.textContent = 'Currently Active';
+                    confirmToggleStatusBtn.className = 'btn btn-warning';
+                    confirmToggleStatusBtn.innerHTML = '<i class="bi bi-person-x me-1"></i> Deactivate User';
+                } else {
+                    // Activating user
+                    statusModalIcon.className = 'bi bi-person-check text-success fs-1';
+                    statusAlert.className = 'alert alert-success';
+                    statusActionTitle.textContent = 'Activate User';
+                    statusActionMessage.textContent = 'This user will regain access to the system with their previous permissions.';
+                    currentStatusBadge.className = 'badge bg-danger';
+                    currentStatusBadge.textContent = 'Currently Inactive';
+                    confirmToggleStatusBtn.className = 'btn btn-success';
+                    confirmToggleStatusBtn.innerHTML = '<i class="bi bi-person-check me-1"></i> Activate User';
+                }
+                
+                // Set action URL
+                confirmToggleStatusBtn.href = actionUrl;
+            });
+        }
+        
+        // Last Superuser Modal
+        window.showLastSuperuserModal = function() {
+            const lastSuperuserModal = new bootstrap.Modal(document.getElementById('lastSuperuserModal'));
+            lastSuperuserModal.show();
+        };
+        
+        // Enhanced form validation for modals
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        if (confirmDeleteBtn) {
+            confirmDeleteBtn.addEventListener('click', function(e) {
+                // Add loading state
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Deleting...';
+                this.disabled = true;
+                
+                // The actual deletion will happen via the link href
+                // This is just for visual feedback
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                }, 3000);
+            });
+        }
+        
+        const confirmToggleStatusBtn = document.getElementById('confirmToggleStatusBtn');
+        if (confirmToggleStatusBtn) {
+            confirmToggleStatusBtn.addEventListener('click', function(e) {
+                // Add loading state
+                const originalText = this.innerHTML;
+                const isDeactivating = this.innerHTML.includes('Deactivate');
+                
+                this.innerHTML = isDeactivating 
+                    ? '<i class="bi bi-hourglass-split me-1"></i> Deactivating...'
+                    : '<i class="bi bi-hourglass-split me-1"></i> Activating...';
+                this.disabled = true;
+                
+                // The actual action will happen via the link href
+                // This is just for visual feedback
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                }, 3000);
+            });
+        }
+    });
+</script>
+
+<style>
+    /* Modal enhancements */
+    .modal-header {
+        background: linear-gradient(120deg, #f8f9fa, #e9ecef);
+    }
+    
+    .modal-content {
+        border: none;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        border-radius: 15px;
+    }
+    
+    .modal-footer {
+        background-color: #f8f9fa;
+        border-radius: 0 0 15px 15px;
+    }
+    
+    /* Button animations */
+    .btn {
+        transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Badge styles */
+    .badge {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.6rem;
+    }
+</style>
+{% endblock %}

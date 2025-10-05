@@ -1,0 +1,314 @@
+{% extends "job/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <!-- Header Section -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="h3 mb-0 text-dark fw-bold">
+                        <i class="bi bi-briefcase me-2"></i>
+                        {% if job %}Edit Job Posting{% else %}Create New Job{% endif %}
+                    </h2>
+                    <p class="text-muted mb-0">{% if job %}Update the job details below{% else %}Fill in the job details to create a new posting{% endif %}</p>
+                </div>
+                <a href="{% url 'job_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Jobs
+                </a>
+            </div>
+            
+            <!-- Form Card -->
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <form method="post" id="jobForm" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        {{ form.media }}
+                        
+                        <div class="row">
+                            <!-- Left Column -->
+                            <div class="col-lg-8">
+                                <!-- Basic Information -->
+                                <div class="mb-4">
+                                    <h5 class="mb-3 text-dark d-flex align-items-center">
+                                        <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px;">
+                                            <i class="bi bi-info-lg"></i>
+                                        </span>
+                                        Basic Information
+                                    </h5>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-8 mb-3">
+                                            <label for="title" class="form-label required-field">Job Title</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-pencil"></i></span>
+                                                {{ form.title }}
+                                            </div>
+                                            {% if form.title.errors %}
+                                            <div class="text-danger mt-1 small">{{ form.title.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="col-md-4 mb-3">
+                                            <label for="category" class="form-label required-field">Category</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-grid"></i></span>
+                                                {{ form.category }}
+                                            </div>
+                                            {% if form.category.errors %}
+                                            <div class="text-danger mt-1 small">{{ form.category.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="id_description" class="form-label required-field">Job Description</label>
+                                        {{ form.description }}
+                                        {% if form.description.errors %}
+                                        <div class="text-danger mt-1 small">{{ form.description.errors }}</div>
+                                        {% endif %}
+                                        <div class="form-text">Describe the responsibilities, requirements, and benefits of this position</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Right Column -->
+                            <div class="col-lg-4">
+                                <div class="card bg-light border-0 mb-4">
+                                    <div class="card-body">
+                                        <h6 class="text-dark mb-3">Quick Actions</h6>
+                                        <div class="d-grid gap-2">
+                                            <button type="submit" class="btn btn-success">
+                                                <i class="bi bi-check-circle me-2"></i>
+                                                {% if job %}Update Job{% else %}Create Job{% endif %}
+                                            </button>
+                                            <a href="{% url 'job_list' %}" class="btn btn-outline-secondary">
+                                                <i class="bi bi-x-circle me-2"></i>Cancel
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Job Details Section -->
+                        <div class="mb-4">
+                            <h5 class="mb-3 text-dark d-flex align-items-center">
+                                <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px;">
+                                    <i class="bi bi-geo-alt"></i>
+                                </span>
+                                Job Details
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label for="job_type" class="form-label required-field">Job Type</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-briefcase"></i></span>
+                                        {{ form.job_type }}
+                                    </div>
+                                    {% if form.job_type.errors %}
+                                    <div class="text-danger mt-1 small">{{ form.job_type.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-3 mb-3">
+                                    <label for="workplace_type" class="form-label required-field">Workplace Type</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-laptop"></i></span>
+                                        {{ form.workplace_type }}
+                                    </div>
+                                    {% if form.workplace_type.errors %}
+                                    <div class="text-danger mt-1 small">{{ form.workplace_type.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-3 mb-3">
+                                    <label for="status" class="form-label required-field">Status</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-eye"></i></span>
+                                        {{ form.status }}
+                                    </div>
+                                    {% if form.status.errors %}
+                                    <div class="text-danger mt-1 small">{{ form.status.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-3 mb-3">
+                                    <label for="location" class="form-label required-field">Location</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-geo-alt"></i></span>
+                                        {{ form.location }}
+                                    </div>
+                                    {% if form.location.errors %}
+                                    <div class="text-danger mt-1 small">{{ form.location.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Salary & Deadline Section -->
+                        <div class="mb-4">
+                            <h5 class="mb-3 text-dark d-flex align-items-center">
+                                <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px;">
+                                    <i class="bi bi-currency-dollar"></i>
+                                </span>
+                                Compensation & Timeline
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="salary_start" class="form-label">Salary</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-currency-dollar"></i></span>
+                                        {{ form.salary_start }}
+                                        <span class="input-group-text bg-light">/ year</span>
+                                    </div>
+                                    {% if form.salary_start.errors %}
+                                    <div class="text-danger mt-1 small">{{ form.salary_start.errors }}</div>
+                                    {% endif %}
+                                    <div class="form-text">Leave empty if salary is not specified</div>
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    <label for="application_deadline" class="form-label required-field">Application Deadline</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-calendar"></i></span>
+                                        {{ form.application_deadline }}
+                                    </div>
+                                    {% if form.application_deadline.errors %}
+                                    <div class="text-danger mt-1 small">{{ form.application_deadline.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between align-items-center border-top pt-4 mt-4">
+                            <a href="{% url 'job_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Jobs
+                            </a>
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle me-2"></i>
+                                    {% if job %}Update Job{% else %}Create Job{% endif %}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.required-field::after {
+    content: " *";
+    color: #dc3545;
+}
+
+.input-group-text {
+    transition: all 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+.ck-editor__editable {
+    min-height: 250px;
+    border-radius: 0.375rem;
+    border: 1px solid #ced4da;
+}
+
+.ck-editor__editable:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+.card {
+    border: none;
+    border-radius: 0.75rem;
+}
+
+.btn {
+    border-radius: 0.5rem;
+    padding: 0.5rem 1.5rem;
+}
+
+.bg-light {
+    background-color: #f8f9fa !important;
+}
+</style>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    const form = document.getElementById('jobForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            const requiredFields = form.querySelectorAll('[required]');
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('is-invalid');
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+                // Scroll to first error
+                const firstError = form.querySelector('.is-invalid');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        });
+    }
+    
+    // Initialize CKEditor if not loaded by form.media
+    setTimeout(function() {
+        if (typeof ClassicEditor === 'undefined') {
+            console.log('CKEditor not found, loading from CDN...');
+            const script = document.createElement('script');
+            script.src = 'https://cdn.ckeditor.com/ckeditor5/41.4.2/balloon-block/ckeditor.js';
+            script.onload = initializeCKEditor;
+            document.head.appendChild(script);
+        } else {
+            initializeCKEditor();
+        }
+    }, 1000);
+
+    function initializeCKEditor() {
+        if (typeof ClassicEditor !== 'undefined') {
+            ClassicEditor
+                .create(document.querySelector('#id_description'), {
+                    toolbar: {
+                        items: [
+                            'heading', '|',
+                            'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|',
+                            'outdent', 'indent', '|',
+                            'blockQuote', 'insertTable', 'undo', 'redo'
+                        ]
+                    },
+                    language: 'en',
+                })
+                .then(editor => {
+                    console.log('CKEditor initialized successfully');
+                })
+                .catch(console.error);
+        }
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

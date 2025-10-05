@@ -1,0 +1,40 @@
+{% load static %}
+
+<div class="col-lg-3">
+    <!-- Side Navigation -->
+    <div class="side-nav">
+        <h4 class="nav-title">Manage Account</h4>
+        <div class="nav flex-column">
+            <a class="nav-link {% if request.resolver_match.url_name == 'jobseeker_dashboard' %}active{% endif %}" href="{% url "jobseeker_dashboard" %}">
+                <i class="fas fa-file-alt"></i> My Dashboard
+            </a>
+            <a class="nav-link {% if request.resolver_match.url_name == 'saved_jobs' %}active{% endif %}" href="{% url "saved_jobs" %}">
+                <i class="fas fa-bookmark"></i> Bookmarked Jobs
+            </a>
+            <a class="nav-link" href="#">
+                <i class="fas fa-bell"></i> Notifications
+                <span class="badge bg-primary ms-2">3</span>
+            </a>
+            <a class="nav-link {% if request.resolver_match.url_name == 'my_applications' %}active{% endif %}" href="{% url 'my_applications' %}">
+                <i class="fas fa-briefcase"></i> Manage Applications
+            </a>
+            {% comment %} <a class="nav-link" href="#">
+                <i class="fas fa-bell"></i> Job Alerts
+            </a> {% endcomment %}
+        </div>
+        
+        <div class="nav-divider"></div>
+        
+        <div class="nav flex-column">
+            <a class="nav-link {% if request.resolver_match.url_name == 'profile_view' or request.resolver_match.url_name == 'profile_edit' %}active{% endif %}" href="{% url 'profile_view' %}">
+                <i class="fas fa-briefcase"></i> Profile
+            </a>
+            <a class="nav-link {% if request.resolver_match.url_name == 'jobseeker-change_password' %}active{% endif %}" href="{% url 'jobseeker-change_password' %}">
+                <i class="fas fa-lock"></i> Change Password
+            </a>
+            <a class="nav-link" href="{% url "accounts:logout" %}">
+                <i class="fas fa-sign-out-alt"></i> Sign Out
+            </a>
+        </div>
+    </div>
+</div>

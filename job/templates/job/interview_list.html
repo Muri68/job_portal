@@ -1,0 +1,57 @@
+{% extends "job/base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-3">Scheduled Interviews</h2>
+
+  {% if interviews %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle shadow-sm">
+        <thead class="table-dark">
+          <tr>
+            <th>#</th>
+            <th>Applicant</th>
+            <th>Job Title</th>
+            <th>Description</th>
+            <th>Date & Time</th>
+            <th>Type</th>
+            <th>Location / Link</th>
+            <th>Assigned To</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for interview in interviews %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+              <a href="{% url 'applicant_detail' interview.application.id %}">
+                {{ interview.application.applicant_name }}
+              </a>
+            </td>
+            <td>{{ interview.application.job.title }}</td>
+            <td>{{ interview.description|default:"—" }}</td>
+            <td>{{ interview.date_time|date:"M d, Y H:i" }}</td>
+            <td>
+              <span class="badge bg-{% if interview.type == 'Online' %}info{% else %}secondary{% endif %}">
+                {{ interview.interview_type }}
+              </span>
+            </td>
+            <td>
+              {% if interview.interview_type == 'online' %}
+                <a href="{{ interview.meeting_link }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                  Join Meeting
+                </a>
+              {% else %}
+                {{ interview.location }}
+              {% endif %}
+            </td>
+            <td>{{ interview.assigned_to.email }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-info">No interviews scheduled yet.</div>
+  {% endif %}
+</div>
+{% endblock %}

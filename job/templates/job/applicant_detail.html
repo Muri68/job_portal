@@ -1,0 +1,471 @@
+{% extends "job/base.html" %}
+{% load static %}
+
+{% block title %}{{ application.applicant_name }} - Application Details{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div class="flex-grow-1">
+                    <nav aria-label="breadcrumb" class="mb-3">
+                        <ol class="breadcrumb mb-2">
+                            <li class="breadcrumb-item"><a href="{% url 'admin-dashboard' %}" class="text-decoration-none text-muted">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'applicants_list' %}" class="text-decoration-none text-muted">Applicants</a></li>
+                            <li class="breadcrumb-item active text-dark">{{ application.applicant_name }}</li>
+                        </ol>
+                    </nav>
+                    
+                    <div class="d-flex align-items-center flex-wrap gap-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary bg-opacity-10 rounded-circle p-3 me-3">
+                                <i class="fas fa-user-tie text-primary fs-4"></i>
+                            </div>
+                            <div>
+                                <h1 class="h3 fw-bold text-dark mb-1">{{ application.applicant_name }}</h1>
+                                <p class="text-muted mb-0">Applied for <strong class="text-primary">{{ application.job.title }}</strong></p>
+                            </div>
+                        </div>
+                        
+                        <div class="ms-auto">
+                            <span class="badge fs-6 px-3 py-2 
+                                {% if application.status == 'pending' %}bg-warning
+                                {% elif application.status == 'reviewed' %}bg-info
+                                {% elif application.status == 'accepted' %}bg-success
+                                {% else %}bg-danger{% endif %}">
+                                <i class="fas fa-circle me-1" style="font-size: 0.6em;"></i>
+                                {{ application.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2 flex-shrink-0">
+                    <a href="{% url 'applicants_list' %}" class="btn btn-outline-secondary px-4">
+                        <i class="fas fa-arrow-left me-2"></i>Back
+                    </a>
+                    <div class="dropdown">
+                        <button class="btn btn-primary px-4 dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-cog me-2"></i>Actions
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a href="{% url 'compose_email' application.id %}" class="btn btn-primary">
+                                    <i class="fas fa-envelope me-2"></i>Send Email
+                                </a>
+                            </li>
+                            <li><a class="dropdown-item" href="tel:{{ application.applicant_phone }}">
+                                <i class="fas fa-phone me-2"></i>Call Applicant
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="#">
+                                <i class="fas fa-trash me-2"></i>Delete Application
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column - Applicant Details -->
+        <div class="col-lg-8">
+            <!-- Contact Information Card -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <h5 class="card-title mb-0 fw-bold">
+                        <i class="fas fa-id-card text-primary me-2"></i>Contact Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-3 bg-light rounded-3">
+                                <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="fas fa-envelope text-primary"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted d-block">Email Address</small>
+                                    <a href="mailto:{{ application.applicant_email }}" class="text-dark fw-semibold text-decoration-none">
+                                        {{ application.applicant_email }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-3 bg-light rounded-3">
+                                <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="fas fa-phone text-primary"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted d-block">Phone Number</small>
+                                    <span class="text-dark fw-semibold">{{ application.applicant_phone|default:"Not provided" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if application.linkedin_profile %}
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-3 bg-light rounded-3">
+                                <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="fab fa-linkedin text-primary"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted d-block">LinkedIn Profile</small>
+                                    <a href="{{ application.linkedin_profile }}" target="_blank" class="text-dark fw-semibold text-decoration-none text-truncate d-block">
+                                        View Profile
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if application.portfolio_url %}
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center p-3 bg-light rounded-3">
+                                <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="fas fa-globe text-primary"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted d-block">Portfolio</small>
+                                    <a href="{{ application.portfolio_url }}" target="_blank" class="text-dark fw-semibold text-decoration-none text-truncate d-block">
+                                        Visit Portfolio
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cover Letter Card -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-transparent border-0 py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0 fw-bold">
+                        <i class="fas fa-file-alt text-primary me-2"></i>Cover Letter
+                    </h5>
+                    <span class="badge bg-primary bg-opacity-10 text-primary">{{ application.cover_letter|wordcount }} words</span>
+                </div>
+                <div class="card-body">
+                    <div class="bg-light p-4 rounded-3">
+                        <div class="cover-letter-content" style="line-height: 1.7; white-space: pre-wrap;">
+                            {{ application.cover_letter|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Actions & Information -->
+        <div class="col-lg-4">
+            <!-- Status Management Card -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <h5 class="card-title mb-0 fw-bold">
+                        <i class="fas fa-sync-alt text-primary me-2"></i>Update Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2" id="statusButtons">
+                        {% for value, label in application.STATUS_CHOICES %}
+                        <button 
+                            class="btn btn-lg {% if application.status == value %}btn-primary{% else %}btn-outline-primary{% endif %} status-btn rounded-3 px-3 py-2 text-start d-flex align-items-center justify-content-between"
+                            data-status="{{ value }}"
+                            {% if application.status == value %}disabled{% endif %}
+                        >
+                            <span>
+                                <i class="fas 
+                                    {% if value == 'pending' %}fa-clock
+                                    {% elif value == 'reviewed' %}fa-eye
+                                    {% elif value == 'accepted' %}fa-check-circle
+                                    {% else %}fa-times-circle{% endif %} me-2"></i>
+                                {{ label }}
+                            </span>
+                            {% if application.status == value %}
+                            <i class="fas fa-check ms-2"></i>
+                            {% endif %}
+                        </button>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Status Message -->
+                    <div id="statusMessage" class="mt-3"></div>
+                </div>
+            </div>
+
+            <!-- Application Details Card -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <h5 class="card-title mb-0 fw-bold">
+                        <i class="fas fa-info-circle text-primary me-2"></i>Application Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item px-0 py-3 border-0 d-flex justify-content-between">
+                            <span class="text-muted">Applied On</span>
+                            <span class="fw-semibold">{{ application.applied_at|date:"M d, Y" }}</span>
+                        </div>
+                        <div class="list-group-item px-0 py-3 border-0 d-flex justify-content-between">
+                            <span class="text-muted">Applied Time</span>
+                            <span class="fw-semibold">{{ application.applied_at|date:"g:i A" }}</span>
+                        </div>
+                        <div class="list-group-item px-0 py-3 border-0 d-flex justify-content-between">
+                            <span class="text-muted">Time Since</span>
+                            <span class="fw-semibold">{{ application.applied_at|timesince }} ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resume Card -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <h5 class="card-title mb-0 fw-bold">
+                        <i class="fas fa-file-pdf text-primary me-2"></i>Resume
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if application.resume %}
+                    <div class="d-grid gap-2">
+                        <a href="{{ application.resume.url }}" class="btn btn-outline-primary rounded-3 py-2" target="_blank">
+                            <i class="fas fa-eye me-2"></i>View Resume
+                        </a>
+                        <a href="{{ application.resume.url }}" download class="btn btn-primary rounded-3 py-2">
+                            <i class="fas fa-download me-2"></i>Download Resume
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-file-excel text-muted fs-1 mb-3 d-block"></i>
+                        <p class="text-muted mb-0">No resume uploaded</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        border: none;
+        border-radius: 12px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+    }
+    
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+    }
+    
+    .breadcrumb-item a {
+        color: #6c757d;
+        transition: color 0.2s ease;
+    }
+    
+    .breadcrumb-item a:hover {
+        color: #4361ee;
+    }
+    
+    .cover-letter-content {
+        font-size: 0.95rem;
+        color: #495057;
+    }
+    
+    .status-btn {
+        transition: all 0.3s ease;
+        border: 2px solid;
+    }
+    
+    .status-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(67, 97, 238, 0.15);
+    }
+    
+    .list-group-item {
+        background: transparent;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .container-fluid {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+        
+        .card-body {
+            padding: 1.25rem;
+        }
+        
+        .d-flex.align-items-center.flex-wrap {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+        
+        .ms-auto {
+            margin-left: 0 !important;
+            margin-top: 1rem;
+        }
+        
+        .btn-group {
+            width: 100%;
+        }
+        
+        .btn-group .btn {
+            flex: 1;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .card-body {
+            padding: 1rem;
+        }
+        
+        .bg-primary.bg-opacity-10.rounded-circle {
+            padding: 0.75rem !important;
+        }
+        
+        .h3 {
+            font-size: 1.5rem;
+        }
+    }
+    
+    /* Custom animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .card {
+        animation: fadeIn 0.5s ease;
+    }
+    
+    /* Status badge animations */
+    .badge {
+        transition: all 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const buttons = document.querySelectorAll(".status-btn");
+        const statusMessage = document.getElementById("statusMessage");
+        const currentStatusBadge = document.querySelector(".badge.fs-6");
+
+        buttons.forEach(button => {
+            button.addEventListener("click", function () {
+                const newStatus = this.dataset.status;
+                const newStatusText = this.textContent.trim();
+
+                // Add loading state
+                const originalContent = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
+                this.disabled = true;
+
+                fetch("{% url 'update_application_status' application.id %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}",
+                        "X-Requested-With": "XMLHttpRequest"
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update all buttons
+                        buttons.forEach(btn => {
+                            btn.classList.remove("btn-primary");
+                            btn.classList.add("btn-outline-primary");
+                            btn.disabled = false;
+                            btn.innerHTML = btn.innerHTML.replace('<i class="fas fa-check ms-2"></i>', '');
+                        });
+                        
+                        // Update clicked button
+                        this.classList.remove("btn-outline-primary");
+                        this.classList.add("btn-primary");
+                        this.disabled = true;
+                        this.innerHTML = originalContent + '<i class="fas fa-check ms-2"></i>';
+                        
+                        // Update status badge with animation
+                        currentStatusBadge.textContent = data.status_display;
+                        currentStatusBadge.className = `badge fs-6 px-3 py-2 ${
+                            newStatus === 'pending' ? 'bg-warning' :
+                            newStatus === 'reviewed' ? 'bg-info' :
+                            newStatus === 'accepted' ? 'bg-success' : 'bg-danger'
+                        }`;
+                        
+                        // Add pulse animation
+                        currentStatusBadge.style.animation = 'pulse 0.6s ease';
+                        setTimeout(() => {
+                            currentStatusBadge.style.animation = '';
+                        }, 600);
+                        
+                        // Show success message
+                        showStatusMessage('success', `${data.message} (Now: <strong>${data.status_display}</strong>)`);
+                    } else {
+                        this.innerHTML = originalContent;
+                        this.disabled = false;
+                        showStatusMessage('error', data.error || 'Failed to update status');
+                    }
+                })
+                .catch(error => {
+                    this.innerHTML = originalContent;
+                    this.disabled = false;
+                    showStatusMessage('error', `Network error: ${error}`);
+                });
+            });
+        });
+
+        function showStatusMessage(type, message) {
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            
+            statusMessage.innerHTML = `
+                <div class="alert ${alertClass} alert-dismissible fade show rounded-3 border-0 shadow-sm" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="fas ${icon} me-2 fs-5"></i>
+                        <div class="flex-grow-1">${message}</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </div>`;
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                const alert = statusMessage.querySelector('.alert');
+                if (alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            }, 5000);
+        }
+
+        // Add CSS for pulse animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+    });
+</script>
+{% endblock %}

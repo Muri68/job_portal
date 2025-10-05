@@ -1,0 +1,821 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Apply for {{ job.title }} | {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Navigation Styles */
+    .navbar {
+        padding: 15px 0;
+        transition: all 0.3s ease;
+        background: white !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        width: 100%;
+        z-index: 1000;
+    }
+    
+    .navbar-brand {
+        font-weight: 700;
+        font-size: 1.8rem;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+    }
+    
+    .navbar-brand .logo {
+        height: 100px;
+        margin-right: 10px;
+    }
+    
+    .navbar-nav .nav-link {
+        color: var(--dark);
+        font-weight: 500;
+        margin: 0 10px;
+        transition: color 0.3s ease;
+        position: relative;
+    }
+    
+    .navbar-nav .nav-link::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: 0;
+        left: 0;
+        background-color: var(--primary);
+        transition: width 0.3s ease;
+    }
+    
+    .navbar-nav .nav-link:hover::after,
+    .navbar-nav .nav-link.active::after {
+        width: 100%;
+    }
+    
+    .navbar-nav .nav-link:hover,
+    .navbar-nav .nav-link.active {
+        color: var(--primary);
+    }
+    
+    .btn-primary {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        padding: 12px 30px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .btn-outline-primary {
+        border-color: var(--primary);
+        color: var(--primary);
+        padding: 10px 25px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    
+
+    .application-hero {
+        background: linear-gradient(rgba(3, 19, 19, 0.9), rgba(3, 15, 15, 0.8)), url('https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&auto=format&fit=crop&w=1500&q=80');
+        background-size: cover;
+        background-position: center;
+        padding: 120px 0 80px; /* Increased bottom padding */
+        color: white;
+        position: relative;
+        z-index: 1;
+    }
+
+    .application-container {
+        width: 90vw;
+        max-width: 1200px; /* Maximum width for large screens */
+        margin: -40px auto 40px; /* Reduced negative margin to lessen overlap */
+        position: relative;
+        z-index: 2;
+    }
+
+    .application-card {
+        background: white;
+        border-radius: 12px;
+        padding: 40px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
+    }
+
+    .form-section {
+        border-bottom: 1px solid #e2e8f0;
+        padding: 30px 0;
+        margin-bottom: 20px;
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    .section-title {
+        font-weight: 600;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e2e8f0;
+        color: var(--dark);
+        position: relative;
+        font-size: 1.4rem;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        width: 50px;
+        height: 3px;
+        background: var(--primary);
+        bottom: 0;
+        left: 0;
+        border-radius: 3px;
+    }
+
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+
+    .form-control {
+        padding: 12px 15px;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.25rem rgba(37, 125, 212, 0.15);
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: var(--dark);
+        margin-bottom: 8px;
+    }
+
+    .file-upload-area {
+        border: 2px dashed #e2e8f0;
+        border-radius: 8px;
+        padding: 40px 30px;
+        text-align: center;
+        background: #f8fafc;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        margin-bottom: 20px;
+    }
+
+    .file-upload-area:hover {
+        border-color: var(--primary);
+        background: rgba(37, 125, 212, 0.02);
+    }
+
+    .file-upload-area.dragover {
+        border-color: var(--primary);
+        background: rgba(37, 125, 212, 0.05);
+    }
+
+    .upload-icon {
+        font-size: 3rem;
+        color: var(--secondary);
+        margin-bottom: 15px;
+        transition: color 0.3s ease;
+    }
+
+    .file-upload-area:hover .upload-icon {
+        color: var(--primary);
+    }
+
+    .terms-checkbox {
+        background: #f8fafc;
+        padding: 25px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .job-overview-card {
+        background: white;
+        border-radius: 8px;
+        padding: 25px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        margin-bottom: 25px;
+        border-left: 4px solid var(--primary);
+    }
+
+    .job-meta-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        color: var(--secondary);
+    }
+
+    .job-meta-item i {
+        margin-right: 10px;
+        color: var(--primary);
+        width: 20px;
+    }
+
+    /* Hero section content adjustments */
+    .hero-title {
+        font-size: 2.8rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
+    .breadcrumb {
+        background: transparent;
+        margin-bottom: 0;
+        padding: 0;
+    }
+
+    .breadcrumb-item a {
+        color: rgba(255, 255, 255, 0.9);
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .breadcrumb-item a:hover {
+        color: white;
+    }
+
+    .breadcrumb-item.active {
+        color: white;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .deadline-badge {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1200px) {
+        .application-container {
+            width: 95vw;
+            max-width: 1000px;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .application-container {
+            width: 97vw;
+            margin: -30px auto 30px;
+        }
+        
+        .application-card {
+            padding: 30px;
+        }
+        
+        .hero-title {
+            font-size: 2.2rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .application-container {
+            width: 100vw;
+            margin: -20px 0 20px;
+            border-radius: 0;
+        }
+        
+        .application-card {
+            padding: 25px 20px;
+            border-radius: 0;
+            box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .application-hero {
+            padding: 100px 0 60px;
+        }
+        
+        .form-section {
+            padding: 20px 0;
+        }
+        
+        .hero-title {
+            font-size: 1.8rem;
+        }
+        
+        .deadline-badge {
+            margin-top: 20px;
+            text-align: left !important;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .application-card {
+            padding: 20px 15px;
+        }
+        
+        .application-hero {
+            padding: 80px 0 50px;
+        }
+        
+        .hero-title {
+            font-size: 1.6rem;
+        }
+    }
+
+    /* Custom file input styling */
+    .custom-file-input {
+        opacity: 0;
+        position: absolute;
+        z-index: -1;
+    }
+
+    .file-info {
+        margin-top: 10px;
+        font-size: 0.9rem;
+    }
+
+    .file-name {
+        color: var(--primary);
+        font-weight: 500;
+    }
+
+    /* Form validation styles */
+    .is-invalid {
+        border-color: #dc3545;
+    }
+
+    .invalid-feedback {
+        display: block;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+        color: #dc3545;
+    }
+
+    /* Loading state */
+    .btn-loading {
+        position: relative;
+        color: transparent;
+    }
+
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 50%;
+        left: 50%;
+        margin-left: -10px;
+        margin-top: -10px;
+        border: 2px solid #ffffff;
+        border-radius: 50%;
+        border-right-color: transparent;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Smooth transitions */
+    .application-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .application-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Application Hero Section -->
+<section class="application-hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="hero-title">Apply for Position</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'job_listings' %}">Job Listings</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'job_detail_frontend' job.id %}">{{ job.title|truncatewords:3 }}</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Apply</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <div class="deadline-badge rounded p-3 text-dark d-inline-block">
+                    <small class="text-muted d-block">Application Deadline</small>
+                    <div class="fw-bold">{{ job.application_deadline|date:"F j, Y" }}</div>
+                    {% if job.is_expired %}
+                    <small class="text-danger">Expired</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="application-container">
+    <div class="application-card">
+        <!-- Job Overview -->
+        <div class="job-overview-card">
+            <div class="d-flex justify-content-between align-items-start flex-wrap">
+                <div>
+                    <h3 class="mb-2">{{ job.title }}</h3>
+                    <div class="job-meta">
+                        <div class="job-meta-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ job.location }}</span>
+                        </div>
+                        <div class="job-meta-item">
+                            <i class="fas fa-briefcase"></i>
+                            <span>{{ job.get_workplace_type_display }}</span>
+                        </div>
+                        {% if job.salary_start %}
+                        <div class="job-meta-item">
+                            <i class="fas fa-euro-sign"></i>
+                            <span>Salary starting from {{ job.salary_start|intcomma }} per annum</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <span class="badge bg-primary fs-6">{{ job.get_job_type_display }}</span>
+            </div>
+        </div>
+
+        {% if existing_application %}
+        <!-- Already Applied Message -->
+        <div class="alert alert-info">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-check-circle fa-2x me-3"></i>
+                <div>
+                    <h5 class="alert-heading mb-1">Application Already Submitted!</h5>
+                    <p class="mb-0">You applied to this position on <strong>{{ existing_application.applied_at|date:"F j, Y" }}</strong>. 
+                    <a href="{% url 'application_detail' existing_application.id %}" class="alert-link">View your application</a></p>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <!-- Application Form -->
+        <form method="post" enctype="multipart/form-data" id="applicationForm" novalidate>
+            {% csrf_token %}
+            
+            <!-- Personal Information Section -->
+            <div class="form-section">
+                <h3 class="section-title">Personal Information</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <label for="{{ form.applicant_name.id_for_label }}" class="form-label required-field">Full Name</label>
+                            {{ form.applicant_name }}
+                            {% if form.applicant_name.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.applicant_name.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <label for="{{ form.applicant_email.id_for_label }}" class="form-label required-field">Email Address</label>
+                            {{ form.applicant_email }}
+                            {% if form.applicant_email.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.applicant_email.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <label for="{{ form.applicant_phone.id_for_label }}" class="form-label">Phone Number</label>
+                            {{ form.applicant_phone }}
+                            <div class="form-text">Include country code if international</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <label for="{{ form.years_of_experience.id_for_label }}" class="form-label">Years of Experience</label>
+                            {{ form.years_of_experience }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Professional Information Section -->
+            <div class="form-section">
+                <h3 class="section-title">Professional Information</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <label for="{{ form.current_company.id_for_label }}" class="form-label">Current Company</label>
+                            {{ form.current_company }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <label for="{{ form.current_position.id_for_label }}" class="form-label">Current Position</label>
+                            {{ form.current_position }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Online Profiles Section -->
+            <div class="form-section">
+                <h3 class="section-title">Online Profiles</h3>
+                <p class="text-muted mb-4">Add links to your professional profiles (optional)</p>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-4">
+                            <label for="{{ form.linkedin_profile.id_for_label }}" class="form-label">
+                                <i class="fab fa-linkedin text-primary me-2"></i>LinkedIn
+                            </label>
+                            {{ form.linkedin_profile }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-4">
+                            <label for="{{ form.github_profile.id_for_label }}" class="form-label">
+                                <i class="fab fa-github text-dark me-2"></i>GitHub
+                            </label>
+                            {{ form.github_profile }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-4">
+                            <label for="{{ form.portfolio_url.id_for_label }}" class="form-label">
+                                <i class="fas fa-globe text-success me-2"></i>Portfolio
+                            </label>
+                            {{ form.portfolio_url }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documents Section -->
+            <div class="form-section">
+                <h3 class="section-title">Application Documents</h3>
+                
+                <!-- Resume Upload -->
+                <div class="mb-4">
+                    <label class="form-label required-field">Resume/CV</label>
+                    <div class="file-upload-area" id="resumeDropArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <h5>Upload Your Resume</h5>
+                        <p class="text-muted">Drag & drop your file here or click to browse</p>
+                        <p class="small text-muted mb-3">Supported formats: PDF, DOC, DOCX (Max: 5MB)</p>
+                        {{ form.resume }}
+                        {% comment %} <div class="mt-3">
+                            <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('{{ form.resume.id_for_label }}').click()">
+                                <i class="fas fa-file-upload me-2"></i>Choose File
+                            </button>
+                        </div>
+                        <div id="fileName" class="file-info"></div> {% endcomment %}
+                    </div>
+                    {% if form.resume.errors %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in form.resume.errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Cover Letter -->
+                <div class="mb-4">
+                    <label for="{{ form.cover_letter.id_for_label }}" class="form-label required-field">Cover Letter</label>
+                    {{ form.cover_letter }}
+                    <div class="form-text">Tell us why you're interested in this position and why you'd be a great fit. Customize your letter for this specific role.</div>
+                    {% if form.cover_letter.errors %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in form.cover_letter.errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Terms and Submission -->
+            <div class="form-section">
+                <div class="terms-checkbox">
+                    <div class="form-check">
+                        {{ form.agree_to_terms }}
+                        <label class="form-check-label" for="{{ form.agree_to_terms.id_for_label }}">
+                            I agree to the processing of my personal data for recruitment purposes in accordance with your Privacy Policy.
+                        </label>
+                    </div>
+                    {% if form.agree_to_terms.errors %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in form.agree_to_terms.errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="d-grid gap-3 d-md-flex justify-content-md-end mt-4">
+                    <a href="{% url 'job_detail_frontend' job.id %}" class="btn btn-outline-secondary me-md-2">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Job
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                        <i class="fas fa-paper-plane me-2"></i>Submit Application
+                    </button>
+                </div>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// JavaScript remains the same as previous version
+document.addEventListener('DOMContentLoaded', function() {
+    const resumeInput = document.getElementById('{{ form.resume.id_for_label }}');
+    const dropArea = document.getElementById('resumeDropArea');
+    const fileName = document.getElementById('fileName');
+    const applicationForm = document.getElementById('applicationForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // File upload handling
+    function updateFileName(file) {
+        if (file) {
+            fileName.innerHTML = `<span class="file-name"><i class="fas fa-check-circle text-success me-2"></i>${file.name}</span> (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+        }
+    }
+
+    resumeInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            updateFileName(this.files[0]);
+        }
+    });
+
+    // Drag and drop functionality
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight() {
+        dropArea.classList.add('dragover');
+    }
+
+    function unhighlight() {
+        dropArea.classList.remove('dragover');
+    }
+
+    dropArea.addEventListener('drop', function(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        if (files.length > 0) {
+            resumeInput.files = files;
+            updateFileName(files[0]);
+            const event = new Event('change');
+            resumeInput.dispatchEvent(event);
+        }
+    });
+
+    dropArea.addEventListener('click', function() {
+        resumeInput.click();
+    });
+
+    // Form validation
+    applicationForm.addEventListener('submit', function(e) {
+        let isValid = true;
+        const requiredFields = this.querySelectorAll('[required]');
+        
+        this.querySelectorAll('.is-invalid').forEach(field => {
+            field.classList.remove('is-invalid');
+        });
+
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.classList.add('is-invalid');
+                
+                if (!field.nextElementSibling || !field.nextElementSibling.classList.contains('invalid-feedback')) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'invalid-feedback';
+                    errorDiv.textContent = 'This field is required.';
+                    field.parentNode.appendChild(errorDiv);
+                }
+            }
+        });
+
+        if (resumeInput.files.length === 0) {
+            isValid = false;
+            resumeInput.classList.add('is-invalid');
+            dropArea.style.borderColor = '#dc3545';
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+            const firstError = this.querySelector('.is-invalid');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            showNotification('Please fill in all required fields correctly.', 'error');
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="btn-loading"></div> Submitting...';
+        }
+    });
+
+    // Real-time validation
+    applicationForm.querySelectorAll('input, textarea, select').forEach(field => {
+        field.addEventListener('blur', function() {
+            if (this.hasAttribute('required') && !this.value.trim()) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+    });
+});
+
+function showNotification(message, type = 'info') {
+    const alertClass = {
+        'success': 'alert-success',
+        'error': 'alert-danger',
+        'warning': 'alert-warning',
+        'info': 'alert-info'
+    }[type];
+
+    const existingAlerts = document.querySelectorAll('.custom-alert');
+    existingAlerts.forEach(alert => alert.remove());
+
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `custom-alert alert ${alertClass} alert-dismissible fade show`;
+    alertDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    `;
+    alertDiv.innerHTML = `
+        <strong>${type.charAt(0).toUpperCase() + type.slice(1)}!</strong> ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(alertDiv);
+
+    setTimeout(() => {
+        if (alertDiv.parentElement) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

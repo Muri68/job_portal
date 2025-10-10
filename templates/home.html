@@ -267,21 +267,25 @@
             margin-bottom: 20px;
         }
         
-        /* Job Cards */
+        /* Job Listings */
+        .job-listings {
+            padding: 80px 0;
+        }
+        
         .job-card {
             background: white;
             border-radius: 8px;
             padding: 25px;
-            box-shadow: 0 5px 15px rgba(13, 71, 161, 0.05);
-            margin-bottom: 30px;
-            transition: all 0.3s ease;
-            border-left: 3px solid var(--primary-light);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-left: 4px solid transparent;
         }
         
         .job-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(13, 71, 161, 0.1);
-            border-left: 3px solid var(--primary);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-left-color: var(--primary);
         }
         
         .job-type {
@@ -291,14 +295,13 @@
             border-radius: 50px;
             font-size: 0.9rem;
             font-weight: 500;
+            display: inline-block;
+            margin-bottom: 15px;
         }
         
-        .job-price {
-            color: var(--primary);
-        }
-        
-        .job-price i {
-            margin-right: -2px;
+        .job-featured {
+            background: rgba(249, 115, 22, 0.1);
+            color: var(--accent);
         }
         
         .company-logo {
@@ -309,6 +312,66 @@
             background: white;
             padding: 5px;
             border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .job-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 1.2rem;
+            color: var(--secondary);
+        }
+        
+        .job-title:hover {
+            color: var(--primary);
+        }
+        
+        .company-name {
+            color: var(--secondary);
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        .job-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .job-detail {
+            display: flex;
+            align-items: center;
+            color: var(--secondary);
+            font-size: 0.9rem;
+        }
+        
+        .job-detail i {
+            margin-right: 5px;
+            color: var(--primary);
+        }
+        
+        .job-salary i {
+            margin-right: -2px;
+        }
+        
+        .job-salary {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .job-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+            margin-top: 15px;
+        }
+        
+        .job-posted {
+            color: var(--secondary);
+            font-size: 0.9rem;
         }
         
         /* Testimonial Cards */
@@ -600,30 +663,67 @@
             </div>
             <div class="row">
                 {% for job in jobs %}
-                <a href="{% url "job_detail_frontend" job.id %}" class="col-lg-6 mb-4">
+                <div class="col-lg-6 mb-4">
                     <div class="job-card">
-                        <div class="d-flex justify-content-between mb-3">
-                            <span class="job-type">{{ job.workplace_type}}</span>
-                            <span class="job-price">Salary starting from <span class="fw-bold"><i class="bi bi-currency-pound"></i>{{ job.salary_start|intcomma }}</span> per annum</span>
-                        </div>
+                        {% if job.is_featured %}
+                        <span class="job-type job-featured"><i class="fas fa-star me-1"></i> Featured</span>
+                        {% else %}
+                        <span class="job-type">{{ job.workplace_type }}</span>
+                        {% endif %}
+                        
                         <div class="d-flex align-items-center mb-3">
+                            {% if job.company and job.company.logo %}
+                            <img src="{{ job.company.logo.url }}" alt="{{ job.company.name }}" class="company-logo">
+                            {% endif %}
                             <div>
-                                <h5 class="mb-3 job-title">{{ job.title }}</h5>
-                                <p class="mb-0 text-muted"><i class="fas fa-map-marker-alt" style="color: #257dd4"></i>  <strong>{{ job.location }}</strong></p>
+                                <a href="{% url 'job_detail_frontend' job.id %}">
+                                    <h5 class="job-title mb-1">{{ job.title }}</h5>
+                                </a>
+                                {% if job.company %}
+                                <span class="company-name">{{ job.company.name }}</span>
+                                {% endif %}
                             </div>
                         </div>
                         
-                            {% if job.short_description %}
-                            <p class="text-muted">{{ job.short_description }}</p>
-                            {% else %}
-                            <p class="text-muted">{{ job.description|safe|striptags|truncatewords:20 }}</p>
+                        <div class="job-details">
+                            <div class="job-detail">
+                                <i class="fas fa-map-marker-alt"></i> {{ job.location }}
+                            </div>
+                            {% if job.salary_start %}
+                            <div class="job-detail job-salary">
+                                <i class="bi bi-currency-pound"></i>Salary starting from {{ job.salary_start|intcomma }} per annum
+                            </div>
                             {% endif %}
+                        </div>
+                        
+                        {% if job.short_description %}
+                        <p class="text-muted mb-3">{{ job.short_description }}</p>
+                        {% else %}
+                        <p class="text-muted mb-3">{{ job.description|safe|striptags|truncatewords:20 }}</p>
+                        {% endif %}
+                        
+                        <div class="job-actions">
+                            <span class="job-posted"><i class="far fa-clock"></i> Posted {{ job.created_at|timesince }} ago</span>
+                            <a href="{% url 'job_detail_frontend' job.id %}" class="btn btn-primary btn-sm">Apply Now</a>
+                        </div>
                     </div>
-                </a>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="job-card">
+                        <div class="text-center py-5">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h4>No jobs found</h4>
+                            <p class="text-muted">Try adjusting your search filters</p>
+                            <a href="{% url 'job_listings' %}" class="btn btn-primary">Browse All Jobs</a>
+                        </div>
+                    </div>
+                </div>
                 {% endfor %}
             </div>
+
             <div class="text-center mt-4">
-                <a href="{% url "job_listings" %}" class="btn btn-outline-primary">Browse All Jobs</a>
+                <a href="{% url 'job_listings' %}" class="btn btn-outline-primary">Browse All Jobs</a>
             </div>
         </div>
     </section>

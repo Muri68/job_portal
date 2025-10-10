@@ -6,6 +6,7 @@ admin.site.register(JobCategory)
 admin.site.register(Job)
 admin.site.register(JobApplication)
 admin.site.register(SavedJob)
+admin.site.register(SiteSetting)
 
 
 from django.contrib import admin

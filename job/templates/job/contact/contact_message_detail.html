@@ -1,0 +1,339 @@
+{% extends "job/base.html" %}
+{% load static %}
+
+{% block title %}Message Details - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+
+<style>
+    :root {
+        --primary: #257dd4;
+        --primary-light: #257cd491;
+        --primary-dark: #257dd4;
+        --secondary: #546E7A;
+        --accent: #FF9800;
+        --light: #E3F2FD;
+        --dark: #257dd4;
+        --gradient-start: #257dd4;
+        --gradient-end: #257dd4;
+        --sidebar-width: 280px;
+    }
+
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+
+    .ck-editor__editable {
+        min-height: 200px;
+        border-radius: 0.375rem;
+        border: 1px solid #ced4da;
+        font-family: inherit;
+    }
+
+    .django-ckeditor-widget {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    .ck.ck-editor {
+        border: 1px solid #dee2e6 !important;
+        border-radius: 0.375rem !important;
+    }
+
+    .ck.ck-toolbar {
+        background-color: #f8f9fa !important;
+        border-bottom: 1px solid #dee2e6 !important;
+        border-radius: 0.375rem 0.375rem 0 0 !important;
+    }
+
+    .ck.ck-content {
+        border-radius: 0 0 0.375rem 0.375rem !important;
+        min-height: 200px;
+    }
+
+    .input-group-text {
+        transition: all 0.2s ease;
+        border-color: #dee2e6;
+    }
+
+    .form-control:focus, 
+    .form-select:focus,
+    .ck-editor__editable:focus {
+        border-color: var(--primary-light);
+        box-shadow: 0 0 0 0.2rem rgba(37, 125, 212, 0.15);
+    }
+
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+    }
+
+    .btn {
+        border-radius: 0.5rem;
+        padding: 0.5rem 1.5rem;
+        font-weight: 500;
+    }
+
+    .bg-light {
+        background-color: var(--light) !important;
+    }
+
+    .btn-primary {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .btn-primary:hover,
+    .btn-primary:focus {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+    }
+
+    .btn-outline-primary {
+        color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .btn-outline-primary:hover,
+    .btn-outline-primary:focus {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        color: white;
+    }
+
+    .btn-outline-secondary {
+        color: var(--secondary);
+        border-color: var(--secondary);
+    }
+
+    .btn-outline-secondary:hover,
+    .btn-outline-secondary:focus {
+        background-color: var(--secondary);
+        border-color: var(--secondary);
+        color: white;
+    }
+
+    .bg-primary {
+        background-color: var(--primary) !important;
+    }
+
+    .text-primary {
+        color: var(--primary) !important;
+    }
+
+    .text-secondary {
+        color: var(--secondary) !important;
+    }
+
+    .text-muted {
+        color: var(--secondary) !important;
+        opacity: 0.8;
+    }
+
+    .is-invalid {
+        border-color: #dc3545;
+    }
+
+    .is-valid {
+        border-color: #198754;
+    }
+
+    .image-preview {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-section {
+        border-left: 3px solid var(--primary);
+        padding-left: 1rem;
+    }
+
+    .nav-tabs .nav-link {
+        border: none;
+        color: var(--secondary);
+        font-weight: 500;
+        padding: 0.75rem 1.5rem;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: var(--primary);
+        border-bottom: 3px solid var(--primary);
+        background: transparent;
+    }
+
+    .nav-tabs .nav-link:hover {
+        color: var(--primary);
+        border-bottom: 3px solid var(--primary-light);
+    }
+
+    @media (max-width: 991.98px) {
+        .btn-lg {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .nav-tabs .nav-link {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+<style>
+    .message-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        border-radius: 0.75rem 0.75rem 0 0;
+    }
+
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+    }
+
+    .status-new { background-color: #007bff; }
+    .status-read { background-color: #6c757d; }
+    .status-replied { background-color: #28a745; }
+    .status-closed { background-color: #dc3545; }
+
+    .message-content {
+        background-color: #f8f9fa;
+        border-left: 4px solid var(--primary);
+    }
+
+    .info-item {
+        border-bottom: 1px solid #dee2e6;
+        padding: 0.75rem 0;
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-12">
+            <!-- Header Section -->
+            <header class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-2 text-dark fw-bold">
+                        <i class="bi bi-envelope-open me-2"></i>
+                        Message Details
+                    </h1>
+                    <p class="text-secondary mb-0">
+                        View and manage contact message
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'contact_messages_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Messages
+                    </a>
+                </div>
+            </header>
+
+            <div class="row">
+                <!-- Message Content -->
+                <div class="col-lg-8">
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="message-header card-header border-0 py-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0 text-white">{{ object.subject }}</h5>
+                                <span class="status-badge status-{{ object.status }}">
+                                    {{ object.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="message-content p-4 rounded mb-4">
+                                <p class="mb-0">{{ object.message|linebreaks }}</p>
+                            </div>
+                            
+                            <!-- Reply Section -->
+                            <div class="mt-4">
+                                <h6 class="text-dark mb-3">Update Status</h6>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <div class="mb-3">
+                                                {{ form.status.label_tag }}
+                                                {{ form.status }}
+                                                {% if form.status.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.status.errors }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 d-flex align-items-end">
+                                            <button type="submit" class="btn btn-primary w-100">
+                                                <i class="bi bi-check-circle me-2"></i>
+                                                Update Status
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sender Information -->
+                <div class="col-lg-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white border-0 py-3">
+                            <h6 class="mb-0 text-dark">
+                                <i class="bi bi-person-circle me-2"></i>
+                                Sender Information
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="info-item">
+                                <small class="text-muted d-block">Name</small>
+                                <strong>{{ object.name }}</strong>
+                            </div>
+                            <div class="info-item">
+                                <small class="text-muted d-block">Email</small>
+                                <a href="mailto:{{ object.email }}" class="text-decoration-none">
+                                    {{ object.email }}
+                                </a>
+                            </div>
+                            <div class="info-item">
+                                <small class="text-muted d-block">IP Address</small>
+                                <code>{{ object.ip_address|default:"Not available" }}</code>
+                            </div>
+                            <div class="info-item">
+                                <small class="text-muted d-block">Submitted</small>
+                                {{ object.created_at|date:"F d, Y g:i A" }}
+                            </div>
+                            <div class="info-item">
+                                <small class="text-muted d-block">Last Updated</small>
+                                {{ object.updated_at|date:"F d, Y g:i A" }}
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white border-0 py-3">
+                            <div class="d-grid gap-2">
+                                <a href="mailto:{{ object.email }}?subject=Re: {{ object.subject }}" 
+                                   class="btn btn-outline-primary">
+                                    <i class="bi bi-reply me-2"></i>Reply via Email
+                                </a>
+                                <a href="{% url 'contact_message_delete' object.pk %}" 
+                                   class="btn btn-outline-danger">
+                                    <i class="bi bi-trash me-2"></i>Delete Message
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

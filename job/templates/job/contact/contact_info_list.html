@@ -1,0 +1,102 @@
+{% extends "job/base.html" %}
+{% load static %}
+
+{% block title %}Contact Information - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .contact-type-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+    }
+
+    .type-address { background-color: #257dd4; color: white; }
+    .type-phone { background-color: #28a745; color: white; }
+    .type-email { background-color: #dc3545; color: white; }
+    .type-hours { background-color: #ffc107; color: black; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-12">
+            <!-- Header Section -->
+            <header class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-2 text-dark fw-bold">
+                        <i class="bi bi-telephone me-2"></i>
+                        Contact Information
+                    </h1>
+                    <p class="text-secondary mb-0">
+                        Manage your company's contact details displayed on the website
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'contact_info_create' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Add Contact Info
+                    </a>
+                    <a href="{% url 'admin-dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </header>
+
+            <!-- Contact Information Grid -->
+            <div class="row">
+                {% for info in contact_info %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <span class="contact-type-badge type-{{ info.contact_type }}">
+                                    {{ info.get_contact_type_display }}
+                                </span>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" 
+                                           {% if info.is_active %}checked{% endif %} disabled>
+                                </div>
+                            </div>
+                            
+                            <h6 class="text-dark mb-2">{{ info.title }}</h6>
+                            <p class="text-muted mb-3">{{ info.value|linebreaks }}</p>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="bi {{ info.icon }} me-1"></i>
+                                    Order: {{ info.order }}
+                                </small>
+                                <div class="btn-group">
+                                    <a href="{% url 'contact_info_update' info.pk %}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="{% url 'contact_info_delete' info.pk %}" 
+                                       class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body text-center py-5">
+                            <i class="bi bi-telephone display-1 text-muted mb-3"></i>
+                            <h5 class="text-muted">No contact information added yet</h5>
+                            <p class="text-muted mb-4">Add your company's contact details to get started</p>
+                            <a href="{% url 'contact_info_create' %}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-2"></i>Add Contact Information
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

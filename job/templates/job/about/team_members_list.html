@@ -1,0 +1,343 @@
+{% extends "job/base.html" %}
+{% load static %}
+
+{% block title %}Manage Team Members - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+    <style>
+        :root {
+            --primary: #257dd4;
+            --primary-light: #257cd491;
+            --primary-dark: #257dd4;
+            --secondary: #546E7A;
+            --accent: #FF9800;
+            --light: #E3F2FD;
+            --dark: #257dd4;
+            --gradient-start: #257dd4;
+            --gradient-end: #257dd4;
+            --sidebar-width: 280px;
+        }
+
+        .required-field::after {
+            content: " *";
+            color: #dc3545;
+        }
+
+        .ck-editor__editable {
+            min-height: 200px;
+            border-radius: 0.375rem;
+            border: 1px solid #ced4da;
+            font-family: inherit;
+        }
+
+        .django-ckeditor-widget {
+            display: block !important;
+            width: 100% !important;
+        }
+
+        .ck.ck-editor {
+            border: 1px solid #dee2e6 !important;
+            border-radius: 0.375rem !important;
+        }
+
+        .ck.ck-toolbar {
+            background-color: #f8f9fa !important;
+            border-bottom: 1px solid #dee2e6 !important;
+            border-radius: 0.375rem 0.375rem 0 0 !important;
+        }
+
+        .ck.ck-content {
+            border-radius: 0 0 0.375rem 0.375rem !important;
+            min-height: 200px;
+        }
+
+        .input-group-text {
+            transition: all 0.2s ease;
+            border-color: #dee2e6;
+        }
+
+        .form-control:focus, 
+        .form-select:focus,
+        .ck-editor__editable:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 0.2rem rgba(37, 125, 212, 0.15);
+        }
+
+        .card {
+            border: none;
+            border-radius: 0.75rem;
+        }
+
+        .btn {
+            border-radius: 0.5rem;
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+        }
+
+        .bg-light {
+            background-color: var(--light) !important;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-outline-primary:hover,
+        .btn-outline-primary:focus {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .btn-outline-secondary {
+            color: var(--secondary);
+            border-color: var(--secondary);
+        }
+
+        .btn-outline-secondary:hover,
+        .btn-outline-secondary:focus {
+            background-color: var(--secondary);
+            border-color: var(--secondary);
+            color: white;
+        }
+
+        .bg-primary {
+            background-color: var(--primary) !important;
+        }
+
+        .text-primary {
+            color: var(--primary) !important;
+        }
+
+        .text-secondary {
+            color: var(--secondary) !important;
+        }
+
+        .text-muted {
+            color: var(--secondary) !important;
+            opacity: 0.8;
+        }
+
+        .is-invalid {
+            border-color: #dc3545;
+        }
+
+        .is-valid {
+            border-color: #198754;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-section {
+            border-left: 3px solid var(--primary);
+            padding-left: 1rem;
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            color: var(--secondary);
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+            background: transparent;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary-light);
+        }
+
+        @media (max-width: 991.98px) {
+            .btn-lg {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .nav-tabs .nav-link {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-12">
+            <!-- Header Section -->
+            <header class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-2 text-dark fw-bold">
+                        <i class="bi bi-people me-2"></i>
+                        Manage Team Members
+                    </h1>
+                    <p class="text-secondary mb-0">
+                        Add, edit, or remove team members from your About Us page
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'team_member_add' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Add Member
+                    </a>
+                    <a href="{% url 'about_manage' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Back to About
+                    </a>
+                </div>
+            </header>
+
+            <!-- Tabs Navigation -->
+             <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0 py-3">
+                    <!-- In the tabs section -->
+                    <ul class="nav nav-tabs card-header-tabs" id="aboutTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" href="{% url 'contact_settings' %}">
+                                <i class="bi bi-gear me-2"></i> Site Settings
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" href="{% url 'about_manage' %}">
+                                <i class="bi bi-file-text me-2"></i>About Us
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" href="{% url 'our_values_list' %}">
+                                <i class="bi bi-heart me-2"></i>Our Values
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="team-tab" type="button" role="tab">
+                                <i class="bi bi-people me-2"></i>Team Members
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" href="{% url 'faq_list' %}">
+                                <i class="bi bi-people me-2"></i>FAQs
+                            </a>
+                        </li>
+                        {% comment %} <li class="nav-item" role="presentation">
+                            <a class="nav-link" href="{% url 'company_stats_list' %}">
+                                <i class="bi bi-graph-up me-2"></i>Company Stats
+                            </a>
+                        </li> {% endcomment %}
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" href="{% url 'about' %}" target="_blank">
+                                <i class="bi bi-eye me-2"></i>Preview
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Team Members List -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    {% if team_members %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="border-0 ps-4" style="width: 60px;">Order</th>
+                                    <th class="border-0" style="width: 80px;">Photo</th>
+                                    <th class="border-0">Name</th>
+                                    <th class="border-0">Position</th>
+                                    <th class="border-0">Bio</th>
+                                    <th class="border-0" style="width: 100px;">Status</th>
+                                    <th class="border-0 pe-4" style="width: 120px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for member in team_members %}
+                                <tr>
+                                    <td class="ps-4">
+                                        <span class="badge bg-primary">{{ member.order }}</span>
+                                    </td>
+                                    <td>
+                                        {% if member.image %}
+                                        <img src="{{ member.image.url }}" alt="{{ member.name }}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                                        {% else %}
+                                        <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                            <span class="text-primary small fw-bold">{{ member.name|first|upper }}</span>
+                                        </div>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <strong class="text-dark">{{ member.name }}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted">{{ member.position }}</span>
+                                    </td>
+                                    <td>
+                                        <p class="text-muted mb-0 small">{{ member.bio|truncatewords:8 }}</p>
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if member.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                            {{ member.is_active|yesno:"Active,Inactive" }}
+                                        </span>
+                                    </td>
+                                    <td class="pe-4">
+                                        <div class="d-flex gap-1">
+                                            <a href="{% url 'team_member_edit' member.pk %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="{% url 'team_member_delete' member.pk %}" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-people fs-1 text-muted opacity-50 mb-3"></i>
+                        <h5 class="text-muted">No team members added yet</h5>
+                        <p class="text-muted">Start by adding your team members to showcase your company</p>
+                        <a href="{% url 'team_member_add' %}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-2"></i>Add First Member
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Help Text -->
+            {% if team_members %}
+            <div class="alert alert-info mt-4">
+                <div class="d-flex">
+                    <i class="bi bi-info-circle me-2 mt-1"></i>
+                    <div>
+                        <strong>Tip:</strong> Team members are displayed in the order specified. Use the order field to control the display sequence.
+                        Active members will be shown on the public About Us page.
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

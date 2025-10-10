@@ -2,459 +2,575 @@
 {% load static %}
 {% load humanize %}
 
-{% block title %}Applications for {{ job.title }}{% endblock %}
-
-{% block extra_css %}
-<style>
-    .applications-header {
-        padding: 3rem 0;
-        margin-bottom: 2rem;
-    }
-    
-    .applicant-card {
-        border: none;
-        border-radius: 12px;
-        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        margin-bottom: 1.5rem;
-    }
-    
-    .applicant-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
-    }
-    
-    .applicant-avatar {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 3px solid #fff;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-    
-    .status-badge {
-        font-size: 0.75rem;
-        padding: 0.35rem 0.75rem;
-    }
-    
-    .filter-section {
-        padding: 1.5rem;
-        border-radius: 10px;
-        margin-bottom: 2rem;
-    }
-    
-    .application-meta {
-        font-size: 0.875rem;
-        color: #6c757d;
-    }
-    
-    .action-buttons .btn {
-        margin-left: 0.25rem;
-    }
-    
-    .empty-state {
-        text-align: center;
-        padding: 3rem 1rem;
-    }
-    
-    .empty-state-icon {
-        font-size: 4rem;
-        color: #dee2e6;
-        margin-bottom: 1rem;
-    }
-    
-    .stat-number {
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin-bottom: 0.25rem;
-    }
-</style>
-{% endblock %}
+{% block title %}Applications for {{ job.title }} - {{ block.super }}{% endblock %}
 
 {% block content %}
-    <!-- Applications Header -->
-    <div class="applications-header">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h1 class="h2 mb-2">Job Applications</h1>
-                    <h2 class="h4 mb-0 opacity-75">{{ job.title }}</h2>
-                    
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-12">
+            <!-- Header Section -->
+            <header class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                <div>
                     <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb breadcrumb-dark mb-2 mt-3">
-                            <li class="breadcrumb-item"><a href="{% url 'admin-dashboard' %}">Dashboard</a></li>
-                            <li class="breadcrumb-item"><a href="{% url 'job_list' %}">Jobs</a></li>
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'admin-dashboard' %}" class="text-primary text-decoration-none">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'job_list' %}" class="text-primary text-decoration-none">Jobs</a></li>
                             <li class="breadcrumb-item active" aria-current="page">Applications</li>
                         </ol>
                     </nav>
+                    <h1 class="h2 mb-2 text-dark fw-bold">Job Applications</h1>
+                    <h2 class="h4 mb-0 text-secondary">{{ job.title }}</h2>
                 </div>
-                <div class="col-md-4 text-md-end">
-                    <div class="applications-stats">
-                        <div class="h3 mb-1">{{ applications.count }}</div>
-                        <small class="opacity-75">Total Applications</small>
-                    </div>
+                <div class="text-end">
+                    <div class="h3 mb-1 text-primary">{{ applications.count }}</div>
+                    <small class="text-secondary">Total Applications</small>
                 </div>
-            </div>
-        </div>
-    </div>
+            </header>
 
-    <div class="container">
-        <!-- Job Info Card -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-8">
-                        <h5 class="card-title">Job Details</h5>
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <small class="text-muted">Location</small>
-                                <p class="mb-2">{{ job.location }}</p>
-                            </div>
-                            <div class="col-sm-6">
-                                <small class="text-muted">Job Type</small>
-                                <p class="mb-2">{{ job.get_job_type_display }}</p>
-                            </div>
-                            <div class="col-sm-6">
-                                <small class="text-muted">Workplace</small>
-                                <p class="mb-2">{{ job.get_workplace_type_display }}</p>
-                            </div>
-                            <div class="col-sm-6">
-                                <small class="text-muted">Deadline</small>
-                                <p class="mb-2 {% if job.is_expired %}text-danger{% endif %}">
-                                    {{ job.application_deadline|date:"M d, Y" }}
-                                    {% if job.is_expired %}(Expired){% endif %}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 text-md-end">
-                        <a href="{% url 'job_manage_edit' job.id %}" class="btn btn-outline-primary mb-2">
-                            <i class="bi bi-pencil me-1"></i>Edit Job
-                        </a>
-                        <a href="{% url 'job_detail_frontend' job.id %}" class="btn btn-outline-secondary" target="_blank">
-                            <i class="bi bi-eye me-1"></i>View Live
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <!-- Filters Section -->
-        <div class="filter-section">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <h5 class="mb-0">Filter Applications </h5>
-                </div>
-                <div class="col-md-6">
-                    <form method="GET" class="d-flex">
-                        <select name="status" class="form-select me-2" onchange="this.form.submit()">
-                            <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Statuses</option>
-                            {% for status_value, status_label in status_choices %}
-                            <option value="{{ status_value }}" {% if status_filter == status_value %}selected{% endif %}>
-                                {{ status_label }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                        <a href="{% url 'admin-job_applications' job.id %}" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-clockwise"></i>
-                        </a>
-                    </form>
-                </div>
-            </div>
-        </div>
-        </div>
-
-        
-
-        <!-- Applications List -->
-        {% if applications %}
-            {% for application in applications %}
-            <div class="card applicant-card">
+            <!-- Job Info Card -->
+            <div class="card shadow-sm border-0 mb-4">
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-md-8">
-                            <div class="d-flex align-items-center">
-                                <img src="https://ui-avatars.com/api/?name={{ application.applicant_name|urlencode }}&background=4361ee&color=fff&size=100" 
-                                     alt="{{ application.applicant_name }}" 
-                                     class="applicant-avatar me-3">
-                                <div>
-                                    <h5 class="mb-1">{{ application.applicant_name }}</h5>
-                                    <p class="text-muted mb-1">
-                                        <i class="bi bi-envelope me-1"></i>{{ application.applicant_email }}
-                                        {% if application.applicant_phone %}
-                                        <span class="ms-3">
-                                            <i class="bi bi-phone me-1"></i>{{ application.applicant_phone }}
-                                        </span>
+                            <h3 class="h5 mb-3 text-dark">Job Details</h3>
+                            <div class="row">
+                                <div class="col-sm-6 mb-2">
+                                    <div class="text-secondary small">Location</div>
+                                    <div class="fw-medium text-dark">{{ job.location }}</div>
+                                </div>
+                                <div class="col-sm-6 mb-2">
+                                    <div class="text-secondary small">Job Type</div>
+                                    <div class="fw-medium text-dark">{{ job.get_job_type_display }}</div>
+                                </div>
+                                <div class="col-sm-6 mb-2">
+                                    <div class="text-secondary small">Workplace Type</div>
+                                    <div class="fw-medium text-dark">{{ job.get_workplace_type_display }}</div>
+                                </div>
+                                <div class="col-sm-6 mb-2">
+                                    <div class="text-secondary small">Application Deadline</div>
+                                    <div class="fw-medium {% if job.is_expired %}text-danger{% else %}text-dark{% endif %}">
+                                        {{ job.application_deadline|date:"M d, Y" }}
+                                        {% if job.is_expired %}
+                                        <span class="badge bg-danger ms-1">Expired</span>
                                         {% endif %}
-                                    </p>
-                                    <div class="application-meta">
-                                        <span class="me-3">
-                                            <i class="bi bi-clock me-1"></i>
-                                            Applied {{ application.applied_at|timesince }} ago
-                                        </span>
-                                        <span>
-                                            <i class="bi bi-calendar me-1"></i>
-                                            {{ application.applied_at|date:"M d, Y" }}
-                                        </span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="status-badge badge 
-                                    {% if application.status == 'pending' %}bg-warning
-                                    {% elif application.status == 'reviewed' %}bg-info
-                                    {% elif application.status == 'accepted' %}bg-success
-                                    {% else %}bg-danger{% endif %}">
-                                    {{ application.get_status_display }}
-                                </span>
-                                <div class="action-buttons">
-                                    <a href="{% url 'applicant_detail' application.id %}" 
-                                       class="btn btn-sm btn-outline-primary" 
-                                       title="View Application">
-                                        <i class="bi bi-eye"></i> View Application
-                                    </a>
-                                    {% if application.resume %}
-                                    <a href="{{ application.resume.url }}" 
-                                       class="btn btn-sm btn-outline-secondary" 
-                                       target="_blank"
-                                       title="Download Resume">
-                                        <i class="bi bi-download"></i>
-                                    </a>
-                                    {% endif %}
-                                    
-                                </div>
+                        <div class="col-md-4 text-md-end">
+                            <div class="d-flex flex-column gap-2">
+                                <a href="{% url 'job_manage_edit' job.id %}" class="btn btn-outline-primary">
+                                    <i class="bi bi-pencil me-2"></i>Edit Job
+                                </a>
+                                <a href="{% url 'job_detail_frontend' job.id %}" class="btn btn-outline-secondary" target="_blank">
+                                    <i class="bi bi-eye me-2"></i>View Live
+                                </a>
                             </div>
                         </div>
                     </div>
-                    
-                    {% if application.cover_letter %}
-                    <div class="mt-3 pt-3 border-top">
-                        <h6 class="mb-2">Cover Letter</h6>
-                        <p class="text-muted mb-0">{{ application.cover_letter|truncatewords:50 }}</p>
-                        {% if application.cover_letter|wordcount > 50 %}
-                        <a href="#" class="small" data-bs-toggle="modal" data-bs-target="#coverLetterModal{{ application.id }}">
-                            Read full cover letter
-                        </a>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Cover Letter Modal -->
-                    <div class="modal fade" id="coverLetterModal{{ application.id }}" tabindex="-1">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">Cover Letter - {{ application.applicant_name }}</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <p>{{ application.cover_letter|linebreaks }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
-            {% endfor %}
-        {% else %}
-            <!-- Empty State -->
-            <div class="card">
-                <div class="card-body empty-state">
-                    <div class="empty-state-icon">
-                        <i class="bi bi-people"></i>
-                    </div>
-                    <h3>No Applications Found</h3>
-                    <p class="text-muted mb-4">
-                        {% if status_filter != 'all' %}
-                        No applications with status "{{ status_filter }}". 
-                        {% endif %}
-                        This job hasn't received any applications yet.
-                    </p>
-                    <a href="{% url 'job_detail_frontend' job.id %}" class="btn btn-primary" target="_blank">
-                        <i class="bi bi-eye me-1"></i>View Job Posting
-                    </a>
-                </div>
-            </div>
-        {% endif %}
 
-        <!-- Status Statistics -->
-        {% if applications %}
-        <div class="card mt-4">
-            <div class="card-body">
-                <h5 class="card-title">Application Statistics</h5>
-                <div class="row text-center">
-                    <div class="col-3">
-                        <div class="stat-number text-primary">{{ applications.count }}</div>
-                        <small class="text-muted">Total</small>
-                    </div>
-                    <div class="col-3">
-                        <div class="stat-number text-warning">
-                            {% with pending_count=applications|length %}
-                                {% for app in applications %}
-                                    {% if app.status == 'pending' %}
-                                        {% with pending_count=forloop.counter0 %}
-                                        {% endwith %}
-                                    {% endif %}
-                                {% endfor %}
-                                {{ applications|length }}
-                            {% endwith %}
+            <!-- Filters Section -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h4 class="h5 mb-0 text-dark">Filter Applications</h4>
                         </div>
-                        <small class="text-muted">Pending</small>
-                    </div>
-                    <div class="col-3">
-                        <div class="stat-number text-info">
-                            {% with reviewed_count=0 %}
-                                {% for app in applications %}
-                                    {% if app.status == 'reviewed' %}
-                                        {% with reviewed_count=reviewed_count|add:1 %}
-                                        {% endwith %}
-                                    {% endif %}
-                                {% endfor %}
-                                {{ reviewed_count }}
-                            {% endwith %}
+                        <div class="col-md-6">
+                            <form method="GET" class="d-flex gap-2">
+                                <select name="status" class="form-select" onchange="this.form.submit()">
+                                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Statuses</option>
+                                    {% for status_value, status_label in status_choices %}
+                                    <option value="{{ status_value }}" {% if status_filter == status_value %}selected{% endif %}>
+                                        {{ status_label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <a href="{% url 'admin-job_applications' job.id %}" class="btn btn-outline-secondary" title="Reset Filters">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                </a>
+                            </form>
                         </div>
-                        <small class="text-muted">Reviewed</small>
-                    </div>
-                    <div class="col-3">
-                        <div class="stat-number text-success">
-                            {% with accepted_count=0 %}
-                                {% for app in applications %}
-                                    {% if app.status == 'accepted' %}
-                                        {% with accepted_count=accepted_count|add:1 %}
-                                        {% endwith %}
-                                    {% endif %}
-                                {% endfor %}
-                                {{ accepted_count }}
-                            {% endwith %}
-                        </div>
-                        <small class="text-muted">Accepted</small>
                     </div>
                 </div>
             </div>
+
+            <!-- Applications List -->
+            <main>
+                {% if applications %}
+                    {% for application in applications %}
+                    <article class="card shadow-sm border-0 mb-3 applicant-card">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-center">
+                                        <img src="https://ui-avatars.com/api/?name={{ application.applicant_name|urlencode }}&background=257dd4&color=fff&size=100" 
+                                             alt="{{ application.applicant_name }}" 
+                                             class="applicant-avatar me-3">
+                                        <div>
+                                            <h4 class="h5 mb-1 text-dark">{{ application.applicant_name }}</h4>
+                                            <p class="text-secondary mb-1">
+                                                <i class="bi bi-envelope me-1"></i>{{ application.applicant_email }}
+                                                {% if application.applicant_phone %}
+                                                <span class="ms-3">
+                                                    <i class="bi bi-phone me-1"></i>{{ application.applicant_phone }}
+                                                </span>
+                                                {% endif %}
+                                            </p>
+                                            <div class="application-meta">
+                                                <span class="me-3">
+                                                    <i class="bi bi-clock me-1"></i>
+                                                    Applied {{ application.applied_at|timesince }} ago
+                                                </span>
+                                                <span>
+                                                    <i class="bi bi-calendar me-1"></i>
+                                                    {{ application.applied_at|date:"M d, Y" }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="status-badge badge 
+                                            {% if application.status == 'pending' %}bg-warning
+                                            {% elif application.status == 'reviewed' %}bg-info
+                                            {% elif application.status == 'accepted' %}bg-success
+                                            {% else %}bg-danger{% endif %}">
+                                            {{ application.get_status_display }}
+                                        </span>
+                                        <div class="action-buttons d-flex gap-1">
+                                            <a href="{% url 'applicant_detail' application.id %}" 
+                                               class="btn btn-sm btn-outline-primary" 
+                                               title="View Application"
+                                               data-bs-toggle="tooltip">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            {% if application.resume %}
+                                            <a href="{{ application.resume.url }}" 
+                                               class="btn btn-sm btn-outline-secondary" 
+                                               target="_blank"
+                                               title="Download Resume"
+                                               data-bs-toggle="tooltip">
+                                                <i class="bi bi-download"></i>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {% if application.cover_letter %}
+                            <div class="mt-3 pt-3 border-top">
+                                <h5 class="h6 mb-2 text-dark">Cover Letter</h5>
+                                <p class="text-secondary mb-0">{{ application.cover_letter|truncatewords:50 }}</p>
+                                {% if application.cover_letter|wordcount > 50 %}
+                                <a href="#" class="small text-primary text-decoration-none" data-bs-toggle="modal" data-bs-target="#coverLetterModal{{ application.id }}">
+                                    Read full cover letter
+                                </a>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Cover Letter Modal -->
+                            <div class="modal fade" id="coverLetterModal{{ application.id }}" tabindex="-1" aria-labelledby="coverLetterModalLabel{{ application.id }}" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title text-dark" id="coverLetterModalLabel{{ application.id }}">Cover Letter - {{ application.applicant_name }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p class="text-secondary">{{ application.cover_letter|linebreaks }}</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </article>
+                    {% endfor %}
+                {% else %}
+                    <!-- Empty State -->
+                    <div class="card shadow-sm border-0 text-center py-5">
+                        <div class="card-body">
+                            <i class="bi bi-people display-1 text-muted mb-3" style="color: var(--primary-light);"></i>
+                            <h3 class="h5 text-secondary mb-2">No Applications Found</h3>
+                            <p class="text-secondary mb-4">
+                                {% if status_filter != 'all' %}
+                                No applications with status "{{ status_filter }}". 
+                                {% endif %}
+                                This job hasn't received any applications yet.
+                            </p>
+                            <a href="{% url 'job_detail_frontend' job.id %}" class="btn btn-primary" target="_blank">
+                                <i class="bi bi-eye me-2"></i>View Job Posting
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </main>
+
+            <!-- Application Statistics -->
+            {% if applications %}
+            <footer class="card shadow-sm border-0 mt-4">
+                <div class="card-body">
+                    <h3 class="h5 mb-4 text-dark">Application Statistics</h3>
+                    <div class="row text-center">
+                        <div class="col-6 col-md-3 mb-3">
+                            <div class="stat-number text-primary">{{ applications.count }}</div>
+                            <small class="text-secondary">Total</small>
+                        </div>
+                        <div class="col-6 col-md-3 mb-3">
+                            <div class="stat-number text-warning">
+                                {% with applications|length as total %}
+                                    {{ applications|length }}
+                                {% endwith %}
+                            </div>
+                            <small class="text-secondary">Pending</small>
+                        </div>
+                        <div class="col-6 col-md-3 mb-3">
+                            <div class="stat-number text-info">
+                                {% with reviewed_count=0 %}
+                                    {% for app in applications %}
+                                        {% if app.status == 'reviewed' %}
+                                            {% with reviewed_count=reviewed_count|add:1 %}
+                                            {% endwith %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {{ reviewed_count }}
+                                {% endwith %}
+                            </div>
+                            <small class="text-secondary">Reviewed</small>
+                        </div>
+                        <div class="col-6 col-md-3 mb-3">
+                            <div class="stat-number text-success">
+                                {% with accepted_count=0 %}
+                                    {% for app in applications %}
+                                        {% if app.status == 'accepted' %}
+                                            {% with accepted_count=accepted_count|add:1 %}
+                                            {% endwith %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {{ accepted_count }}
+                                {% endwith %}
+                            </div>
+                            <small class="text-secondary">Accepted</small>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+            {% endif %}
         </div>
-        {% endif %}
     </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --primary: #257dd4;
+    --primary-light: #257cd491;
+    --primary-dark: #257dd4;
+    --secondary: #546E7A;
+    --accent: #FF9800;
+    --light: #E3F2FD;
+    --dark: #257dd4;
+    --gradient-start: #257dd4;
+    --gradient-end: #257dd4;
+    --sidebar-width: 280px;
+}
+
+/* Button styles using your theme */
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.btn-outline-primary {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.btn-outline-secondary {
+    color: var(--secondary);
+    border-color: var(--secondary);
+}
+
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus {
+    background-color: var(--secondary);
+    border-color: var(--secondary);
+    color: white;
+}
+
+/* Text colors */
+.text-primary {
+    color: var(--primary) !important;
+}
+
+.text-secondary {
+    color: var(--secondary) !important;
+}
+
+.text-muted {
+    color: var(--secondary) !important;
+    opacity: 0.8;
+}
+
+/* Card styles */
+.card {
+    border-radius: 0.75rem;
+    border: none;
+}
+
+.applicant-card {
+    border: 1px solid rgba(37, 125, 212, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.applicant-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 125, 212, 0.15) !important;
+    border-color: var(--primary-light);
+}
+
+/* Applicant avatar */
+.applicant-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(37, 125, 212, 0.2);
+}
+
+/* Status badges */
+.status-badge {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 0.5rem;
+}
+
+.badge.bg-primary {
+    background-color: var(--primary) !important;
+}
+
+/* Application meta info */
+.application-meta {
+    font-size: 0.875rem;
+    color: var(--secondary);
+}
+
+/* Statistics */
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+/* Breadcrumb styling */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 0.5rem;
+}
+
+.breadcrumb-item a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+.breadcrumb-item.active {
+    color: var(--secondary);
+}
+
+/* Form controls */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 0.2rem rgba(37, 125, 212, 0.15);
+}
+
+/* Action buttons */
+.action-buttons .btn {
+    border-radius: 0.5rem;
+    padding: 0.375rem 0.75rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .applicant-avatar {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .action-buttons .btn {
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .stat-number {
+        font-size: 1.25rem;
+    }
+    
+    .d-flex.gap-2 {
+        gap: 0.5rem !important;
+    }
+}
+
+/* Empty state styling */
+.bi-people {
+    opacity: 0.5;
+}
+
+/* Modal styling */
+.modal-header {
+    border-bottom: 1px solid rgba(37, 125, 212, 0.1);
+}
+
+.modal-footer {
+    border-top: 1px solid rgba(37, 125, 212, 0.1);
+}
+</style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-        
-        // Status change functionality
-        document.querySelectorAll('.status-change').forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                const newStatus = this.getAttribute('data-status');
-                const card = this.closest('.applicant-card');
-                const badge = card.querySelector('.status-badge');
-                const applicantName = card.querySelector('h5').textContent;
-                
-                // Update badge appearance based on status
-                let statusText = '';
-                let badgeClass = '';
-                
-                switch(newStatus) {
-                    case 'pending':
-                        statusText = 'Pending';
-                        badgeClass = 'bg-warning';
-                        break;
-                    case 'reviewed':
-                        statusText = 'Reviewed';
-                        badgeClass = 'bg-info';
-                        break;
-                    case 'accepted':
-                        statusText = 'Accepted';
-                        badgeClass = 'bg-success';
-                        break;
-                    case 'rejected':
-                        statusText = 'Rejected';
-                        badgeClass = 'bg-danger';
-                        break;
-                }
-                
-                badge.className = `status-badge badge ${badgeClass}`;
-                badge.textContent = statusText;
-                
-                // Show success message
-                showToast('success', `${applicantName} status updated to ${statusText}`);
-                
-                // Here you would typically make an AJAX call to update the status in the database
-                updateApplicationStatus(card, newStatus);
-            });
-        });
-        
-        function updateApplicationStatus(card, newStatus) {
-            // This is where you would implement AJAX to update the application status
-            // For now, we'll just log to console
-            console.log('Updating application status to:', newStatus);
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltips.forEach(tooltip => new bootstrap.Tooltip(tooltip));
+    
+    // Status change functionality
+    document.querySelectorAll('.status-change').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const newStatus = this.getAttribute('data-status');
+            const card = this.closest('.applicant-card');
+            const badge = card.querySelector('.status-badge');
+            const applicantName = card.querySelector('h4').textContent;
             
-            // Example AJAX implementation:
-            /*
-            const applicationId = card.getAttribute('data-application-id');
-            fetch(`/update-application-status/${applicationId}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken'),
-                },
-                body: JSON.stringify({
-                    status: newStatus
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showToast('success', 'Status updated successfully');
-                } else {
-                    showToast('error', 'Failed to update status');
-                }
-            });
-            */
-        }
-        
-        function showToast(type, message) {
-            // Use your existing toast system or create a simple alert
-            const toastContainer = document.querySelector('.toast-container');
-            if (toastContainer && typeof bootstrap !== 'undefined') {
-                // Create and show a Bootstrap toast
-                const toastEl = document.createElement('div');
-                toastEl.className = `toast align-items-center text-white bg-${type} border-0`;
-                toastEl.innerHTML = `
-                    <div class="d-flex">
-                        <div class="toast-body">${message}</div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                    </div>
-                `;
-                toastContainer.appendChild(toastEl);
-                const toast = new bootstrap.Toast(toastEl);
-                toast.show();
-            } else {
-                // Fallback alert
-                alert(`${type.toUpperCase()}: ${message}`);
+            // Update badge appearance based on status
+            let statusText = '';
+            let badgeClass = '';
+            
+            switch(newStatus) {
+                case 'pending':
+                    statusText = 'Pending';
+                    badgeClass = 'bg-warning';
+                    break;
+                case 'reviewed':
+                    statusText = 'Reviewed';
+                    badgeClass = 'bg-info';
+                    break;
+                case 'accepted':
+                    statusText = 'Accepted';
+                    badgeClass = 'bg-success';
+                    break;
+                case 'rejected':
+                    statusText = 'Rejected';
+                    badgeClass = 'bg-danger';
+                    break;
             }
-        }
-        
-        // Helper function to get CSRF token
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
+            
+            badge.className = `status-badge badge ${badgeClass}`;
+            badge.textContent = statusText;
+            
+            // Show success message
+            showToast('success', `${applicantName} status updated to ${statusText}`);
+            
+            // Here you would typically make an AJAX call to update the status in the database
+            updateApplicationStatus(card, newStatus);
+        });
     });
+    
+    function updateApplicationStatus(card, newStatus) {
+        // This is where you would implement AJAX to update the application status
+        // For now, we'll just log to console
+        console.log('Updating application status to:', newStatus);
+        
+        // Example AJAX implementation:
+        /*
+        const applicationId = card.getAttribute('data-application-id');
+        fetch(`/update-application-status/${applicationId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify({
+                status: newStatus
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('success', 'Status updated successfully');
+            } else {
+                showToast('error', 'Failed to update status');
+            }
+        });
+        */
+    }
+    
+    function showToast(type, message) {
+        // Use your existing toast system or create a simple alert
+        const toastContainer = document.querySelector('.toast-container');
+        if (toastContainer && typeof bootstrap !== 'undefined') {
+            // Create and show a Bootstrap toast
+            const toastEl = document.createElement('div');
+            toastEl.className = `toast align-items-center text-white bg-${type} border-0`;
+            toastEl.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            toastContainer.appendChild(toastEl);
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        } else {
+            // Fallback alert
+            alert(`${type.toUpperCase()}: ${message}`);
+        }
+    }
+    
+    // Helper function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
 </script>
 {% endblock %}

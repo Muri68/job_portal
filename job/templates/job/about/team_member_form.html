@@ -1,0 +1,440 @@
+{% extends "job/base.html" %}
+{% load static %}
+
+{% block title %}
+    {% if form.instance.pk %}Edit Team Member - {{ form.instance.name }}{% else %}Add New Team Member{% endif %} - {{ block.super }}
+{% endblock %}
+
+{% block extra_css %}
+    <style>
+        :root {
+            --primary: #257dd4;
+            --primary-light: #257cd491;
+            --primary-dark: #257dd4;
+            --secondary: #546E7A;
+            --accent: #FF9800;
+            --light: #E3F2FD;
+            --dark: #257dd4;
+            --gradient-start: #257dd4;
+            --gradient-end: #257dd4;
+            --sidebar-width: 280px;
+        }
+
+        .required-field::after {
+            content: " *";
+            color: #dc3545;
+        }
+
+        .ck-editor__editable {
+            min-height: 200px;
+            border-radius: 0.375rem;
+            border: 1px solid #ced4da;
+            font-family: inherit;
+        }
+
+        .django-ckeditor-widget {
+            display: block !important;
+            width: 100% !important;
+        }
+
+        .ck.ck-editor {
+            border: 1px solid #dee2e6 !important;
+            border-radius: 0.375rem !important;
+        }
+
+        .ck.ck-toolbar {
+            background-color: #f8f9fa !important;
+            border-bottom: 1px solid #dee2e6 !important;
+            border-radius: 0.375rem 0.375rem 0 0 !important;
+        }
+
+        .ck.ck-content {
+            border-radius: 0 0 0.375rem 0.375rem !important;
+            min-height: 200px;
+        }
+
+        .input-group-text {
+            transition: all 0.2s ease;
+            border-color: #dee2e6;
+        }
+
+        .form-control:focus, 
+        .form-select:focus,
+        .ck-editor__editable:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 0.2rem rgba(37, 125, 212, 0.15);
+        }
+
+        .card {
+            border: none;
+            border-radius: 0.75rem;
+        }
+
+        .btn {
+            border-radius: 0.5rem;
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+        }
+
+        .bg-light {
+            background-color: var(--light) !important;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-outline-primary:hover,
+        .btn-outline-primary:focus {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .btn-outline-secondary {
+            color: var(--secondary);
+            border-color: var(--secondary);
+        }
+
+        .btn-outline-secondary:hover,
+        .btn-outline-secondary:focus {
+            background-color: var(--secondary);
+            border-color: var(--secondary);
+            color: white;
+        }
+
+        .bg-primary {
+            background-color: var(--primary) !important;
+        }
+
+        .text-primary {
+            color: var(--primary) !important;
+        }
+
+        .text-secondary {
+            color: var(--secondary) !important;
+        }
+
+        .text-muted {
+            color: var(--secondary) !important;
+            opacity: 0.8;
+        }
+
+        .is-invalid {
+            border-color: #dc3545;
+        }
+
+        .is-valid {
+            border-color: #198754;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-section {
+            border-left: 3px solid var(--primary);
+            padding-left: 1rem;
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            color: var(--secondary);
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+            background: transparent;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary-light);
+        }
+
+        @media (max-width: 991.98px) {
+            .btn-lg {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .nav-tabs .nav-link {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-12">
+            <!-- Header Section -->
+            <header class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-2 text-dark fw-bold">
+                        <i class="bi bi-person me-2"></i>
+                        {% if form.instance.pk %}Edit Team Member{% else %}Add New Team Member{% endif %}
+                    </h1>
+                    <p class="text-secondary mb-0">
+                        {% if form.instance.pk %}Update team member information{% else %}Add a new team member to your About Us page{% endif %}
+                    </p>
+                </div>
+                <a href="{% url 'team_members_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Team
+                </a>
+            </header>
+
+            <!-- Form Card -->
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <form method="post" id="memberForm" class="needs-validation" novalidate enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <!-- Basic Information -->
+                            <div class="col-lg-8">
+                                <div class="row">
+                                    <div class="col-md-6 mb-4">
+                                        <label for="{{ form.name.id_for_label }}" class="form-label required-field">Full Name</label>
+                                        {{ form.name }}
+                                        {% if form.name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.name.errors }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-4">
+                                        <label for="{{ form.position.id_for_label }}" class="form-label required-field">Position</label>
+                                        {{ form.position }}
+                                        {% if form.position.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.position.errors }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="{{ form.bio.id_for_label }}" class="form-label required-field">Bio/Description</label>
+                                    {{ form.bio }}
+                                    {% if form.bio.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.bio.errors }}
+                                    </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        A brief description of the team member's role and background
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-4">
+                                        <label for="{{ form.order.id_for_label }}" class="form-label required-field">Display Order</label>
+                                        {{ form.order }}
+                                        {% if form.order.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.order.errors }}
+                                        </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            Lower numbers appear first in the team listing
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Sidebar -->
+                            <div class="col-lg-4">
+                                <div class="card bg-light border-0">
+                                    <div class="card-body">
+                                        <!-- Photo Upload -->
+                                        <div class="mb-4">
+                                            <label for="{{ form.image.id_for_label }}" class="form-label fw-medium text-dark">Profile Photo</label>
+                                            {% if form.instance.image %}
+                                                <div class="mb-3 text-center">
+                                                    <img src="{{ form.instance.image.url }}" alt="{{ form.instance.name }}" class="img-fluid rounded-circle mb-2" style="width: 120px; height: 120px; object-fit: cover;">
+                                                    <small class="text-muted d-block">Current photo</small>
+                                                </div>
+                                            {% endif %}
+                                            {{ form.image }}
+                                            {% if form.image.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.image.errors }}
+                                            </div>
+                                            {% endif %}
+                                            <div class="form-text">
+                                                Recommended: 400x400px, JPG or PNG format
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Status -->
+                                        <div class="mb-3">
+                                            <div class="form-check form-switch">
+                                                {{ form.is_active }}
+                                                <label class="form-check-label fw-medium text-dark" for="{{ form.is_active.id_for_label }}">
+                                                    Active
+                                                </label>
+                                            </div>
+                                            <div class="form-text">
+                                                Active members will be displayed on the public page
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Social Media -->
+                                <div class="card bg-light border-0 mt-4">
+                                    <div class="card-header bg-transparent border-0">
+                                        <h6 class="mb-0 fw-medium text-dark">
+                                            <i class="bi bi-link-45deg me-2"></i>Social Media Links
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="{{ form.linkedin_url.id_for_label }}" class="form-label small">LinkedIn</label>
+                                            {{ form.linkedin_url }}
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="{{ form.twitter_url.id_for_label }}" class="form-label small">Twitter</label>
+                                            {{ form.twitter_url }}
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="{{ form.github_url.id_for_label }}" class="form-label small">GitHub</label>
+                                            {{ form.github_url }}
+                                        </div>
+                                        <div class="mb-0">
+                                            <label for="{{ form.portfolio_url.id_for_label }}" class="form-label small">Portfolio</label>
+                                            {{ form.portfolio_url }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <footer class="d-flex justify-content-between align-items-center border-top pt-4 mt-4">
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'team_members_list' %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left me-2"></i>Cancel
+                                </a>
+                                <button type="reset" class="btn btn-outline-danger">
+                                    <i class="bi bi-arrow-clockwise me-2"></i>Reset
+                                </button>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle me-2"></i>
+                                {% if form.instance.pk %}Update Member{% else %}Create Member{% endif %}
+                            </button>
+                        </footer>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control, .form-select {
+        border-radius: 0.375rem;
+        border: 1px solid #dee2e6;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(37, 125, 212, 0.15);
+    }
+    
+    textarea.form-control {
+        min-height: 100px;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Image preview
+    const imageInput = document.getElementById('{{ form.image.id_for_label }}');
+    if (imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    let preview = document.querySelector('.img-fluid.rounded-circle');
+                    if (!preview) {
+                        preview = document.createElement('img');
+                        preview.className = 'img-fluid rounded-circle mb-2';
+                        preview.style.width = '120px';
+                        preview.style.height = '120px';
+                        preview.style.objectFit = 'cover';
+                        imageInput.parentNode.insertBefore(preview, imageInput.nextSibling);
+                    }
+                    preview.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    // Form validation
+    const form = document.getElementById('memberForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const requiredFields = form.querySelectorAll('[required]');
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+                // Show notification
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-danger alert-dismissible fade show';
+                alert.innerHTML = `
+                    Please fill in all required fields.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                alert.style.position = 'fixed';
+                alert.style.top = '20px';
+                alert.style.right = '20px';
+                alert.style.zIndex = '1060';
+                
+                document.body.appendChild(alert);
+                
+                setTimeout(() => {
+                    if (alert.parentNode) alert.parentNode.removeChild(alert);
+                }, 5000);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

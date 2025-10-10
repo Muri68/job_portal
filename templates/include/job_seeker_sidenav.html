@@ -11,9 +11,13 @@
             <a class="nav-link {% if request.resolver_match.url_name == 'saved_jobs' %}active{% endif %}" href="{% url "saved_jobs" %}">
                 <i class="fas fa-bookmark"></i> Bookmarked Jobs
             </a>
-            <a class="nav-link" href="#">
-                <i class="fas fa-bell"></i> Notifications
-                <span class="badge bg-primary ms-2">3</span>
+            <a class="nav-link {% if request.resolver_match.url_name == 'job_seeker_notification' %}active{% endif %}" 
+            href="{% url 'job_seeker_notification' %}">
+                <i class="fas fa-bell me-2"></i>
+                Notifications
+                {% if unread_notification_count > 0 %}
+                <span class="badge bg-primary ms-2">{{ unread_notification_count }}</span>
+                {% endif %}
             </a>
             <a class="nav-link {% if request.resolver_match.url_name == 'my_applications' %}active{% endif %}" href="{% url 'my_applications' %}">
                 <i class="fas fa-briefcase"></i> Manage Applications

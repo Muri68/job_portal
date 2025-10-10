@@ -2,6 +2,8 @@
 {% load static %}
 {% load humanize %}
 
+{% block title %}Job by #{{ category.name }}{% endblock %}
+
 {% block extra_css %}
     <style>
         /* Navigation Styles */
@@ -212,7 +214,11 @@
             font-size: 1.4rem;
             font-weight: 700;
             margin-bottom: 5px;
-            color: var(--dark);
+            color: var(--secondary);
+        }
+    
+        .job-title:hover {
+            color: var(--primary);
         }
         
         .job-location {
@@ -245,6 +251,10 @@
             color: var(--primary);
             font-weight: 600;
             font-size: 1.1rem;
+        }
+        
+        .job-salary i {
+            margin-right: -2px;
         }
         
         .job-description {
@@ -464,8 +474,8 @@
                                 </div>
                                 {% if job.salary_start %}
                                 <div class="meta-item job-salary">
-                                    <i class="fas fa-euro-sign"></i>
-                                    €{{ job.salary_start|intcomma }}+
+                                    <i class="bi bi-currency-pound"></i>
+                                    {{ job.salary_start|intcomma }}/Year
                                 </div>
                                 {% endif %}
                             </div>
@@ -485,9 +495,9 @@
                                     {% endif %}
                                 </span>
                                 <div>
-                                    <a href="#" class="btn btn-outline-primary me-2">
+                                    {% comment %} <a href="#" class="btn btn-outline-primary me-2">
                                         <i class="far fa-bookmark me-1"></i>Save
-                                    </a>
+                                    </a> {% endcomment %}
                                     <a href="{% url 'job_detail_frontend' job.id %}" class="btn btn-primary">
                                         Apply Now
                                     </a>
@@ -562,13 +572,6 @@
                         <form>
                             <div class="mb-3">
                                 <input type="email" class="form-control" placeholder="Your email" required>
-                            </div>
-                            <div class="mb-3">
-                                <select class="form-select">
-                                    <option>Daily</option>
-                                    <option>Weekly</option>
-                                    <option>Monthly</option>
-                                </select>
                             </div>
                             <button type="submit" class="btn btn-primary w-100">Create Alert</button>
                         </form>

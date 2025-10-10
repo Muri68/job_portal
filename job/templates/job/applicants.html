@@ -1,121 +1,455 @@
 {% extends "job/base.html" %}
 {% load static %}
+{% load humanize %}
+
+{% block title %}{{ page_title }} - {{ block.super }}{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4">{{ page_title }}</h2>
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-12">
+            <!-- Header Section -->
+            <header class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                <div>
+                    <h1 class="h2 mb-2 text-dark fw-bold">{{ page_title }}</h1>
+                    <p class="text-secondary mb-0">Manage and review all job applications</p>
+                </div>
+                <div class="text-end">
+                    <div class="h3 mb-1 text-primary">{{ applications.paginator.count|default:0 }}</div>
+                    <small class="text-secondary">Total Applicants</small>
+                </div>
+            </header>
 
-    <!-- Search -->
-    <form method="get" class="row g-2 mb-4">
-        <div class="col-md-4">
-            <input type="text" name="q" class="form-control" placeholder="Search applicants..." value="{{ query }}">
-        </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-primary w-100">Search</button>
-        </div>
-    </form>
-
-    <!-- Applicants Cards -->
-    <div class="row">
-        {% for app in applications %}
-        <div class="col-md-6 col-lg-6 mb-4">
-            <div class="card h-100 shadow-sm border-0 rounded-3">
+            <!-- Search and Filters -->
+            <section class="card shadow-sm border-0 mb-4" aria-labelledby="search-heading">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h5 class="card-title mb-0">
-                            <a href="{% url 'applicant_detail' app.id %}" class="text-decoration-none">
-                                {{ app.applicant_name }}
+                    <form method="get" class="row g-3 align-items-end">
+                        <div class="col-md-8">
+                            <label for="searchInput" class="form-label fw-medium text-dark">Search Applicants</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-search text-secondary"></i>
+                                </span>
+                                <input type="text" 
+                                       id="searchInput"
+                                       name="q" 
+                                       class="form-control" 
+                                       placeholder="Search by name, email, or job title..." 
+                                       value="{{ query }}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-search me-2"></i>Search
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Applicants Grid -->
+            <main>
+                <div class="row g-4">
+                    {% for app in applications %}
+                    <div class="col-xl-6 col-lg-6 col-md-6">
+                        <article class="card h-100 shadow-sm border-0 applicant-card">
+                            <div class="card-body d-flex flex-column">
+                                <!-- Header -->
+                                <header class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <img src="https://ui-avatars.com/api/?name={{ app.applicant_name|urlencode }}&background=257dd4&color=fff&size=80" 
+                                             alt="{{ app.applicant_name }}" 
+                                             class="applicant-avatar me-3">
+                                        <div>
+                                            <h2 class="h5 mb-1 text-dark fw-semibold">
+                                                <a href="{% url 'applicant_detail' app.id %}" class="text-dark text-decoration-none">
+                                                    {{ app.applicant_name }}
+                                                </a>
+                                            </h2>
+                                            <div class="text-secondary small">
+                                                <i class="bi bi-envelope me-1"></i>{{ app.applicant_email }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span class="badge 
+                                        {% if app.status == 'pending' %}bg-warning
+                                        {% elif app.status == 'reviewed' %}bg-info
+                                        {% elif app.status == 'accepted' %}bg-success
+                                        {% else %}bg-danger{% endif %}">
+                                        {{ app.get_status_display }}
+                                    </span>
+                                </header>
+
+                                <!-- Contact Info -->
+                                {% if app.applicant_phone %}
+                                <div class="mb-2">
+                                    <span class="text-secondary small">
+                                        <i class="bi bi-telephone me-1"></i>{{ app.applicant_phone }}
+                                    </span>
+                                </div>
+                                {% endif %}
+
+                                <!-- Job Applied -->
+                                <div class="mb-3">
+                                    <h3 class="h6 mb-1 text-dark">Applied Position</h3>
+                                    <p class="mb-0 text-primary fw-medium">
+                                        <i class="bi bi-briefcase me-1"></i>
+                                        {{ app.job.title }}
+                                    </p>
+                                </div>
+
+                                <!-- Applied Date -->
+                                <div class="mb-3">
+                                    <span class="text-secondary small">
+                                        <i class="bi bi-clock me-1"></i>
+                                        Applied {{ app.applied_at|date:"M d, Y" }} at {{ app.applied_at|date:"g:i A" }}
+                                    </span>
+                                </div>
+
+                                <!-- Cover Letter Snippet -->
+                                {% if app.cover_letter %}
+                                <div class="mt-auto">
+                                    <h3 class="h6 mb-2 text-dark">Cover Letter</h3>
+                                    <p class="text-truncate-3 text-secondary small mb-0">
+                                        {{ app.cover_letter }}
+                                    </p>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Footer -->
+                            <footer class="card-footer bg-transparent border-top-0 pt-0">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <a href="{% url 'applicant_detail' app.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-person-lines-fill me-1"></i>View Details
+                                    </a>
+                                    <div class="d-flex gap-1">
+                                        {% if app.resume %}
+                                        <a href="{{ app.resume.url }}" 
+                                           target="_blank" 
+                                           class="btn btn-sm btn-outline-secondary"
+                                           title="View Resume"
+                                           data-bs-toggle="tooltip">
+                                            <i class="bi bi-file-earmark-text"></i>
+                                        </a>
+                                        {% endif %}
+                                        <a href="{% url 'compose_email' app.id %}" 
+                                           class="btn btn-sm btn-outline-secondary"
+                                           title="Send Email"
+                                           data-bs-toggle="tooltip">
+                                            <i class="bi bi-envelope"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </footer>
+                        </article>
+                    </div>
+                    {% empty %}
+                    <div class="col-12">
+                        <div class="card shadow-sm border-0 text-center py-5">
+                            <div class="card-body">
+                                <i class="bi bi-people display-1 text-muted mb-3" style="color: var(--primary-light);"></i>
+                                <h3 class="h5 text-secondary mb-2">No applicants found</h3>
+                                <p class="text-secondary mb-3">
+                                    {% if query %}
+                                    No applicants match your search criteria. Try adjusting your search terms.
+                                    {% else %}
+                                    No job applications have been submitted yet.
+                                    {% endif %}
+                                </p>
+                                {% if query %}
+                                <a href="{% url 'applicants_list' %}" class="btn btn-outline-primary">
+                                    <i class="bi bi-arrow-clockwise me-2"></i>Clear Search
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </main>
+
+            <!-- Pagination -->
+            {% if applications.has_other_pages %}
+            <footer class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
+                <div class="text-secondary">
+                    Showing <span class="fw-semibold">{{ applications.start_index }}-{{ applications.end_index }}</span> 
+                    of <span class="fw-semibold">{{ applications.paginator.count }}</span> applicants
+                </div>
+                
+                <nav aria-label="Applicants pagination">
+                    <ul class="pagination mb-0">
+                        {% if applications.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" 
+                               href="?page={{ applications.previous_page_number }}{% if query %}&q={{ query }}{% endif %}"
+                               aria-label="Previous page">
+                                Previous
                             </a>
-                        </h5>
-                        <span class="badge 
-                            {% if app.status == 'pending' %} bg-warning
-                            {% elif app.status == 'reviewed' %} bg-info
-                            {% elif app.status == 'accepted' %} bg-success
-                            {% else %} bg-danger
-                            {% endif %}">
-                            {{ app.status|title }}
-                        </span>
-                    </div>
-
-                    <!-- Contact Info -->
-                    <div class="text-muted small mb-2">
-                        <i class="bi bi-envelope me-1"></i>{{ app.applicant_email }}<br>
-                        {% if app.applicant_phone %}
-                            <i class="bi bi-telephone me-1"></i>{{ app.applicant_phone }}
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Previous</span>
+                        </li>
                         {% endif %}
-                    </div>
 
-                    <!-- Job Applied -->
-                    <p class="mb-2">
-                        <i class="bi bi-briefcase me-1"></i>
-                        Applied for: <strong>{{ app.job.title }}</strong>
-                    </p>
+                        {% for num in applications.paginator.page_range %}
+                            {% if applications.number == num %}
+                            <li class="page-item active" aria-current="page">
+                                <span class="page-link" style="background-color: var(--primary); border-color: var(--primary);">{{ num }}</span>
+                            </li>
+                            {% elif num > applications.number|add:"-3" and num < applications.number|add:"3" %}
+                            <li class="page-item">
+                                <a class="page-link" 
+                                   href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}"
+                                   style="color: var(--primary);">
+                                    {{ num }}
+                                </a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
 
-                    <!-- Applied Date -->
-                    <p class="small text-muted mb-3">
-                        <i class="bi bi-clock me-1"></i> {{ app.applied_at|date:"M d, Y H:i" }}
-                    </p>
-
-                    <!-- Cover Letter Snippet -->
-                    <p class="text-truncate-3 small">{{ app.cover_letter }}</p>
-                </div>
-
-                <div class="card-footer bg-transparent">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <a href="{% url 'applicant_detail' app.id %}" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-person-lines-fill me-1"></i> View Profile
-                        </a>
-                        {% if app.resume %}
-                        <a href="{{ app.resume.url }}" target="_blank" class="btn btn-sm btn-outline-success">
-                            <i class="bi bi-file-earmark-text me-1"></i> Resume
-                        </a>
+                        {% if applications.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" 
+                               href="?page={{ applications.next_page_number }}{% if query %}&q={{ query }}{% endif %}"
+                               aria-label="Next page"
+                               style="color: var(--primary);">
+                                Next
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Next</span>
+                        </li>
                         {% endif %}
-                    </div>
-                </div>
-            </div>
+                    </ul>
+                </nav>
+            </footer>
+            {% endif %}
         </div>
-        {% empty %}
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-body text-center py-5">
-                    <i class="bi bi-people display-4 d-block text-muted mb-3"></i>
-                    <h5 class="text-muted">No applicants found</h5>
-                    <p class="text-muted">Try adjusting your filters</p>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
     </div>
-
-    <!-- Pagination -->
-    <nav aria-label="Applicants pagination" class="mt-3">
-        <ul class="pagination justify-content-center">
-            {% if applications.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ applications.previous_page_number }}&q={{ query }}">Previous</a>
-                </li>
-            {% endif %}
-            {% for num in applications.paginator.page_range %}
-                <li class="page-item {% if applications.number == num %} active {% endif %}">
-                    <a class="page-link" href="?page={{ num }}&q={{ query }}">{{ num }}</a>
-                </li>
-            {% endfor %}
-            {% if applications.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ applications.next_page_number }}&q={{ query }}">Next</a>
-                </li>
-            {% endif %}
-        </ul>
-    </nav>
 </div>
+{% endblock %}
 
-<!-- Extra CSS to truncate cover letter text -->
+{% block extra_css %}
 <style>
+:root {
+    --primary: #257dd4;
+    --primary-light: #257cd491;
+    --primary-dark: #257dd4;
+    --secondary: #546E7A;
+    --accent: #FF9800;
+    --light: #E3F2FD;
+    --dark: #257dd4;
+    --gradient-start: #257dd4;
+    --gradient-end: #257dd4;
+    --sidebar-width: 280px;
+}
+
+/* Applicant avatar styling */
+.applicant-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(37, 125, 212, 0.2);
+}
+
+/* Button styles using your theme */
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.btn-outline-primary {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.btn-outline-secondary {
+    color: var(--secondary);
+    border-color: var(--secondary);
+}
+
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus {
+    background-color: var(--secondary);
+    border-color: var(--secondary);
+    color: white;
+}
+
+/* Text colors */
+.text-primary {
+    color: var(--primary) !important;
+}
+
+.text-secondary {
+    color: var(--secondary) !important;
+}
+
+.text-dark {
+    color: #2c3e50 !important;
+}
+
+/* Card styles */
+.card {
+    border: none;
+    border-radius: 0.75rem;
+}
+
+.applicant-card {
+    border: 1px solid rgba(37, 125, 212, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.applicant-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 125, 212, 0.15) !important;
+    border-color: var(--primary-light);
+}
+
+/* Background colors */
+.bg-light {
+    background-color: var(--light) !important;
+}
+
+/* Text truncation for cover letters */
 .text-truncate-3 {
     display: -webkit-box;
-    -webkit-line-clamp: 3; /* limit to 3 lines */
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    line-height: 1.4;
+}
+
+/* Badge styling */
+.badge.bg-primary {
+    background-color: var(--primary) !important;
+}
+
+/* Pagination styles */
+.page-link {
+    color: var(--primary);
+    border-color: rgba(37, 125, 212, 0.1);
+}
+
+.page-item.active .page-link {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.page-link:hover {
+    color: var(--primary-dark);
+    background-color: var(--light);
+    border-color: rgba(37, 125, 212, 0.2);
+}
+
+/* Form controls */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 0.2rem rgba(37, 125, 212, 0.15);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .applicant-avatar {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .d-flex.gap-1 {
+        gap: 0.25rem !important;
+    }
+    
+    .text-truncate-3 {
+        -webkit-line-clamp: 2;
+    }
+}
+
+@media (max-width: 576px) {
+    .applicant-avatar {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .h2 {
+        font-size: 1.5rem;
+    }
+    
+    .h5 {
+        font-size: 1rem;
+    }
+}
+
+/* Empty state styling */
+.bi-people {
+    opacity: 0.5;
+}
+
+/* Tooltip adjustments */
+.tooltip {
+    font-size: 0.75rem;
 }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltips.forEach(tooltip => new bootstrap.Tooltip(tooltip));
+    
+    // Auto-focus search input
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput && !searchInput.value) {
+        searchInput.focus();
+    }
+    
+    // Add loading state to search form
+    const searchForm = document.querySelector('form[method="get"]');
+    if (searchForm) {
+        searchForm.addEventListener('submit', function() {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="bi bi-search spinner-border spinner-border-sm me-2"></i>Searching...';
+                submitBtn.disabled = true;
+                
+                // Revert after 3 seconds (in case of slow response)
+                setTimeout(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }, 3000);
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

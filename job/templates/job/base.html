@@ -7,7 +7,25 @@
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Hugo 0.84.0">
-    <title>{% block title %}Company Dashboard · Bootstrap v5.0{% endblock %}</title>
+    <title>Tech Recruitmen UK - {% block title %} {% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon/favicon.ico' %}">
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'img/favicon/favicon.ico' %}">
+    
+    <!-- For modern browsers -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/favicon/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'img/favicon/favicon-16x16.png' %}">
+    
+    <!-- For Apple devices -->
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/favicon/apple-touch-icon.png' %}">
+    
+    <!-- For Android Chrome -->
+    <link rel="icon" type="image/png" sizes="192x192" href="{% static 'img/favicon/android-chrome-192x192.png' %}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{% static 'img/favicon/android-chrome-512x512.png' %}">
+    
+    <!-- Web App Manifest for Android -->
+    <link rel="manifest" href="{% static 'img/favicon/site.webmanifest' %}">
 
     <link rel="canonical" href="https://getbootstrap.com/docs/5.0/examples/dashboard/">
 
@@ -598,68 +616,7 @@
       });
 
       // Initialize Feather Icons
-      feather.replace({ 'aria-hidden': 'true' });
-      
-      // Graphs
-      var ctx = document.getElementById('myChart');
-      if (ctx) {
-        var myChart = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: [
-              'Monday',
-              'Tuesday',
-              'Wednesday',
-              'Thursday',
-              'Friday',
-              'Saturday',
-              'Sunday'
-            ],
-            datasets: [{
-              label: 'Applications',
-              data: [34, 45, 52, 38, 49, 15, 8],
-              lineTension: 0.3,
-              backgroundColor: 'rgba(67, 97, 238, 0.05)',
-              borderColor: '#4361ee',
-              borderWidth: 2,
-              pointBackgroundColor: '#4361ee',
-              pointRadius: 3,
-              pointHoverRadius: 5
-            }, {
-              label: 'Interviews',
-              data: [12, 18, 15, 22, 19, 5, 2],
-              lineTension: 0.3,
-              backgroundColor: 'rgba(76, 201, 240, 0.05)',
-              borderColor: '#4cc9f0',
-              borderWidth: 2,
-              pointBackgroundColor: '#4cc9f0',
-              pointRadius: 3,
-              pointHoverRadius: 5
-            }]
-          },
-          options: {
-            scales: {
-              yAxes: [{
-                ticks: {
-                  beginAtZero: true
-                }
-              }]
-            },
-            legend: {
-              display: true,
-              position: 'bottom'
-            },
-            maintainAspectRatio: false
-          }
-        });
-      }
-
-      // Adjust chart on window resize
-      window.addEventListener('resize', function() {
-        if (myChart) {
-          myChart.resize();
-        }
-      });
+      feather.replace({ 'aria-hidden': 'true' });      
     </script>
 
     <!-- Toast Container -->

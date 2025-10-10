@@ -1,0 +1,701 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Notifications | {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+    <style>             
+        /* Navigation Styles */
+        .navbar {
+            padding: 15px 0;
+            transition: all 0.3s ease;
+            background: white !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .navbar-brand .logo {
+            height: 100px;
+            margin-right: 10px;
+        }
+        
+        .navbar-nav .nav-link {
+            color: var(--dark);
+            font-weight: 500;
+            margin: 0 10px;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+        
+        .navbar-nav .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        .navbar-nav .nav-link:hover::after,
+        .navbar-nav .nav-link.active::after {
+            width: 100%;
+        }
+        
+        .navbar-nav .nav-link:hover,
+        .navbar-nav .nav-link.active {
+            color: var(--primary);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            padding: 10px 25px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-outline-primary {
+            border-color: var(--primary);
+            color: var(--primary);
+            padding: 10px 25px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Hero Section */
+        .notifications-hero {
+            background: linear-gradient(rgba(0, 80, 83, 0.9), rgba(0, 80, 83, 0.8)), url('https://images.unsplash.com/photo-1516387938699-a93567ec168e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1500&q=80');
+            background-size: cover;
+            background-position: center;
+            padding: 100px 0 60px;
+            color: white;
+        }
+        
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .breadcrumb {
+            background: transparent;
+            margin-bottom: 0;
+            padding: 0;
+        }
+        
+        .breadcrumb-item a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: white;
+        }
+        
+        .breadcrumb-item + .breadcrumb-item::before {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Side Navigation */
+        .side-nav {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            height: 100%;
+        }
+        
+        .side-nav .nav-title {
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            color: var(--dark);
+            position: relative;
+        }
+        
+        .side-nav .nav-title::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 3px;
+            background: var(--primary);
+            bottom: 0;
+            left: 0;
+            border-radius: 3px;
+        }
+        
+        .side-nav .nav-link {
+            color: var(--secondary);
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .side-nav .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .side-nav .nav-link:hover,
+        .side-nav .nav-link.active {
+            background-color: var(--light);
+            color: var(--primary);
+        }
+        
+        .side-nav .nav-link.active {
+            font-weight: 500;
+        }
+        
+        .side-nav .nav-divider {
+            height: 1px;
+            background-color: #e2e8f0;
+            margin: 20px 0;
+        }
+        
+        /* Notifications Content */
+        .notifications-content {
+            padding: 80px 0;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .page-title {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--dark);
+            margin-bottom: 0;
+        }
+        
+        .mark-all-read {
+            color: var(--primary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .mark-all-read:hover {
+            color: var(--primary-dark);
+        }
+        
+        .notification-card {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-left: 4px solid transparent;
+            position: relative;
+        }
+        
+        .notification-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .notification-card.unread {
+            border-left-color: var(--primary);
+            background-color: rgba(0, 80, 83, 0.03);
+        }
+        
+        .notification-card.unread::before {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            top: 28px;
+            left: 10px;
+        }
+        
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--dark);
+            padding-left: 15px;
+        }
+        
+        .notification-time {
+            color: var(--secondary);
+            font-size: 0.85rem;
+            white-space: nowrap;
+            margin-left: 15px;
+        }
+        
+        .notification-content {
+            color: var(--secondary);
+            margin-bottom: 15px;
+            padding-left: 15px;
+        }
+        
+        .notification-actions {
+            display: flex;
+            gap: 10px;
+            padding-left: 15px;
+        }
+        
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .empty-state i {
+            font-size: 5rem;
+            color: var(--light);
+            margin-bottom: 20px;
+        }
+        
+        .empty-state h4 {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+        
+        .empty-state p {
+            color: var(--secondary);
+            margin-bottom: 30px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 70px 0 30px;
+        }
+        
+        .footer-title {
+            font-weight: 600;
+            margin-bottom: 25px;
+            font-size: 1.2rem;
+        }
+        
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: white;
+        }
+        
+        .social-icons a {
+            color: white;
+            font-size: 1.2rem;
+            margin-right: 15px;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+        
+        .social-icons a:hover {
+            color: var(--primary-light);
+            transform: translateY(-3px);
+        }
+        
+        .copyright {
+            border-top: 1px solid #334155;
+            padding-top: 20px;
+            margin-top: 50px;
+            color: #94a3b8;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .hero-title {
+                font-size: 2.2rem;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 1.8rem;
+            }
+            
+            .notifications-content {
+                padding: 60px 0;
+            }
+            
+            .notification-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .notification-time {
+                margin-left: 0;
+                margin-top: 5px;
+            }
+            
+            .navbar-brand .logo {
+                height: 30px;
+            }
+        }
+        
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+        }
+        
+        .status-pending { background-color: #6c757d; color: white; }
+        .status-reviewed { background-color: #17a2b8; color: white; }
+        .status-shortlisted { background-color: #ffc107; color: black; }
+        .status-interview { background-color: #007bff; color: white; }
+        .status-rejected { background-color: #dc3545; color: white; }
+        .status-accepted { background-color: #28a745; color: white; }
+        
+        .status-change-arrow {
+            color: var(--primary);
+            font-weight: bold;
+            margin: 0 0.5rem;
+        }
+        
+        .notification-card.unread {
+            border-left-color: var(--primary);
+            background-color: rgba(0, 80, 83, 0.03);
+        }
+        
+        .notification-card.unread::before {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            top: 28px;
+            left: 10px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .empty-state i {
+            font-size: 5rem;
+            color: var(--light);
+            margin-bottom: 20px;
+        }
+        
+        .empty-state h4 {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+        
+        .empty-state p {
+            color: var(--secondary);
+            margin-bottom: 30px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <!-- Hero Section -->
+    <section class="notifications-hero">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h1 class="hero-title">Notifications</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'jobseeker_dashboard' %}">Dashboard</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Notifications</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Notifications Content -->
+    <section class="notifications-content">
+        <div class="container">
+            <div class="row">
+                <!-- Side Navigation -->
+                {% include "include/job_seeker_sidenav.html" %}
+
+                <div class="col-lg-9">
+                    <div class="page-header">
+                        <h2 class="page-title">Application Notifications</h2>
+                        {% if unread_count > 0 %}
+                        <form method="post" action="{% url 'mark_all_notifications_read' %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-link p-0 border-0 mark-all-read">
+                                Mark all as read
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+
+                    <!-- Today's Notifications -->
+                    {% if today_notifications %}
+                    <h5 class="mb-3">Today</h5>
+                    {% for application in today_notifications %}
+                    <div class="notification-card" id="notification-{{ application.id }}">
+                        <div class="d-flex">
+                            <div class="notification-icon">
+                                <i class="fas fa-sync-alt"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="notification-header">
+                                    <h5 class="notification-title">Application Status Updated</h5>
+                                    <span class="notification-time">{{ application.status_changed_at|timesince }} ago</span>
+                                </div>
+                                <p class="notification-content">
+                                    Your application for <strong>{{ application.job.title }}</strong> at 
+                                    <strong>{{ application.job.company_name }}</strong> has been updated to
+                                    <span class="status-badge status-{{ application.status }}">{{ application.get_status_display }}</span>
+                                </p>
+                                <div class="notification-actions">
+                                    <a href="{% url 'application_detail' application.id %}" class="btn btn-sm btn-outline-primary">View Application</a>
+                                    <form method="post" action="{% url 'mark_single_notification_read' application.id %}" class="d-inline mark-read-form">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">Mark as read</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    <!-- Yesterday's Notifications -->
+                    {% if yesterday_notifications %}
+                    <h5 class="mb-3 mt-5">Yesterday</h5>
+                    {% for application in yesterday_notifications %}
+                    <div class="notification-card" id="notification-{{ application.id }}">
+                        <div class="d-flex">
+                            <div class="notification-icon">
+                                <i class="fas fa-sync-alt"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="notification-header">
+                                    <h5 class="notification-title">Application Status Updated</h5>
+                                    <span class="notification-time">{{ application.status_changed_at|timesince }} ago</span>
+                                </div>
+                                <p class="notification-content">
+                                    Your application for <strong>{{ application.job.title }}</strong> at 
+                                    <strong>{{ application.job.company_name }}</strong> has been updated to
+                                    <span class="status-badge status-{{ application.status }}">{{ application.get_status_display }}</span>
+                                </p>
+                                <div class="notification-actions">
+                                    <a href="{% url 'application_detail' application.id %}" class="btn btn-sm btn-outline-primary">View Application</a>
+                                    <form method="post" action="{% url 'mark_single_notification_read' application.id %}" class="d-inline mark-read-form">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">Mark as read</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    <!-- This Week's Notifications -->
+                    {% if this_week_notifications %}
+                    <h5 class="mb-3 mt-5">This Week</h5>
+                    {% for application in this_week_notifications %}
+                    <div class="notification-card" id="notification-{{ application.id }}">
+                        <div class="d-flex">
+                            <div class="notification-icon">
+                                <i class="fas fa-sync-alt"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="notification-header">
+                                    <h5 class="notification-title">Application Status Updated</h5>
+                                    <span class="notification-time">{{ application.status_changed_at|date:"M d, Y" }}</span>
+                                </div>
+                                <p class="notification-content">
+                                    Your application for <strong>{{ application.job.title }}</strong> at 
+                                    <strong>{{ application.job.company_name }}</strong> has been updated to
+                                    <span class="status-badge status-{{ application.status }}">{{ application.get_status_display }}</span>
+                                </p>
+                                <div class="notification-actions">
+                                    <a href="{% url 'job_application_detail' application.id %}" class="btn btn-sm btn-outline-primary">View Application</a>
+                                    <form method="post" action="{% url 'mark_single_notification_read' application.id %}" class="d-inline mark-read-form">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">Mark as read</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    <!-- Empty State -->
+                    {% if not today_notifications and not yesterday_notifications and not this_week_notifications %}
+                    <div class="empty-state">
+                        <i class="fas fa-bell-slash"></i>
+                        <h4>No notifications yet</h4>
+                        <p>You'll see notifications here when your application status changes or when you receive important updates.</p>
+                        <a href="{% url 'job_list' %}" class="btn btn-primary">Browse Jobs</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock content %}
+
+{% block extra_js %}
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // AJAX for marking notifications as read
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mark individual notification as read
+            const markReadForms = document.querySelectorAll('.mark-read-form');
+            markReadForms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(this);
+                    const applicationId = this.action.split('/').filter(Boolean).pop();
+                    
+                    fetch(this.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const notificationCard = document.getElementById(`notification-${applicationId}`);
+                            if (notificationCard) {
+                                notificationCard.classList.remove('unread');
+                                this.remove();
+                                
+                                // Update unread count in sidebar
+                                updateNotificationCount();
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                });
+            });
+            
+            // Update notification count in sidebar
+            function updateNotificationCount() {
+                fetch('{% url "get_unread_notification_count" %}')
+                    .then(response => response.json())
+                    .then(data => {
+                        const unreadBadge = document.querySelector('.side-nav .badge');
+                        if (unreadBadge) {
+                            if (data.unread_count > 0) {
+                                unreadBadge.textContent = data.unread_count;
+                                unreadBadge.style.display = 'inline-block';
+                            } else {
+                                unreadBadge.style.display = 'none';
+                            }
+                        }
+                        
+                        // Also update any other notification badges
+                        const navBadges = document.querySelectorAll('.notification-badge');
+                        navBadges.forEach(badge => {
+                            if (data.unread_count > 0) {
+                                badge.textContent = data.unread_count;
+                                badge.style.display = 'inline-block';
+                            } else {
+                                badge.style.display = 'none';
+                            }
+                        });
+                    });
+            }
+            
+            // Initial count update
+            updateNotificationCount();
+        });
+    </script>
+{% endblock extra_js %}

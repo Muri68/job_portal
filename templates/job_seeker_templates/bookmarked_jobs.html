@@ -2,7 +2,6 @@
 {% load humanize %}
 {% load static %}
 
-
 {% block content %}
     <style>        
         /* Navigation Styles */
@@ -341,6 +340,7 @@
             background: white;
             border-radius: 8px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-top: 20px;
         }
         
         .empty-state i {
@@ -464,8 +464,8 @@
                     <h1 class="hero-title">Bookmarked Jobs</h1>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="#">Home</a></li>
-                            <li class="breadcrumb-item"><a href="#">Candidates</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'jobseeker_dashboard' %}">Dashboard</a></li>
                             <li class="breadcrumb-item active" aria-current="page">Bookmarked Jobs</li>
                         </ol>
                     </nav>
@@ -484,10 +484,14 @@
                 <div class="col-lg-9">
                     <div class="page-header">
                         <h2 class="page-title">Bookmarked Jobs</h2>
+                        {% if saved_jobs %}
                         <p class="bookmarked-count">{{ total_saved }} Bookmarked job{{ total_saved|pluralize }}</p>
+                        {% else %}
+                        <p class="bookmarked-count">0 Bookmarked jobs</p>
+                        {% endif %}
                     </div>
 
-                    <!-- Job Card -->
+                    <!-- Job Cards -->
                     {% if saved_jobs %}
                         {% for saved_job in saved_jobs %}
                             <div class="job-card">
@@ -504,42 +508,88 @@
                                 </div>
                                 <div class="job-details">
                                     <div class="job-detail">
-                                        <i class="fas fa-map-marker-alt"></i> {{ saved_job.job.title }}
+                                        <i class="fas fa-map-marker-alt"></i> {{ saved_job.job.location }}
                                     </div>
                                     <div class="job-detail job-salary">
                                         <i class="fas fa-dollar-sign"></i> Salary starting from {{ saved_job.job.salary_start|intcomma }} per annum
+                                    </div>
+                                    <div class="job-detail">
+                                        <i class="fas fa-briefcase"></i> {{ saved_job.job.get_employment_type_display }}
                                     </div>
                                 </div>
                                 <p>{{ saved_job.job.description|striptags|truncatewords:30 }}</p>
                                 <div class="job-actions">
                                     <span class="job-posted"><i class="far fa-clock"></i> Bookmarked {{ saved_job.saved_at|timesince }} ago</span>
                                     <div class="action-buttons">
-                                        <button type= onclick="unsaveJob({{ saved_job.job.id }})" class="btn btn-outline-danger"><i class="fas fa-trash-alt"></i> Remove</button>
+                                        <button type="button" onclick="unsaveJob({{ saved_job.job.id }})" class="btn btn-outline-danger">
+                                            <i class="fas fa-trash-alt"></i> Remove
+                                        </button>
                                         <a href="{% url 'job_detail_frontend' saved_job.job.id %}" class="btn btn-outline-primary">Job Detail</a>
+                                        <a href="{% url 'apply_for_job' saved_job.job.id %}" class="btn btn-primary">Apply Now</a>
                                     </div>
                                 </div>
                             </div>
                         {% endfor %}
-                    {% else %}
-                    {% endif %}
 
-                    <!-- Pagination -->
-                    <nav aria-label="Page navigation" class="pagination-container">
-                        <ul class="pagination justify-content-center">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
-                                    <i class="fas fa-chevron-left"></i>
-                                </a>
-                            </li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">
-                                    <i class="fas fa-chevron-right"></i>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
+                        <!-- Pagination -->
+                        {% if saved_jobs.has_other_pages %}
+                        <nav aria-label="Page navigation" class="pagination-container">
+                            <ul class="pagination justify-content-center">
+                                {% if saved_jobs.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ saved_jobs.previous_page_number }}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                                {% endif %}
+
+                                {% for i in saved_jobs.paginator.page_range %}
+                                    {% if saved_jobs.number == i %}
+                                    <li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
+                                    {% else %}
+                                    <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if saved_jobs.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ saved_jobs.next_page_number }}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+
+                    {% else %}
+                    <!-- Empty State -->
+                    <div class="empty-state">
+                        <i class="fas fa-bookmark" style="color: #dee2e6;"></i>
+                        <h4>No Bookmarked Jobs</h4>
+                        <p>You haven't saved any jobs yet. Start browsing available positions and save the ones you're interested in to apply later.</p>
+                        <div class="d-flex gap-3 justify-content-center">
+                            <a href="{% url 'job_list' %}" class="btn btn-primary">
+                                <i class="fas fa-search me-2"></i>Browse Jobs
+                            </a>
+                            <a href="{% url 'jobseeker_dashboard' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-home me-2"></i>Back to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -548,64 +598,91 @@
 
 {% block extra_js %}
 <script>
-    // Bookmark functionality
-    function toggleSaveJob(jobId) {
-        fetch(`/job/${jobId}/toggle-save/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'Content-Type': 'application/json',
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                updateBookmarkUI(jobId, data.is_saved);
-                
-                // Show notification
-                showNotification(data.message, data.is_saved ? 'success' : 'info');
-            } else {
-                showNotification(data.error, 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showNotification('An error occurred. Please try again.', 'error');
-        });
-    }
-
-    function updateBookmarkUI(jobId, isSaved) {
-        const bookmarkBtn = document.querySelector(`.bookmark-component[data-job-id="${jobId}"] .bookmark-btn`);
-        const bookmarkIcon = bookmarkBtn.querySelector('i');
-        const bookmarkText = bookmarkBtn.querySelector('.bookmark-text');
-        
-        if (isSaved) {
-            bookmarkBtn.classList.add('bookmarked');
-            bookmarkIcon.className = 'fas fa-bookmark';
-            bookmarkText.textContent = 'Saved';
-            bookmarkBtn.setAttribute('title', 'Remove from Saved');
-        } else {
-            bookmarkBtn.classList.remove('bookmarked');
-            bookmarkIcon.className = 'far fa-bookmark';
-            bookmarkText.textContent = 'Save';
-            bookmarkBtn.setAttribute('title', 'Save Job');
+    // Unsave job functionality
+    function unsaveJob(jobId) {
+        if (confirm('Are you sure you want to remove this job from your bookmarks?')) {
+            fetch(`/job/${jobId}/toggle-save/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove the job card from the DOM
+                    const jobCard = document.querySelector(`.job-card:has(button[onclick="unsaveJob(${jobId})"])`);
+                    if (jobCard) {
+                        jobCard.style.opacity = '0';
+                        setTimeout(() => {
+                            jobCard.remove();
+                            
+                            // Update the count
+                            updateBookmarkCount();
+                            
+                            // Check if no jobs left, show empty state
+                            checkEmptyState();
+                        }, 300);
+                    }
+                    
+                    showNotification('Job removed from bookmarks', 'success');
+                } else {
+                    showNotification(data.error || 'Failed to remove bookmark', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('An error occurred. Please try again.', 'error');
+            });
         }
     }
 
-    function checkSavedStatus(jobId) {
-        if (!isJobSeeker) return;
+    // Update bookmark count
+    function updateBookmarkCount() {
+        const remainingJobs = document.querySelectorAll('.job-card').length;
+        const countElement = document.querySelector('.bookmarked-count');
         
-        fetch(`/job/${jobId}/check-saved/`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.is_saved) {
-                updateBookmarkUI(jobId, true);
-            }
-        });
+        if (countElement) {
+            countElement.textContent = `${remainingJobs} Bookmarked job${remainingJobs !== 1 ? 's' : ''}`;
+        }
     }
 
-    function showLoginAlert() {
-        showNotification('Please log in as a job seeker to save jobs.', 'warning');
+    // Check and show empty state if no jobs
+    function checkEmptyState() {
+        const jobCards = document.querySelectorAll('.job-card');
+        const mainContent = document.querySelector('.col-lg-9');
+        
+        if (jobCards.length === 0) {
+            // Remove pagination if exists
+            const pagination = document.querySelector('.pagination-container');
+            if (pagination) {
+                pagination.remove();
+            }
+            
+            // Show empty state
+            const emptyStateHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-bookmark" style="color: #dee2e6;"></i>
+                    <h4>No Bookmarked Jobs</h4>
+                    <p>You haven't saved any jobs yet. Start browsing available positions and save the ones you're interested in to apply later.</p>
+                    <div class="d-flex gap-3 justify-content-center">
+                        <a href="{% url 'job_list' %}" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>Browse Jobs
+                        </a>
+                        <a href="{% url 'jobseeker_dashboard' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-home me-2"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            `;
+            
+            // Insert empty state after the page header
+            const pageHeader = document.querySelector('.page-header');
+            if (pageHeader && mainContent) {
+                pageHeader.insertAdjacentHTML('afterend', emptyStateHTML);
+            }
+        }
     }
 
     // Utility functions
@@ -625,7 +702,7 @@
     }
 
     function showNotification(message, type = 'info') {
-        // You can use Toastify, SweetAlert, or your preferred notification library
+        // Simple notification implementation
         const alertClass = {
             'success': 'alert-success',
             'error': 'alert-danger',
@@ -633,7 +710,6 @@
             'info': 'alert-info'
         }[type];
         
-        // Simple Bootstrap alert implementation
         const alertDiv = document.createElement('div');
         alertDiv.className = `alert ${alertClass} alert-dismissible fade show`;
         alertDiv.innerHTML = `
@@ -641,7 +717,6 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         `;
         
-        // Add to notification container or create one
         let container = document.getElementById('notification-container');
         if (!container) {
             container = document.createElement('div');
@@ -664,13 +739,10 @@
         }, 5000);
     }
 
-    // Initialize bookmark status on page load
+    // Initialize on page load
     document.addEventListener('DOMContentLoaded', function() {
-        // Check saved status for all job cards on the page
-        document.querySelectorAll('.bookmark-component').forEach(component => {
-            const jobId = component.dataset.jobId;
-            checkSavedStatus(jobId);
-        });
+        // Check if we're on the bookmarks page and initialize
+        console.log('Bookmarks page loaded');
     });
 </script>
 {% endblock extra_js %}

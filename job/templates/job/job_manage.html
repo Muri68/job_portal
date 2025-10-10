@@ -1,249 +1,384 @@
 {% extends "job/base.html" %}
 {% load static %}
 
+{% block title %}
+    {% if job %}Edit Job Posting - {{ job.title }}{% else %}Create New Job Posting{% endif %}
+{% endblock %}
+
+
+{% block extra_css %}
+    <style>
+        :root {
+            --primary: #257dd4;
+            --primary-light: #257cd491;
+            --primary-dark: #257dd4;
+            --secondary: #546E7A;
+            --accent: #FF9800;
+            --light: #E3F2FD;
+            --dark: #257dd4;
+            --gradient-start: #257dd4;
+            --gradient-end: #257dd4;
+            --sidebar-width: 280px;
+        }
+
+        .required-field::after {
+            content: " *";
+            color: #dc3545;
+        }
+
+        .input-group-text {
+            transition: all 0.2s ease;
+            border-color: #dee2e6;
+        }
+
+        .form-control:focus, 
+        .form-select:focus,
+        .ck-editor__editable:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 0.2rem rgba(37, 125, 212, 0.15);
+        }
+
+        .ck-editor__editable {
+            min-height: 280px;
+            border-radius: 0.375rem;
+            border: 1px solid #ced4da;
+            font-family: inherit;
+        }
+
+        .card {
+            border: none;
+            border-radius: 0.75rem;
+        }
+
+        .btn {
+            border-radius: 0.5rem;
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+        }
+
+        .bg-light {
+            background-color: var(--light) !important;
+        }
+
+        /* Button styles using your theme */
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-outline-primary:hover,
+        .btn-outline-primary:focus {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .btn-outline-secondary {
+            color: var(--secondary);
+            border-color: var(--secondary);
+        }
+
+        .btn-outline-secondary:hover,
+        .btn-outline-secondary:focus {
+            background-color: var(--secondary);
+            border-color: var(--secondary);
+            color: white;
+        }
+
+        /* Section header icons */
+        .bg-primary {
+            background-color: var(--primary) !important;
+        }
+
+        /* Text colors */
+        .text-primary {
+            color: var(--primary) !important;
+        }
+
+        .text-secondary {
+            color: var(--secondary) !important;
+        }
+
+        .text-muted {
+            color: var(--secondary) !important;
+            opacity: 0.8;
+        }
+
+        /* Validation styles */
+        .is-invalid {
+            border-color: #dc3545;
+            padding-right: calc(1.5em + 0.75rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 3.6.4.4.4-.4'/%3e%3cpath d='M6 7v2'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+
+        .is-valid {
+            border-color: #198754;
+            padding-right: calc(1.5em + 0.75rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 991.98px) {
+            .btn-lg {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Form section styling */
+        .form-section {
+            border-left: 3px solid var(--primary);
+            padding-left: 1rem;
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid py-4">
     <div class="row justify-content-center">
-        <div class="col-12">
+        <div class="col-12 col-xl-12">
             <!-- Header Section -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <header class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h2 class="h3 mb-0 text-dark fw-bold">
+                    <h1 class="h3 mb-2 text-dark fw-bold">
                         <i class="bi bi-briefcase me-2"></i>
                         {% if job %}Edit Job Posting{% else %}Create New Job{% endif %}
-                    </h2>
-                    <p class="text-muted mb-0">{% if job %}Update the job details below{% else %}Fill in the job details to create a new posting{% endif %}</p>
+                    </h1>
+                    <p class="text-secondary mb-0">
+                        {% if job %}Update the job details below{% else %}Fill in the job details to create a new posting{% endif %}
+                    </p>
                 </div>
                 <a href="{% url 'job_list' %}" class="btn btn-outline-secondary">
                     <i class="bi bi-arrow-left me-2"></i>Back to Jobs
                 </a>
-            </div>
+            </header>
             
             <!-- Form Card -->
             <div class="card shadow-sm border-0">
                 <div class="card-body p-4">
                     <form method="post" id="jobForm" class="needs-validation" novalidate>
                         {% csrf_token %}
-                        
                         {{ form.media }}
                         
                         <div class="row">
-                            <!-- Left Column -->
-                            <div class="col-lg-8">
-                                <!-- Basic Information -->
-                                <div class="mb-4">
-                                    <h5 class="mb-3 text-dark d-flex align-items-center">
-                                        <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px;">
+                            <!-- Main Content Column -->
+                            <div class="col-lg-12">
+                                <!-- Basic Information Section -->
+                                <section class="mb-5" aria-labelledby="basic-info-heading">
+                                    <h2 id="basic-info-heading" class="h5 mb-4 text-dark d-flex align-items-center">
+                                        <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
                                             <i class="bi bi-info-lg"></i>
                                         </span>
                                         Basic Information
-                                    </h5>
+                                    </h2>
                                     
                                     <div class="row">
                                         <div class="col-md-8 mb-3">
-                                            <label for="title" class="form-label required-field">Job Title</label>
-                                            <div class="input-group">
-                                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-pencil"></i></span>
+                                            <label for="{{ form.title.id_for_label }}" class="form-label required-field">Job Title</label>
+                                            <div class="input-group has-validation">
+                                                <span class="input-group-text bg-light border-end-0">
+                                                    <i class="bi bi-pencil" aria-hidden="true"></i>
+                                                </span>
                                                 {{ form.title }}
+                                                {% if form.title.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.title.errors }}
+                                                </div>
+                                                {% endif %}
                                             </div>
-                                            {% if form.title.errors %}
-                                            <div class="text-danger mt-1 small">{{ form.title.errors }}</div>
-                                            {% endif %}
                                         </div>
                                         
                                         <div class="col-md-4 mb-3">
-                                            <label for="category" class="form-label required-field">Category</label>
-                                            <div class="input-group">
-                                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-grid"></i></span>
+                                            <label for="{{ form.category.id_for_label }}" class="form-label required-field">Category</label>
+                                            <div class="input-group has-validation">
+                                                <span class="input-group-text bg-light border-end-0">
+                                                    <i class="bi bi-grid" aria-hidden="true"></i>
+                                                </span>
                                                 {{ form.category }}
+                                                {% if form.category.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.category.errors }}
+                                                </div>
+                                                {% endif %}
                                             </div>
-                                            {% if form.category.errors %}
-                                            <div class="text-danger mt-1 small">{{ form.category.errors }}</div>
-                                            {% endif %}
                                         </div>
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <label for="id_description" class="form-label required-field">Job Description</label>
+                                        <label for="{{ form.description.id_for_label }}" class="form-label required-field">Job Description</label>
                                         {{ form.description }}
                                         {% if form.description.errors %}
-                                        <div class="text-danger mt-1 small">{{ form.description.errors }}</div>
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.description.errors }}
+                                        </div>
                                         {% endif %}
-                                        <div class="form-text">Describe the responsibilities, requirements, and benefits of this position</div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Right Column -->
-                            <div class="col-lg-4">
-                                <div class="card bg-light border-0 mb-4">
-                                    <div class="card-body">
-                                        <h6 class="text-dark mb-3">Quick Actions</h6>
-                                        <div class="d-grid gap-2">
-                                            <button type="submit" class="btn btn-success">
-                                                <i class="bi bi-check-circle me-2"></i>
-                                                {% if job %}Update Job{% else %}Create Job{% endif %}
-                                            </button>
-                                            <a href="{% url 'job_list' %}" class="btn btn-outline-secondary">
-                                                <i class="bi bi-x-circle me-2"></i>Cancel
-                                            </a>
+                                        <div class="form-text">
+                                            Describe the responsibilities, requirements, and benefits of this position
                                         </div>
                                     </div>
-                                </div>
+                                </section>
+
+                                <!-- Job Details Section -->
+                                <section class="mb-5" aria-labelledby="job-details-heading">
+                                    <h2 id="job-details-heading" class="h5 mb-4 text-dark d-flex align-items-center">
+                                        <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                            <i class="bi bi-geo-alt"></i>
+                                        </span>
+                                        Job Details
+                                    </h2>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 col-lg-3 mb-3">
+                                            <label for="{{ form.job_type.id_for_label }}" class="form-label required-field">Job Type</label>
+                                            <div class="input-group has-validation">
+                                                <span class="input-group-text bg-light border-end-0">
+                                                    <i class="bi bi-briefcase" aria-hidden="true"></i>
+                                                </span>
+                                                {{ form.job_type }}
+                                                {% if form.job_type.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.job_type.errors }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6 col-lg-3 mb-3">
+                                            <label for="{{ form.workplace_type.id_for_label }}" class="form-label required-field">Workplace Type</label>
+                                            <div class="input-group has-validation">
+                                                <span class="input-group-text bg-light border-end-0">
+                                                    <i class="bi bi-laptop" aria-hidden="true"></i>
+                                                </span>
+                                                {{ form.workplace_type }}
+                                                {% if form.workplace_type.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.workplace_type.errors }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6 col-lg-3 mb-3">
+                                            <label for="{{ form.status.id_for_label }}" class="form-label required-field">Status</label>
+                                            <div class="input-group has-validation">
+                                                <span class="input-group-text bg-light border-end-0">
+                                                    <i class="bi bi-eye" aria-hidden="true"></i>
+                                                </span>
+                                                {{ form.status }}
+                                                {% if form.status.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.status.errors }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6 col-lg-3 mb-3">
+                                            <label for="{{ form.location.id_for_label }}" class="form-label required-field">Location</label>
+                                            <div class="input-group has-validation">
+                                                <span class="input-group-text bg-light border-end-0">
+                                                    <i class="bi bi-geo-alt" aria-hidden="true"></i>
+                                                </span>
+                                                {{ form.location }}
+                                                {% if form.location.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.location.errors }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <!-- Compensation & Timeline Section -->
+                                <section class="mb-4" aria-labelledby="compensation-heading">
+                                    <h2 id="compensation-heading" class="h5 mb-4 text-dark d-flex align-items-center">
+                                        <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                            <i class="bi bi-currency-dollar"></i>
+                                        </span>
+                                        Compensation & Timeline
+                                    </h2>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="{{ form.salary_start.id_for_label }}" class="form-label">Salary Range</label>
+                                            <div class="input-group has-validation">
+                                                <span class="input-group-text bg-light border-end-0">
+                                                    <i class="bi bi-currency-pound" aria-hidden="true"></i>
+                                                </span>
+                                                {{ form.salary_start }}
+                                                <span class="input-group-text bg-light">/ year</span>
+                                            </div>
+                                            {% if form.salary_start.errors or form.salary_end.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.salary_start.errors }}
+                                                {{ form.salary_end.errors }}
+                                            </div>
+                                            {% endif %}
+                                            <div class="form-text">Leave empty if salary is not specified</div>
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-3">
+                                            <label for="{{ form.application_deadline.id_for_label }}" class="form-label required-field">Application Deadline</label>
+                                            <div class="input-group has-validation">
+                                                <span class="input-group-text bg-light border-end-0">
+                                                    <i class="bi bi-calendar" aria-hidden="true"></i>
+                                                </span>
+                                                {{ form.application_deadline }}
+                                                {% if form.application_deadline.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.application_deadline.errors }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
                             </div>
                         </div>
                         
-                        <!-- Job Details Section -->
-                        <div class="mb-4">
-                            <h5 class="mb-3 text-dark d-flex align-items-center">
-                                <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px;">
-                                    <i class="bi bi-geo-alt"></i>
-                                </span>
-                                Job Details
-                            </h5>
-                            
-                            <div class="row">
-                                <div class="col-md-3 mb-3">
-                                    <label for="job_type" class="form-label required-field">Job Type</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-briefcase"></i></span>
-                                        {{ form.job_type }}
-                                    </div>
-                                    {% if form.job_type.errors %}
-                                    <div class="text-danger mt-1 small">{{ form.job_type.errors }}</div>
-                                    {% endif %}
-                                </div>
-                                
-                                <div class="col-md-3 mb-3">
-                                    <label for="workplace_type" class="form-label required-field">Workplace Type</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-laptop"></i></span>
-                                        {{ form.workplace_type }}
-                                    </div>
-                                    {% if form.workplace_type.errors %}
-                                    <div class="text-danger mt-1 small">{{ form.workplace_type.errors }}</div>
-                                    {% endif %}
-                                </div>
-                                
-                                <div class="col-md-3 mb-3">
-                                    <label for="status" class="form-label required-field">Status</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-eye"></i></span>
-                                        {{ form.status }}
-                                    </div>
-                                    {% if form.status.errors %}
-                                    <div class="text-danger mt-1 small">{{ form.status.errors }}</div>
-                                    {% endif %}
-                                </div>
-                                
-                                <div class="col-md-3 mb-3">
-                                    <label for="location" class="form-label required-field">Location</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-geo-alt"></i></span>
-                                        {{ form.location }}
-                                    </div>
-                                    {% if form.location.errors %}
-                                    <div class="text-danger mt-1 small">{{ form.location.errors }}</div>
-                                    {% endif %}
-                                </div>
+                        <!-- Form Actions Footer -->
+                        <footer class="d-flex justify-content-between align-items-center border-top pt-4 mt-4">
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'job_list' %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left me-2"></i>Back to Jobs
+                                </a>
+                                <button type="reset" class="btn btn-outline-danger">
+                                    <i class="bi bi-arrow-clockwise me-2"></i>Reset Form
+                                </button>
                             </div>
-                        </div>
-                        
-                        <!-- Salary & Deadline Section -->
-                        <div class="mb-4">
-                            <h5 class="mb-3 text-dark d-flex align-items-center">
-                                <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px;">
-                                    <i class="bi bi-currency-dollar"></i>
-                                </span>
-                                Compensation & Timeline
-                            </h5>
-                            
-                            <div class="row">
-                                <div class="col-md-4 mb-3">
-                                    <label for="salary_start" class="form-label">Salary</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-currency-dollar"></i></span>
-                                        {{ form.salary_start }}
-                                        <span class="input-group-text bg-light">/ year</span>
-                                    </div>
-                                    {% if form.salary_start.errors %}
-                                    <div class="text-danger mt-1 small">{{ form.salary_start.errors }}</div>
-                                    {% endif %}
-                                    <div class="form-text">Leave empty if salary is not specified</div>
-                                </div>
-                                
-                                <div class="col-md-4 mb-3">
-                                    <label for="application_deadline" class="form-label required-field">Application Deadline</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-calendar"></i></span>
-                                        {{ form.application_deadline }}
-                                    </div>
-                                    {% if form.application_deadline.errors %}
-                                    <div class="text-danger mt-1 small">{{ form.application_deadline.errors }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Form Actions -->
-                        <div class="d-flex justify-content-between align-items-center border-top pt-4 mt-4">
-                            <a href="{% url 'job_list' %}" class="btn btn-outline-secondary">
-                                <i class="bi bi-arrow-left me-2"></i>Back to Jobs
-                            </a>
-                            <div>
-                                <button type="submit" class="btn btn-primary">
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">
                                     <i class="bi bi-check-circle me-2"></i>
                                     {% if job %}Update Job{% else %}Create Job{% endif %}
                                 </button>
                             </div>
-                        </div>
+                        </footer>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
-<style>
-.required-field::after {
-    content: " *";
-    color: #dc3545;
-}
-
-.input-group-text {
-    transition: all 0.2s ease;
-}
-
-.form-control:focus, .form-select:focus {
-    border-color: #86b7fe;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
-}
-
-.ck-editor__editable {
-    min-height: 250px;
-    border-radius: 0.375rem;
-    border: 1px solid #ced4da;
-}
-
-.ck-editor__editable:focus {
-    border-color: #86b7fe;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
-}
-
-.card {
-    border: none;
-    border-radius: 0.75rem;
-}
-
-.btn {
-    border-radius: 0.5rem;
-    padding: 0.5rem 1.5rem;
-}
-
-.bg-light {
-    background-color: #f8f9fa !important;
-}
-</style>
 
 {% block extra_js %}
 <script>
@@ -251,16 +386,28 @@ document.addEventListener('DOMContentLoaded', function() {
     // Form validation
     const form = document.getElementById('jobForm');
     if (form) {
+        // Real-time validation
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                validateField(this);
+            });
+            
+            input.addEventListener('input', function() {
+                if (this.classList.contains('is-invalid')) {
+                    validateField(this);
+                }
+            });
+        });
+
+        // Form submission validation
         form.addEventListener('submit', function(e) {
             let isValid = true;
             const requiredFields = form.querySelectorAll('[required]');
             
             requiredFields.forEach(field => {
-                if (!field.value.trim()) {
+                if (!validateField(field)) {
                     isValid = false;
-                    field.classList.add('is-invalid');
-                } else {
-                    field.classList.remove('is-invalid');
                 }
             });
             
@@ -269,46 +416,78 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Scroll to first error
                 const firstError = form.querySelector('.is-invalid');
                 if (firstError) {
-                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                    firstError.focus();
                 }
+                
+                // Show toast notification
+                showNotification('Please fix the errors in the form before submitting.', 'error');
             }
         });
     }
     
-    // Initialize CKEditor if not loaded by form.media
-    setTimeout(function() {
-        if (typeof ClassicEditor === 'undefined') {
-            console.log('CKEditor not found, loading from CDN...');
-            const script = document.createElement('script');
-            script.src = 'https://cdn.ckeditor.com/ckeditor5/41.4.2/balloon-block/ckeditor.js';
-            script.onload = initializeCKEditor;
-            document.head.appendChild(script);
+    function validateField(field) {
+        const value = field.value.trim();
+        const isValid = field.type === 'checkbox' ? field.checked : value !== '';
+        
+        if (isValid) {
+            field.classList.remove('is-invalid');
+            field.classList.add('is-valid');
         } else {
-            initializeCKEditor();
+            field.classList.remove('is-valid');
+            field.classList.add('is-invalid');
         }
-    }, 1000);
-
-    function initializeCKEditor() {
-        if (typeof ClassicEditor !== 'undefined') {
-            ClassicEditor
-                .create(document.querySelector('#id_description'), {
-                    toolbar: {
-                        items: [
-                            'heading', '|',
-                            'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|',
-                            'outdent', 'indent', '|',
-                            'blockQuote', 'insertTable', 'undo', 'redo'
-                        ]
-                    },
-                    language: 'en',
-                })
-                .then(editor => {
-                    console.log('CKEditor initialized successfully');
-                })
-                .catch(console.error);
-        }
+        
+        return isValid;
+    }
+    
+    function showNotification(message, type = 'info') {
+        // Simple notification implementation
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
+        alert.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        alert.style.position = 'fixed';
+        alert.style.top = '20px';
+        alert.style.right = '20px';
+        alert.style.zIndex = '1060';
+        alert.style.minWidth = '300px';
+        
+        document.body.appendChild(alert);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.parentNode.removeChild(alert);
+            }
+        }, 5000);
+    }
+    
+    // Date picker enhancement
+    const deadlineField = document.getElementById('{{ form.application_deadline.id_for_label }}');
+    if (deadlineField) {
+        deadlineField.min = new Date().toISOString().split('T')[0];
+    }
+    
+    // Salary range validation
+    const salaryStart = document.getElementById('{{ form.salary_start.id_for_label }}');
+    const salaryEnd = document.getElementById('{{ form.salary_end.id_for_label }}');
+    
+    if (salaryStart && salaryEnd) {
+        [salaryStart, salaryEnd].forEach(field => {
+            field.addEventListener('blur', function() {
+                if (salaryStart.value && salaryEnd.value && 
+                    parseInt(salaryStart.value) > parseInt(salaryEnd.value)) {
+                    showNotification('Starting salary should be less than ending salary.', 'warning');
+                }
+            });
+        });
     }
 });
 </script>
-{% endblock %}
 {% endblock %}

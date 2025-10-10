@@ -24,11 +24,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=False, cast=bool)
+DEBUG = config('DEBUG', default=True, cast=bool)
 
 
-ALLOWED_HOSTS = ["*"]
-
+ALLOWED_HOSTS = [
+    'dev.techrecruitmentuk.com',
+    'www.dev.techrecruitmentuk.com', 
+    'localhost',
+    '127.0.0.1',
+    '199.192.16.138',
+]
 
 
 # Application definition
@@ -57,6 +62,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -84,6 +90,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'accounts.context_processors.user_roles',
+                'accounts.context_processors.notification_count',
             ],
         },
     },
@@ -132,17 +139,35 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 
-# Sessions & cookies security
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
-# SESSION_COOKIE_HTTPONLY = True
-# CSRF_COOKIE_HTTPONLY = True
-# SECURE_BROWSER_XSS_FILTER = True
-# SECURE_CONTENT_TYPE_NOSNIFF = True
-# SECURE_HSTS_SECONDS = 3600 # increase in prod
-# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-# SECURE_HSTS_PRELOAD = True
-# SECURE_SSL_REDIRECT = True
+# CSRF Settings
+CSRF_TRUSTED_ORIGINS = [
+    'https://dev.techrecruitmentuk.com',
+    'http://dev.techrecruitmentuk.com',
+    'https://www.dev.techrecruitmentuk.com',
+    'http://www.dev.techrecruitmentuk.com',
+    "http://localhost:8000",
+    "http://127.0.0.1:8000"
+]
+
+# Cookie settings for production
+CSRF_COOKIE_SECURE = False  # Set to False if not using HTTPS yet
+CSRF_COOKIE_HTTPONLY = True
+CSRF_USE_SESSIONS = False  # Set to True if you want to use sessions instead of cookies
+
+SESSION_COOKIE_SECURE = False  # Set to False if not using HTTPS yet
+SESSION_COOKIE_HTTPONLY = True
+
+# For development (if you're still testing without HTTPS)
+# CSRF_COOKIE_SECURE = False
+# SESSION_COOKIE_SECURE = False
+
+# CSRF failure view (optional)
+CSRF_FAILURE_VIEW = 'django.views.csrf.csrf_failure'
+
+# If you're behind a proxy, make sure these are set
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
 
 
 # Sessions
@@ -208,6 +233,17 @@ STATICFILES_DIRS = [
 # Media files (user uploaded content)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# WhiteNoise configuration
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Optional: Cache static files forever
+WHITENOISE_MAX_AGE = 31536000  # 1 year in seconds
+
+# Optional: Use gzip/brotli compression
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_MANIFEST_STRICT = False
+WHITENOISE_ALLOW_ALL_ORIGINS = True
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

@@ -1,5 +1,6 @@
 {% extends "job/base.html" %}
-
+{% load static %}
+{% block title %} Dashboard {% endblock %}
 
 {% block content %}
 <style>
@@ -21,6 +22,11 @@
     color: #ffffff;
   }
   
+  .chart-container {
+    position: relative;
+    height: 350px;
+    width: 100%;
+  }
 </style>
 
 <div class="main-header">
@@ -35,7 +41,7 @@
   </div>
 </div>
 
-<!-- Stats Cards -->
+<!-- Stats Cards (Keep exactly as you have them) -->
 <div class="row">
   <div class="col-xl-4 col-md-6 mb-4">
     <div class="card border-0 stats-card">
@@ -102,59 +108,73 @@
   </div>
 </div>
 
+<!-- Chart Section - col-lg-6 as requested -->
 <div class="row">
-  <div class="col-lg-8">
-    <div class="card">
-      <div class="card-header bg-white">
-        <h5 class="card-title mb-0">Application Statistics</h5>
+  <div class="col-lg-7">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 py-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="card-title mb-1 fw-bold text-dark">Most Applied Jobs</h5>
+            <p class="text-muted mb-0">Top job positions by application volume</p>
+          </div>
+          <span class="badge bg-primary bg-opacity-10 text-primary fs-6">
+            <i class="bi bi-trophy me-1"></i>Top {{ top_job_titles|length }}
+          </span>
+        </div>
       </div>
       <div class="card-body">
-        <div class="chart-container">
-          <canvas id="myChart" width="900" height="380"></canvas>
-        </div>
+        {% if top_job_titles.0 != 'No applications yet' %}
+          <div class="chart-container">
+            <canvas id="topJobsChart"></canvas>
+          </div>
+        {% else %}
+          <div class="text-center py-5">
+            <div class="mb-3">
+              <i class="bi bi-bar-chart-line fs-1 text-muted opacity-50"></i>
+            </div>
+            <h5 class="text-muted">No applications data yet</h5>
+            <p class="text-muted">Application statistics will appear here once candidates start applying.</p>
+          </div>
+        {% endif %}
       </div>
     </div>
   </div>
-  <div class="col-lg-4">
-    <div class="card">
-      <div class="card-header bg-white">
-        <h5 class="card-title mb-0">Recent Activity</h5>
+
+  <div class="col-lg-5">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0">
+        <h5 class="card-title mb-0 fw-bold text-dark">Recent Activity</h5>
       </div>
       <div class="card-body">
-        <div class="d-flex mb-4">
-          <div class="flex-shrink-0">
-            <img src="https://ui-avatars.com/api/?name=Sarah+Johnson&background=4cc9f0&color=fff" alt="" class="user-avatar" style="width: 40px; height: 40px;">
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-marker bg-primary"></div>
+            <div class="timeline-content">
+              <h6 class="mb-1">Sarah Johnson applied for Frontend Developer</h6>
+              <p class="text-muted mb-0 small">2 hours ago</p>
+            </div>
           </div>
-          <div class="flex-grow-1 ms-3">
-            <h6 class="mb-1">Sarah Johnson applied for Frontend Developer</h6>
-            <p class="text-muted mb-0">2 hours ago</p>
+          <div class="timeline-item">
+            <div class="timeline-marker bg-success"></div>
+            <div class="timeline-content">
+              <h6 class="mb-1">Michael Chen scheduled an interview</h6>
+              <p class="text-muted mb-0 small">5 hours ago</p>
+            </div>
           </div>
-        </div>
-        <div class="d-flex mb-4">
-          <div class="flex-shrink-0">
-            <img src="https://ui-avatars.com/api/?name=Michael+Chen&background=3f37c9&color=fff" alt="" class="user-avatar" style="width: 40px; height: 40px;">
+          <div class="timeline-item">
+            <div class="timeline-marker bg-info"></div>
+            <div class="timeline-content">
+              <h6 class="mb-1">Emma Wilson was hired as UX Designer</h6>
+              <p class="text-muted mb-0 small">Yesterday</p>
+            </div>
           </div>
-          <div class="flex-grow-1 ms-3">
-            <h6 class="mb-1">Michael Chen scheduled an interview</h6>
-            <p class="text-muted mb-0">5 hours ago</p>
-          </div>
-        </div>
-        <div class="d-flex mb-4">
-          <div class="flex-shrink-0">
-            <img src="https://ui-avatars.com/api/?name=Emma+Wilson&background=4361ee&color=fff" alt="" class="user-avatar" style="width: 40px; height: 40px;">
-          </div>
-          <div class="flex-grow-1 ms-3">
-            <h6 class="mb-1">Emma Wilson was hired as UX Designer</h6>
-            <p class="text-muted mb-0">Yesterday</p>
-          </div>
-        </div>
-        <div class="d-flex">
-          <div class="flex-shrink-0">
-            <img src="https://ui-avatars.com/api/?name=David+Brown&background=4cc9f0&color=fff" alt="" class="user-avatar" style="width: 40px; height: 40px;">
-          </div>
-          <div class="flex-grow-1 ms-3">
-            <h6 class="mb-1">David Brown posted a new job</h6>
-            <p class="text-muted mb-0">2 days ago</p>
+          <div class="timeline-item">
+            <div class="timeline-marker bg-warning"></div>
+            <div class="timeline-content">
+              <h6 class="mb-1">David Brown posted a new job</h6>
+              <p class="text-muted mb-0 small">2 days ago</p>
+            </div>
           </div>
         </div>
       </div>
@@ -162,55 +182,176 @@
   </div>
 </div>
 
-<div class="card mt-4">
-  <div class="card-header bg-white">
-    <h5 class="card-title mb-0">Recent Applicants</h5>
-  </div>
-  <div class="card-body">
-    <div class="table-responsive">
-      <table class="table table-hover">
-        <thead>
-          <tr>
-            <th scope="col">Serial</th>
-            <th scope="col">Name</th>
-            <th scope="col">Position</th>
-            <th scope="col">Status</th>
-            <th scope="col">Applied On</th>
-            <th scope="col">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for applicants in recent_applications %}
-          <tr>
-            <td>{{ forloop.counter }}.</td>
-            <td>
-              <div class="d-flex align-items-center">
-                {{ applicants.applicant_name}}
-              </div>
-            </td>
-            <td>{{applicants.job.title }}</td>
-            <td>
-              <span class="badge 
-                  {% if applicants.status == 'pending' %} bg-warning
-                  {% elif applicants.status == 'reviewed' %} bg-info
-                  {% elif applicants.status == 'accepted' %} bg-success
-                  {% else %} bg-danger
-                  {% endif %}">
-                  {{ applicants.status|title }}
-              </span>
-            </td>
-            <td>{{ applicants.applied_at|date:"M d, Y H:i" }}</td>
-            <td>
-              <a href="{% url 'applicant_detail' applicants.id %}" class="btn btn-sm applicant-btn">
-                  <i class="bi bi-person-lines-fill me-1"></i> View Profile
-              </a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+
+<div class="row mt-4">
+  <div class="col-lg-12">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0">
+        <h5 class="card-title mb-0 fw-bold text-dark">Recent Applicants</h5>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="bg-light">
+              <tr>
+                <th scope="col" class="border-0 ps-4">Name</th>
+                <th scope="col" class="border-0">Position</th>
+                <th scope="col" class="border-0">Status</th>
+                <th scope="col" class="border-0 pe-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for applicant in recent_applications %}
+              <tr>
+                <td class="ps-4">
+                  <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                      <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                        <span class="text-primary small fw-bold">{{ applicant.applicant_name|first|upper }}</span>
+                      </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                      <span class="fw-medium text-dark">{{ applicant.applicant_name }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="text-dark">{{ applicant.job.title|truncatewords:3 }}</span>
+                </td>
+                <td>
+                  <span class="badge 
+                      {% if applicant.status == 'pending' %} bg-warning
+                      {% elif applicant.status == 'reviewed' %} bg-info
+                      {% elif applicant.status == 'shortlisted' %} bg-primary
+                      {% elif applicant.status == 'interview' %} bg-purple
+                      {% elif applicant.status == 'accepted' %} bg-success
+                      {% else %} bg-danger
+                      {% endif %}">
+                      {{ applicant.status|title }}
+                  </span>
+                </td>
+                <td class="pe-4">
+                  <a href="{% url 'applicant_detail' applicant.id %}" class="btn btn-sm applicant-btn">
+                    <i class="bi bi-eye me-1"></i> View
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 {% endblock content %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      const topJobsCtx = document.getElementById('topJobsChart');
+      if (topJobsCtx) {
+          // Create gradient using your primary color
+          const gradient = topJobsCtx.getContext('2d').createLinearGradient(0, 0, 0, 400);
+          gradient.addColorStop(0, 'rgba(37, 125, 212, 0.8)');
+          gradient.addColorStop(1, 'rgba(37, 125, 212, 0.2)');
+
+          const topJobsChart = new Chart(topJobsCtx, {
+              type: 'polarArea',
+              data: {
+                  labels: {{ top_job_titles|safe }},
+                  datasets: [{
+                      label: 'Applications',
+                      data: {{ top_job_applications|safe }},
+                      backgroundColor: gradient,
+                      borderColor: 'rgba(37, 125, 212, 1)',
+                      borderWidth: 2,
+                      borderRadius: 8,
+                      borderSkipped: false,
+                      barPercentage: 0.6,
+                      categoryPercentage: 0.7,
+                  }]
+              },
+              options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  layout: {
+                      padding: {
+                          top: 10,
+                          right: 15,
+                          bottom: 10,
+                          left: 10
+                      }
+                  },
+                  plugins: {
+                      legend: {
+                          display: false
+                      },
+                      tooltip: {
+                          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                          titleColor: '#2c3e50',
+                          bodyColor: '#2c3e50',
+                          borderColor: 'rgba(37, 125, 212, 0.2)',
+                          borderWidth: 1,
+                          cornerRadius: 6,
+                          displayColors: false,
+                          padding: 10,
+                          callbacks: {
+                              title: function(tooltipItems) {
+                                  return tooltipItems[0].label;
+                              },
+                          }
+                      }
+                  },
+                  animation: {
+                      duration: 1000,
+                      easing: 'easeOutQuart'
+                  }
+              }
+          });
+      }
+  });
+</script>
+
+<style>
+  .timeline {
+      position: relative;
+      padding-left: 20px;
+  }
+
+  .timeline-item {
+      position: relative;
+      padding-bottom: 20px;
+  }
+
+  .timeline-item:last-child {
+      padding-bottom: 0;
+  }
+
+  .timeline-marker {
+      position: absolute;
+      left: -20px;
+      top: 5px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 0 0 2px var(--bs-primary);
+  }
+
+  .timeline-content {
+      padding-left: 10px;
+  }
+
+  .bg-purple {
+      background-color: #6f42c1 !important;
+  }
+
+  .card {
+      border: 1px solid rgba(0, 0, 0, 0.08);
+  }
+</style>
+{% endblock %}

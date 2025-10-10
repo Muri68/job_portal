@@ -2,25 +2,27 @@
 {% load static %}
 {% load humanize %}
 
+{% block title %}{{ job.title }} Details - {{ block.super }}{% endblock %}
+
 {% block content %}
 <div class="container-fluid py-4">
     <div class="row justify-content-center">
         <div class="col-lg-12">
             <!-- Header Section -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <header class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                 <div>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="{% url 'job_list' %}">Jobs</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'job_list' %}" class="text-primary text-decoration-none">Jobs</a></li>
                             <li class="breadcrumb-item active" aria-current="page">{{ job.title }}</li>
                         </ol>
                     </nav>
                     <h1 class="h2 mb-0 text-dark fw-bold">{{ job.title }}</h1>
-                    <div class="d-flex align-items-center mt-2">
-                        <span class="badge bg-{% if job.status == 'publish' %}success{% elif job.status == 'draft' %}warning{% else %}secondary{% endif %} me-2">
+                    <div class="d-flex align-items-center mt-2 flex-wrap gap-2">
+                        <span class="badge {% if job.status == 'publish' %}bg-success{% elif job.status == 'draft' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
                             {{ job.get_status_display }}
                         </span>
-                        <span class="text-muted small">
+                        <span class="text-secondary small">
                             <i class="bi bi-clock me-1"></i>
                             {% if job.is_new_job %}
                                 Created {{ job.created_at|timesince }} ago
@@ -30,57 +32,76 @@
                         </span>
                     </div>
                 </div>
-                <div>
-                    <a href="{% url 'job_manage_edit' job.id %}" class="btn btn-primary me-2">
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{% url 'job_manage_edit' job.id %}" class="btn btn-primary">
                         <i class="bi bi-pencil me-2"></i>Edit Job
                     </a>
                     <a href="{% url 'job_list' %}" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-left me-2"></i>Back to List
                     </a>
                 </div>
-            </div>
+            </header>
 
             <!-- Job Details Card -->
-            <div class="card shadow-sm border-0 mb-4">
+            <div class="card shadow-sm border-0">
                 <div class="card-body p-4">
                     <div class="row">
-                        <div class="col-md-8">
-                            <!-- Basic Info -->
-                            <div class="mb-4">
-                                <h5 class="text-dark mb-3">Basic Information</h5>
+                        <!-- Main Content -->
+                        <div class="col-lg-8">
+                            <!-- Basic Information -->
+                            <section class="mb-5" aria-labelledby="basic-info-heading">
+                                <h2 id="basic-info-heading" class="h5 mb-4 text-dark d-flex align-items-center">
+                                    <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                        <i class="bi bi-info-lg"></i>
+                                    </span>
+                                    Basic Information
+                                </h2>
                                 <div class="row">
                                     <div class="col-sm-6 mb-3">
-                                        <div class="text-muted small">Category</div>
-                                        <div class="fw-medium">{{ job.category.name }}</div>
+                                        <div class="text-secondary small mb-1">Category</div>
+                                        <div class="fw-medium text-dark">{{ job.category.name }}</div>
                                     </div>
                                     <div class="col-sm-6 mb-3">
-                                        <div class="text-muted small">Job Type</div>
-                                        <div class="fw-medium">{{ job.get_job_type_display }}</div>
+                                        <div class="text-secondary small mb-1">Job Type</div>
+                                        <div class="fw-medium text-dark">{{ job.get_job_type_display }}</div>
                                     </div>
                                     <div class="col-sm-6 mb-3">
-                                        <div class="text-muted small">Workplace Type</div>
-                                        <div class="fw-medium">{{ job.get_workplace_type_display }}</div>
+                                        <div class="text-secondary small mb-1">Workplace Type</div>
+                                        <div class="fw-medium text-dark">{{ job.get_workplace_type_display }}</div>
                                     </div>
                                     <div class="col-sm-6 mb-3">
-                                        <div class="text-muted small">Location</div>
-                                        <div class="fw-medium">{{ job.location }}</div>
+                                        <div class="text-secondary small mb-1">Location</div>
+                                        <div class="fw-medium text-dark">{{ job.location }}</div>
                                     </div>
                                 </div>
-                            </div>
+                            </section>
 
-                            <!-- Salary & Deadline -->
-                            <div class="mb-4">
-                                <h5 class="text-dark mb-3">Compensation & Timeline</h5>
+                            <!-- Compensation & Timeline -->
+                            <section class="mb-5" aria-labelledby="compensation-heading">
+                                <h2 id="compensation-heading" class="h5 mb-4 text-dark d-flex align-items-center">
+                                    <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                        <i class="bi bi-currency-dollar"></i>
+                                    </span>
+                                    Compensation & Timeline
+                                </h2>
                                 <div class="row">
                                     {% if job.salary_start %}
                                     <div class="col-sm-6 mb-3">
-                                        <div class="text-muted small">Salary</div>
-                                        <div class="fw-medium text-success"><i class="bi bi-currency-pound"></i> {{ job.salary_start }} / year</div>
+                                        <div class="text-secondary small mb-1">Salary Range</div>
+                                        <div class="fw-medium text-primary">
+                                            <i class="bi bi-currency-pound me-1"></i>
+                                            {{ job.salary_start|intcomma }}
+                                            {% if job.salary_end %}
+                                            - {{ job.salary_end|intcomma }}
+                                            {% endif %}
+                                            / year
+                                        </div>
                                     </div>
                                     {% endif %}
                                     <div class="col-sm-6 mb-3">
-                                        <div class="text-muted small">Application Deadline</div>
-                                        <div class="fw-medium {% if job.is_expired %}text-danger{% endif %}">
+                                        <div class="text-secondary small mb-1">Application Deadline</div>
+                                        <div class="fw-medium {% if job.is_expired %}text-danger{% else %}text-dark{% endif %}">
+                                            <i class="bi bi-calendar-event me-1"></i>
                                             {{ job.application_deadline|date:"F j, Y" }}
                                             {% if job.is_expired %}
                                             <span class="badge bg-danger ms-2">Expired</span>
@@ -88,60 +109,65 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </section>
 
                             <!-- Job Description -->
-                            <div class="mb-4">
-                                <h5 class="text-dark mb-3">Job Description</h5>
-                                <div class="job-description-content">
+                            <section class="mb-4" aria-labelledby="description-heading">
+                                <h2 id="description-heading" class="h5 mb-4 text-dark d-flex align-items-center">
+                                    <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                        <i class="bi bi-file-text"></i>
+                                    </span>
+                                    Job Description
+                                </h2>
+                                <article class="job-description-content">
                                     {{ job.description|safe }}
-                                </div>
-                            </div>
+                                </article>
+                            </section>
                         </div>
 
                         <!-- Sidebar -->
-                        <div class="col-md-4">
-                            <div class="card bg-light border-0">
+                        <div class="col-lg-4">
+                            <div class="card border-0 shadow-sm">
                                 <div class="card-body">
-                                    <h6 class="text-dark mb-3">Job Summary</h6>
+                                    <h3 class="h6 text-dark mb-4">Job Summary</h3>
                                     
                                     <div class="d-flex align-items-center mb-3">
-                                        <div class="bg-primary rounded-circle p-2 me-3">
+                                        <div class="rounded-circle p-2 me-3" style="background-color: var(--primary);">
                                             <i class="bi bi-briefcase text-white"></i>
                                         </div>
                                         <div>
-                                            <div class="text-muted small">Status</div>
-                                            <div class="fw-medium">{{ job.get_status_display }}</div>
+                                            <div class="text-secondary small">Status</div>
+                                            <div class="fw-medium text-dark">{{ job.get_status_display }}</div>
                                         </div>
                                     </div>
                                     
                                     <div class="d-flex align-items-center mb-3">
-                                        <div class="bg-info rounded-circle p-2 me-3">
+                                        <div class="rounded-circle p-2 me-3" style="background-color: var(--primary);">
                                             <i class="bi bi-calendar text-white"></i>
                                         </div>
                                         <div>
-                                            <div class="text-muted small">Created</div>
-                                            <div class="fw-medium">{{ job.created_at|date:"M j, Y" }}</div>
+                                            <div class="text-secondary small">Created Date</div>
+                                            <div class="fw-medium text-dark">{{ job.created_at|date:"M j, Y" }}</div>
                                         </div>
                                     </div>
                                     
                                     <div class="d-flex align-items-center mb-3">
-                                        <div class="bg-warning rounded-circle p-2 me-3">
+                                        <div class="rounded-circle p-2 me-3" style="background-color: var(--primary);">
                                             <i class="bi bi-arrow-repeat text-white"></i>
                                         </div>
                                         <div>
-                                            <div class="text-muted small">Last Updated</div>
-                                            <div class="fw-medium">{{ job.updated_at|date:"M j, Y" }}</div>
+                                            <div class="text-secondary small">Last Updated</div>
+                                            <div class="fw-medium text-dark">{{ job.updated_at|date:"M j, Y" }}</div>
                                         </div>
                                     </div>
                                     
                                     <div class="d-flex align-items-center mb-3">
-                                        <div class="bg-danger rounded-circle p-2 me-3">
+                                        <div class="rounded-circle p-2 me-3" style="background-color: var(--primary);">
                                             <i class="bi bi-clock text-white"></i>
                                         </div>
                                         <div>
-                                            <div class="text-muted small">Days Remaining</div>
-                                            <div class="fw-medium">
+                                            <div class="text-secondary small">Days Remaining</div>
+                                            <div class="fw-medium {% if job.is_expired %}text-danger{% else %}text-dark{% endif %}">
                                                 {% if job.is_expired %}
                                                 0 (Expired)
                                                 {% else %}
@@ -151,7 +177,7 @@
                                         </div>
                                     </div>
                                     
-                                    <hr>
+                                    <hr class="my-4">
                                     
                                     <div class="d-grid gap-2">
                                         <a href="{% url 'job_manage_edit' job.id %}" class="btn btn-primary">
@@ -170,10 +196,92 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_css %}
 <style>
+:root {
+    --primary: #257dd4;
+    --primary-light: #257cd491;
+    --primary-dark: #257dd4;
+    --secondary: #546E7A;
+    --accent: #FF9800;
+    --light: #E3F2FD;
+    --dark: #257dd4;
+    --gradient-start: #257dd4;
+    --gradient-end: #257dd4;
+    --sidebar-width: 280px;
+}
+
+/* Button styles using your theme */
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.btn-outline-primary {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.btn-outline-secondary {
+    color: var(--secondary);
+    border-color: var(--secondary);
+}
+
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus {
+    background-color: var(--secondary);
+    border-color: var(--secondary);
+    color: white;
+}
+
+/* Text colors */
+.text-primary {
+    color: var(--primary) !important;
+}
+
+.text-secondary {
+    color: var(--secondary) !important;
+}
+
+.text-muted {
+    color: var(--secondary) !important;
+    opacity: 0.8;
+}
+
+/* Background colors */
+.bg-primary {
+    background-color: var(--primary) !important;
+}
+
+.bg-light {
+    background-color: var(--light) !important;
+}
+
+/* Card styles */
+.card {
+    border-radius: 0.75rem;
+    border: none;
+}
+
+/* Job description content styling */
 .job-description-content {
-    line-height: 1.6;
+    line-height: 1.7;
+    color: var(--secondary);
 }
 
 .job-description-content h1, 
@@ -184,69 +292,97 @@
 .job-description-content h6 {
     margin-top: 1.5rem;
     margin-bottom: 1rem;
-    color: #2c3e50;
+    color: var(--dark);
+    font-weight: 600;
 }
 
+.job-description-content h1 { font-size: 1.5rem; }
+.job-description-content h2 { font-size: 1.35rem; }
+.job-description-content h3 { font-size: 1.25rem; }
+.job-description-content h4 { font-size: 1.15rem; }
+.job-description-content h5 { font-size: 1.1rem; }
+.job-description-content h6 { font-size: 1.05rem; }
+
 .job-description-content p {
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
 }
 
 .job-description-content ul, 
 .job-description-content ol {
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
     padding-left: 1.5rem;
 }
 
-.timeline {
-    position: relative;
-    padding-left: 3rem;
+.job-description-content li {
+    margin-bottom: 0.5rem;
 }
 
-.timeline-item {
-    position: relative;
-    margin-bottom: 2rem;
+.job-description-content strong {
+    color: var(--dark);
+    font-weight: 600;
 }
 
-.timeline-badge {
-    position: absolute;
-    left: -3rem;
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
+.job-description-content blockquote {
+    border-left: 4px solid var(--primary-light);
+    padding-left: 1rem;
+    margin-left: 0;
+    font-style: italic;
+    color: var(--secondary);
 }
 
-.timeline-content {
-    padding: 1rem;
-    background: #f8f9fa;
-    border-radius: 0.5rem;
-}
-
-.timeline-item:not(:last-child):after {
-    content: '';
-    position: absolute;
-    left: -1.75rem;
-    top: 2.5rem;
-    bottom: -2rem;
-    width: 2px;
-    background-color: #e9ecef;
-}
-
-.card {
-    border-radius: 0.75rem;
-}
-
+/* Breadcrumb styling */
 .breadcrumb {
     background: transparent;
     padding: 0;
     margin-bottom: 0.5rem;
 }
 
-.bg-light {
-    background-color: #f8f9fa !important;
+.breadcrumb-item a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+.breadcrumb-item.active {
+    color: var(--secondary);
+}
+
+/* Badge styling */
+.badge.bg-primary {
+    background-color: var(--primary) !important;
+}
+
+/* Section header icons */
+.rounded-circle.bg-primary {
+    background-color: var(--primary) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1.5rem !important;
+    }
+    
+    .d-flex.flex-wrap {
+        gap: 0.5rem !important;
+    }
+    
+    .btn {
+        padding: 0.5rem 1rem;
+    }
+}
+
+/* Hover effects */
+.card.shadow-sm {
+    transition: box-shadow 0.2s ease;
+}
+
+.card.shadow-sm:hover {
+    box-shadow: 0 4px 12px rgba(37, 125, 212, 0.15) !important;
 }
 </style>
 {% endblock %}

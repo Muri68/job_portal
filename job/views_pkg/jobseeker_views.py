@@ -372,36 +372,36 @@ def unsave_job(request, job_id):
         })
 
 
+from django.contrib import messages
+from django.shortcuts import redirect, get_object_or_404
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_protect
+from django.contrib.auth.decorators import login_required
+
 @require_http_methods(["POST"])
 @csrf_protect
 @login_required
 @job_seeker_required
 def toggle_save_job(request, job_id):
-    """Toggle save/unsave job (single endpoint for both actions)"""
-    job = get_object_or_404(Job, id=job_id, status='publish')
-    
-    # Check if job is already saved
-    saved_job = SavedJob.objects.filter(job_seeker=request.user, job=job).first()
-    
-    if saved_job:
-        # Unsave the job
-        saved_job.delete()
-        return JsonResponse({
-            'success': True,
-            'message': 'Job removed from saved list.',
-            'action': 'unsaved',
-            'is_saved': False
-        })
-    else:
-        # Save the job
-        saved_job = SavedJob.objects.create(job_seeker=request.user, job=job)
-        return JsonResponse({
-            'success': True,
-            'message': 'Job saved successfully!',
-            'action': 'saved',
-            'is_saved': True,
-            'saved_job_id': saved_job.id
-        })
+    try:
+        job = get_object_or_404(Job, id=job_id, status='publish')
+        saved_job = SavedJob.objects.filter(job_seeker=request.user, job=job).first()
+
+        if saved_job:
+            saved_job.delete()
+            messages.success(request, 'Job removed from saved list.')
+        else:
+            saved_job = SavedJob.objects.create(job_seeker=request.user, job=job)
+            messages.success(request, 'Job saved successfully!')
+
+        # Redirect back to the job detail page where messages will be displayed
+        return redirect('job_detail_frontend', job_id=job_id)
+
+    except Exception as e:
+        print("Toggle save job error:", e)
+        messages.error(request, f'An error occurred: {str(e)}')
+        return redirect('job_detail_frontend', job_id=job_id)
+
 
 
 @login_required
@@ -637,3 +637,93 @@ def get_browser_info(user_agent):
         return 'Opera'
     else:
         return 'Unknown Browser'
+    
+    
+    
+# def job_seeker_notification(request):
+#     context = {
+#         'page_title': 'Notification',
+#     }
+#     return render(request, 'job_seeker_templates/notifications.html', context)
+
+from django.utils import timezone
+from datetime import timedelta
+
+@login_required
+@job_seeker_required
+def job_seeker_notification(request):
+    # Get user's applications with status changes
+    applications_with_changes = JobApplication.objects.filter(
+        applicant=request.user,
+        status_changed_at__isnull=False
+    ).select_related('job').order_by('-status_changed_at')
+    
+    # Mark all as read when user visits the notifications page
+    if applications_with_changes.filter(status_change_read=False).exists():
+        applications_with_changes.filter(status_change_read=False).update(status_change_read=True)
+    
+    # Group notifications by time
+    today = timezone.now().date()
+    yesterday = today - timedelta(days=1)
+    this_week_start = today - timedelta(days=today.weekday())
+    
+    today_notifications = applications_with_changes.filter(status_changed_at__date=today)
+    yesterday_notifications = applications_with_changes.filter(status_changed_at__date=yesterday)
+    this_week_notifications = applications_with_changes.filter(
+        status_changed_at__date__range=[this_week_start, today - timedelta(days=2)]
+    )
+    
+    # Count unread notifications (before marking them as read)
+    unread_count = applications_with_changes.filter(status_change_read=False).count()
+    
+    context = {
+        'today_notifications': today_notifications,
+        'yesterday_notifications': yesterday_notifications,
+        'this_week_notifications': this_week_notifications,
+        'unread_count': unread_count,
+        'page_title': 'Notifications',
+    }
+    
+    return render(request, 'job_seeker_templates/notifications.html', context)
+
+@login_required
+@job_seeker_required
+def mark_all_notifications_read(request):
+    if request.method == 'POST':
+        JobApplication.objects.filter(
+            applicant=request.user,
+            status_change_read=False
+        ).update(status_change_read=True)
+        messages.success(request, 'All notifications marked as read!')
+    
+    return redirect('job_seeker_notification')
+
+@login_required
+@job_seeker_required
+def mark_single_notification_read(request, application_id):
+    if request.method == 'POST':
+        try:
+            application = JobApplication.objects.get(
+                id=application_id,
+                applicant=request.user
+            )
+            application.status_change_read = True
+            application.save()
+            return JsonResponse({'success': True})
+        except JobApplication.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Application not found'})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+@login_required
+@job_seeker_required
+def get_unread_notification_count(request):
+    """API endpoint to get unread notification count for AJAX updates"""
+    if request.user.is_authenticated:
+        unread_count = JobApplication.objects.filter(
+            applicant=request.user,
+            status_change_read=False,
+            status_changed_at__isnull=False
+        ).count()
+        return JsonResponse({'unread_count': unread_count})
+    return JsonResponse({'unread_count': 0})

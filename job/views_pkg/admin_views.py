@@ -41,6 +41,7 @@ def send_email_in_background(email):
 
 
 # Dashboard View
+# Dashboard View
 @login_required
 @admin_required
 def admin_dashboard(request):
@@ -59,6 +60,29 @@ def admin_dashboard(request):
     recent_jobs = Job.objects.order_by('-created_at')[:5]
     recent_applications = JobApplication.objects.select_related('job').order_by('-applied_at')[:5]
 
+    # Top 5 most applied jobs
+    from django.db.models import Count
+    top_jobs = Job.objects.annotate(
+        application_count=Count('applications')
+    ).order_by('-application_count')[:5]
+
+    # Prepare chart data - handle empty data case
+    top_job_titles = []
+    top_job_applications = []
+    
+    for job in top_jobs:
+        # Truncate long job titles for better display
+        title = job.title
+        if len(title) > 30:
+            title = title[:27] + '...'
+        top_job_titles.append(title)
+        top_job_applications.append(job.application_count)
+
+    # If no applications yet, show placeholder data
+    if not top_job_applications:
+        top_job_titles = ['No applications yet']
+        top_job_applications = [0]
+
     context = {
         'page_title': page_title,
         'total_jobs': total_jobs,
@@ -66,6 +90,8 @@ def admin_dashboard(request):
         'total_applications': total_applications,
         'recent_jobs': recent_jobs,
         'recent_applications': recent_applications,
+        'top_job_titles': top_job_titles,
+        'top_job_applications': top_job_applications,
     }
     return render(request, 'job/dashboard.html', context)
 
@@ -577,3 +603,316 @@ def compose_email(request, application_id):
     }
     
     return render(request, 'job/compose_email.html', context)
+
+
+
+
+from django.views.generic import DetailView, ListView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils.decorators import method_decorator
+from django.contrib import messages
+from django.shortcuts import render
+from job.models import AboutUs, OurValue, TeamMember, CompanyStat
+from job.forms import AboutUsForm, OurValueForm, TeamMemberForm, CompanyStatForm
+
+
+# AboutUs Management Views
+@method_decorator([login_required, admin_required], name='dispatch')
+class AboutUsManageView(UpdateView):
+    model = AboutUs
+    form_class = AboutUsForm
+    template_name = 'job/about/about_us_manage.html'
+    success_url = reverse_lazy('about_manage')
+
+    def get_object(self):
+        about, created = AboutUs.objects.get_or_create(
+            is_active=True,
+            defaults={
+                'title': 'About Our Company',
+                'description': 'Tell your company story here...',
+                'mission': 'Our mission statement...',
+                'vision': 'Our vision statement...'
+            }
+        )
+        return about
+
+    def form_valid(self, form):
+        messages.success(self.request, 'About Us content updated successfully!')
+        return super().form_valid(form)
+
+# OurValue Management Views
+@method_decorator([login_required, admin_required], name='dispatch')
+class OurValueListView(ListView):
+    model = OurValue
+    template_name = 'job/about/our_values_list.html'
+    context_object_name = 'values'
+
+    def get_queryset(self):
+        return OurValue.objects.filter(is_active=True).order_by('order')
+
+@method_decorator([login_required, admin_required], name='dispatch')
+class OurValueCreateView(CreateView):
+    model = OurValue
+    form_class = OurValueForm
+    template_name = 'job/about/our_value_form.html'
+    success_url = reverse_lazy('our_values_list')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Value created successfully!')
+        return super().form_valid(form)
+
+@method_decorator([login_required, admin_required], name='dispatch')
+class OurValueUpdateView(UpdateView):
+    model = OurValue
+    form_class = OurValueForm
+    template_name = 'job/about/our_value_form.html'
+    success_url = reverse_lazy('our_values_list')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Value updated successfully!')
+        return super().form_valid(form)
+
+@method_decorator([login_required, admin_required], name='dispatch')
+class OurValueDeleteView(DeleteView):
+    model = OurValue
+    template_name = 'job/about/our_value_confirm_delete.html'
+    success_url = reverse_lazy('our_values_list')
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, 'Value deleted successfully!')
+        return super().delete(request, *args, **kwargs)
+
+# TeamMember Management Views
+@method_decorator([login_required, admin_required], name='dispatch')
+class TeamMemberListView(ListView):
+    model = TeamMember
+    template_name = 'job/about/team_members_list.html'
+    context_object_name = 'team_members'
+
+    def get_queryset(self):
+        return TeamMember.objects.filter(is_active=True).order_by('order')
+
+@method_decorator([login_required, admin_required], name='dispatch')
+class TeamMemberCreateView(CreateView):
+    model = TeamMember
+    form_class = TeamMemberForm
+    template_name = 'job/about/team_member_form.html'
+    success_url = reverse_lazy('team_members_list')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Team member created successfully!')
+        return super().form_valid(form)
+
+@method_decorator([login_required, admin_required], name='dispatch')
+class TeamMemberUpdateView(UpdateView):
+    model = TeamMember
+    form_class = TeamMemberForm
+    template_name = 'job/about/team_member_form.html'
+    success_url = reverse_lazy('team_members_list')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Team member updated successfully!')
+        return super().form_valid(form)
+
+@method_decorator([login_required, admin_required], name='dispatch')
+class TeamMemberDeleteView(DeleteView):
+    model = TeamMember
+    template_name = 'job/about/team_member_confirm_delete.html'
+    success_url = reverse_lazy('team_members_list')
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, 'Team member deleted successfully!')
+        return super().delete(request, *args, **kwargs)
+
+# CompanyStat Management Views
+@method_decorator([login_required, admin_required], name='dispatch')
+class CompanyStatListView(ListView):
+    model = CompanyStat
+    template_name = 'job/about/company_stats_list.html'
+    context_object_name = 'company_stats'
+
+    def get_queryset(self):
+        return CompanyStat.objects.filter(is_active=True).order_by('order')
+
+@method_decorator([login_required, admin_required], name='dispatch')
+class CompanyStatCreateView(CreateView):
+    model = CompanyStat
+    form_class = CompanyStatForm
+    template_name = 'job/about/company_stat_form.html'
+    success_url = reverse_lazy('company_stats_list')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Company stat created successfully!')
+        return super().form_valid(form)
+
+@method_decorator([login_required, admin_required], name='dispatch')
+class CompanyStatUpdateView(UpdateView):
+    model = CompanyStat
+    form_class = CompanyStatForm
+    template_name = 'job/about/company_stat_form.html'
+    success_url = reverse_lazy('company_stats_list')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Company stat updated successfully!')
+        return super().form_valid(form)
+
+@method_decorator([login_required, admin_required], name='dispatch')
+class CompanyStatDeleteView(DeleteView):
+    model = CompanyStat
+    template_name = 'job/about/company_stat_confirm_delete.html'
+    success_url = reverse_lazy('company_stats_list')
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, 'Company stat deleted successfully!')
+        return super().delete(request, *args, **kwargs)
+    
+    
+    
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, TemplateView
+from django.urls import reverse_lazy
+from django.contrib import messages
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404
+from job.models import ContactMessage, ContactInfo, FAQ, SiteSetting
+from job.forms import ContactMessageForm, ContactInfoForm, FAQForm, SiteSettingForm
+
+
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
+# Management Views
+@method_decorator([login_required, admin_required], name='dispatch')
+class ContactMessageListView(ListView):
+    model = ContactMessage
+    template_name = 'job/contact/contact_messages_list.html'
+    context_object_name = 'messages'
+    paginate_by = 20
+
+    def get_queryset(self):
+        return ContactMessage.objects.all().order_by('-created_at')
+
+@method_decorator([login_required, admin_required], name='dispatch')
+class ContactMessageDetailView(UpdateView):
+    model = ContactMessage
+    form_class = ContactMessageForm
+    template_name = 'job/contact/contact_message_detail.html'
+    success_url = reverse_lazy('contact_messages_list')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Message status updated successfully!')
+        return super().form_valid(form)
+
+@method_decorator([login_required, admin_required], name='dispatch')
+class ContactMessageDeleteView(DeleteView):
+    model = ContactMessage
+    template_name = 'job/contact/contact_message_confirm_delete.html'
+    success_url = reverse_lazy('contact_messages_list')
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, 'Message deleted successfully!')
+        return super().delete(request, *args, **kwargs)
+
+@method_decorator([login_required, admin_required], name='dispatch')
+class ContactInfoListView(ListView):
+    model = ContactInfo
+    template_name = 'job/contact/contact_info_list.html'
+    context_object_name = 'contact_info'
+
+    def get_queryset(self):
+        return ContactInfo.objects.all().order_by('order')
+
+@method_decorator([login_required, admin_required], name='dispatch')
+class ContactInfoCreateView(CreateView):
+    model = ContactInfo
+    form_class = ContactInfoForm
+    template_name = 'job/contact/contact_info_form.html'
+    success_url = reverse_lazy('contact_info_list')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Contact information added successfully!')
+        return super().form_valid(form)
+
+@method_decorator([login_required, admin_required], name='dispatch')
+class ContactInfoUpdateView(UpdateView):
+    model = ContactInfo
+    form_class = ContactInfoForm
+    template_name = 'job/contact/contact_info_form.html'
+    success_url = reverse_lazy('contact_info_list')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Contact information updated successfully!')
+        return super().form_valid(form)
+
+@method_decorator([login_required, admin_required], name='dispatch')
+class ContactInfoDeleteView(DeleteView):
+    model = ContactInfo
+    template_name = 'job/contact/contact_info_confirm_delete.html'
+    success_url = reverse_lazy('contact_info_list')
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, 'Contact information deleted successfully!')
+        return super().delete(request, *args, **kwargs)
+
+@method_decorator([login_required, admin_required], name='dispatch')
+class FAQListView(ListView):
+    model = FAQ
+    template_name = 'job/about/faq_list.html'
+    context_object_name = 'faqs'
+
+    def get_queryset(self):
+        return FAQ.objects.all().order_by('order')
+
+@method_decorator([login_required, admin_required], name='dispatch')
+class FAQCreateView(CreateView):
+    model = FAQ
+    form_class = FAQForm
+    template_name = 'job/about/faq_form.html'
+    success_url = reverse_lazy('faq_list')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'FAQ added successfully!')
+        return super().form_valid(form)
+
+@method_decorator([login_required, admin_required], name='dispatch')
+class FAQUpdateView(UpdateView):
+    model = FAQ
+    form_class = FAQForm
+    template_name = 'job/about/faq_form.html'
+    success_url = reverse_lazy('faq_list')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'FAQ updated successfully!')
+        return super().form_valid(form)
+
+@method_decorator([login_required, admin_required], name='dispatch')
+class FAQDeleteView(DeleteView):
+    model = FAQ
+    template_name = 'job/about/faq_confirm_delete.html'
+    success_url = reverse_lazy('faq_list')
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, 'FAQ deleted successfully!')
+        return super().delete(request, *args, **kwargs)
+
+@method_decorator([login_required, admin_required], name='dispatch')
+class SiteSettingUpdateView(UpdateView):
+    model = SiteSetting
+    form_class = SiteSettingForm
+    template_name = 'job/site_setting_form.html'
+    success_url = reverse_lazy('contact_settings')
+
+    def get_object(self):
+        setting, created = SiteSetting.objects.get_or_create()
+        return setting
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Site settings updated successfully!')
+        return super().form_valid(form)

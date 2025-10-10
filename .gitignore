@@ -284,6 +284,7 @@ Thumbs.db
 *.db
 *.sqlite
 *.sqlite3
+sqlite3
 
 # Media files (user uploads)
 media/

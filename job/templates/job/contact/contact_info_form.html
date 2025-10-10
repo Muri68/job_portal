@@ -1,0 +1,118 @@
+{% extends "job/base.html" %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Edit{% else %}Add{% endif %} Contact Info - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <!-- Header Section -->
+            <header class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-2 text-dark fw-bold">
+                        <i class="bi bi-telephone me-2"></i>
+                        {% if form.instance.pk %}Edit{% else %}Add{% endif %} Contact Information
+                    </h1>
+                    <p class="text-secondary mb-0">
+                        {% if form.instance.pk %}Update{% else %}Create new{% endif %} contact information entry
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'contact_info_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Back to List
+                    </a>
+                </div>
+            </header>
+
+            <!-- Form Card -->
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.contact_type.id_for_label }}" class="form-label required-field">
+                                    Contact Type
+                                </label>
+                                {{ form.contact_type }}
+                                {% if form.contact_type.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.contact_type.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.order.id_for_label }}" class="form-label">Display Order</label>
+                                {{ form.order }}
+                                {% if form.order.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.order.errors }}
+                                </div>
+                                {% endif %}
+                                <div class="form-text">Lower numbers appear first</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.title.id_for_label }}" class="form-label required-field">Title</label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.title.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">e.g., "Main Office", "Support Line", "Sales Department"</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.value.id_for_label }}" class="form-label required-field">Information</label>
+                            {{ form.value }}
+                            {% if form.value.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.value.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Enter the contact details (address, phone number, email, etc.)</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.icon.id_for_label }}" class="form-label">Icon Class</label>
+                            {{ form.icon }}
+                            {% if form.icon.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.icon.errors }}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Bootstrap Icons class name (e.g., bi-telephone, bi-envelope)</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                    Active
+                                </label>
+                            </div>
+                            <div class="form-text">Show this contact information on the website</div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between align-items-center border-top pt-4">
+                            <a href="{% url 'contact_info_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-2"></i>
+                                {% if form.instance.pk %}Update{% else %}Create{% endif %} Contact Info
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

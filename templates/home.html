@@ -2,6 +2,8 @@
 {% load static %}
 {% load humanize %}
 
+{% block title %} Index {% endblock %}
+
 {% block extra_css %}
 
     <style>    
@@ -450,6 +452,17 @@
             text-decoration: none;
             color: inherit;
         }
+
+        .job-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            color: var(--secondary);
+        }
+
+        .job-title:hover {
+            color: var(--primary);
+        }
     </style>
 
 {% endblock %}
@@ -506,9 +519,6 @@
                     <div class="col-md-8">
                         <div class="category-card">
                             <div class="d-flex align-items-center">
-                                <div class="category-icon me-4">
-                                    <i class="fas fa-robot fa-3x"></i>
-                                </div>
                                 <div>
                                     {% with category=categories.0 %}
                                     <h3>{{ category.name }}</h3>
@@ -598,8 +608,8 @@
                         </div>
                         <div class="d-flex align-items-center mb-3">
                             <div>
-                                <h5 class="mb-1">{{ job.title }}</h5>
-                                <p class="mb-0 text-muted">{{ job.location }}</p>
+                                <h5 class="mb-3 job-title">{{ job.title }}</h5>
+                                <p class="mb-0 text-muted"><i class="fas fa-map-marker-alt" style="color: #257dd4"></i>  <strong>{{ job.location }}</strong></p>
                             </div>
                         </div>
                         

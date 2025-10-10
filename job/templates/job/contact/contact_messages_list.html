@@ -1,0 +1,224 @@
+{% extends "job/base.html" %}
+{% load static %}
+
+{% block title %}Contact Messages - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary: #257dd4;
+        --primary-light: #257cd491;
+        --primary-dark: #257dd4;
+        --secondary: #546E7A;
+        --accent: #FF9800;
+        --light: #E3F2FD;
+        --dark: #257dd4;
+        --gradient-start: #257dd4;
+        --gradient-end: #257dd4;
+        --sidebar-width: 280px;
+    }
+
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+    }
+
+    .status-new { background-color: #257dd4; color: white; }
+    .status-read { background-color: #6c757d; color: white; }
+    .status-replied { background-color: #28a745; color: white; }
+    .status-closed { background-color: #dc3545; color: white; }
+
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        color: var(--secondary);
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .message-preview {
+        max-width: 300px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .action-buttons .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-12">
+            <!-- Header Section -->
+            <header class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-2 text-dark fw-bold">
+                        <i class="bi bi-envelope me-2"></i>
+                        Contact Messages
+                    </h1>
+                    <p class="text-secondary mb-0">
+                        Manage and respond to messages from your contact form
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'admin-dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </header>
+
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-white" style="background: #257dd4">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="mb-0">{{ messages.count }}</h4>
+                                    <small>Total Messages</small>
+                                </div>
+                                <i class="bi bi-envelope fs-2 opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% comment %} <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="mb-0">{{ messages|length }}</h4>
+                                    <small>New Messages</small>
+                                </div>
+                                <i class="bi bi-envelope-plus fs-2 opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="mb-0">{{ messages|length }}</h4>
+                                    <small>Replied</small>
+                                </div>
+                                <i class="bi bi-envelope-check fs-2 opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-secondary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="mb-0">{{ messages|length }}</h4>
+                                    <small>Closed</small>
+                                </div>
+                                <i class="bi bi-envelope-x fs-2 opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div> {% endcomment %}
+            </div>
+
+            <!-- Messages Table -->
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">Name</th>
+                                    <th>Email</th>
+                                    <th>Subject</th>
+                                    <th>Message</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th class="text-end pe-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for message in messages %}
+                                <tr>
+                                    <td class="ps-4 fw-medium">{{ message.name }}</td>
+                                    <td> {{ message.email }} </td>
+                                    <td>{{ message.subject }}</td>
+                                    <td>
+                                        <span class="message-preview" title="{{ message.message }}">
+                                            {{ message.message|truncatewords:10 }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-{{ message.status }}">
+                                            {{ message.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ message.created_at|date:"M d, Y" }}
+                                        </small>
+                                    </td>
+                                    <td class="text-end pe-4 action-buttons">
+                                        <div class="btn-group">
+                                            <a href="{% url 'contact_message_detail' message.pk %}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{% url 'contact_message_delete' message.pk %}" 
+                                               class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-4 text-muted">
+                                        <i class="bi bi-inbox display-4 d-block mb-2"></i>
+                                        No contact messages yet
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <nav aria-label="Messages pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

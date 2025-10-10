@@ -2,6 +2,8 @@
 {% load static %}
 {% load humanize %}
 
+{% block title %} Job Listings {% endblock %}
+
 {% block extra_css %}
     <style>
         
@@ -185,7 +187,11 @@
             font-weight: 600;
             margin-bottom: 5px;
             font-size: 1.2rem;
-            color: var(--dark);
+            color: var(--secondary);
+        }
+        
+        .job-title:hover {
+            color: var(--primary);
         }
         
         .company-name {
@@ -497,7 +503,7 @@
                         <div class="job-actions">
                             <span class="job-posted"><i class="far fa-clock"></i> Posted {{ job.created_at|timesince }} ago</span>
                             <div>
-                                <a href="#" class="btn btn-outline-primary me-2"><i class="far fa-bookmark"></i> Save</a>
+                                {% comment %} <a href="#" class="btn btn-outline-primary me-2"><i class="far fa-bookmark"></i> Save</a> {% endcomment %}
                                 <a href="{% url 'job_detail_frontend' job.id %}" class="btn btn-primary">Apply Now</a>
                             </div>
                         </div>
@@ -574,7 +580,7 @@
                         <ul class="category-list">
                             {% for category in categories %}
                             <li>
-                                <a href="?category={{ category.name }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_location %}&location={{ selected_location }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">
+                                <a href="{% url 'jobs_by_category' category.slug %}">
                                     <i class="fas fa-briefcase me-2"></i> {{ category.name }}
                                 </a>
                                 <span class="category-count">{{ category.job_count }}</span>

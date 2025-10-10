@@ -2,108 +2,210 @@
 {% load static %}
 {% load humanize %}
 
-{% block title %} {{page_title}} {% endblock %}
+{% block title %}Job Management - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+    <style>
+        :root {
+            --primary: #257dd4;
+            --primary-light: #257cd491;
+            --primary-dark: #257dd4;
+            --secondary: #546E7A;
+            --accent: #FF9800;
+            --light: #E3F2FD;
+            --dark: #257dd4;
+            --gradient-start: #257dd4;
+            --gradient-end: #257dd4;
+            --sidebar-width: 280px;
+        }
+
+        /* Custom button styles using your theme */
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-outline-primary:hover,
+        .btn-outline-primary:focus {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        /* View toggle active states */
+        .btn-check:checked + .btn-outline-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .btn-check:checked + .btn-outline-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            color: white;
+        }
+
+        /* Card styles */
+        .job-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid rgba(37, 125, 212, 0.1);
+        }
+
+        .job-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 125, 212, 0.15) !important;
+            border-color: var(--primary-light);
+        }
+
+        /* Table styles */
+        .table th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            color: var(--secondary);
+            background-color: var(--light);
+        }
+
+        /* Badge styles */
+        .badge.bg-primary {
+            background-color: var(--primary) !important;
+        }
+
+        /* Text colors */
+        .text-primary {
+            color: var(--primary) !important;
+        }
+
+        .text-secondary {
+            color: var(--secondary) !important;
+        }
+
+        /* Background colors */
+        .bg-light {
+            background-color: var(--light) !important;
+        }
+
+        /* Pagination styles */
+        .page-link {
+            color: var(--primary);
+            border-color: rgba(37, 125, 212, 0.1);
+        }
+
+        .page-item.active .page-link {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .page-link:hover {
+            color: var(--primary-dark);
+            background-color: var(--light);
+            border-color: rgba(37, 125, 212, 0.2);
+        }
+
+        /* Form control focus states */
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 0.2rem rgba(37, 125, 212, 0.15);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .job-meta .d-md-inline {
+                display: none !important;
+            }
+            
+            .btn-group .d-sm-inline {
+                display: none !important;
+            }
+            
+            .table-responsive {
+                font-size: 0.875rem;
+            }
+        }
+
+        /* Ensure proper spacing for empty states */
+        .card .bi-briefcase {
+            opacity: 0.5;
+        }
+
+        /* Custom badge for job types */
+        .type-badge {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            border: 1px solid var(--primary-light);
+        }
+
+        /* Applications link hover effect */
+        .applications-link:hover {
+            color: var(--primary-dark) !important;
+        }
+    </style>
+{% endblock %}
 
 {% block content %}
-<style>
-    .job-card {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        border: 1px solid rgba(0,0,0,0.08);
-        border-radius: 12px;
-        overflow: hidden;
-    }
-    .job-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-    }
-    .stat-card {
-        border-radius: 12px;
-        border: none;
-    }
-    .stat-card .card-body {
-        padding: 1.25rem;
-    }
-    .job-meta-info {
-        font-size: 0.85rem;
-    }
-    .separator {
-        color: #dee2e6;
-    }
-    .applications-count {
-        color: #0dcaf0;
-        font-weight: 500;
-    }
-    .action-buttons .btn {
-        margin-left: 0.3rem;
-        border-radius: 6px;
-    }
-    .description-text {
-        color: #555;
-        font-size: 0.9rem;
-        line-height: 1.5;
-    }
-    @media (max-width: 768px) {
-        .job-meta-info .separator {
-            display: none;
-        }
-        .job-meta-info .d-flex {
-            flex-direction: column;
-            align-items: flex-start !important;
-        }
-        .job-meta-info span {
-            margin-bottom: 4px;
-        }
-        .action-buttons {
-            display: flex;
-            flex-wrap: nowrap;
-        }
-        .action-buttons .btn {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-        }
-    }
-</style>
-
-
 <div class="container-fluid py-4">
-    <!-- Header with Stats -->
-    <div class="row mb-4">
+    <!-- Header Section -->
+    <header class="row mb-4">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
-                    <h2 class="h3 mb-1">Job Management</h2>
-                    <p class="text-muted mb-0">Manage all job listings in one place</p>
+                    <h1 class="h2 text-dark fw-bold mb-2">Job Management</h1>
+                    <p class="text-secondary mb-0">Manage all job listings</p>
                 </div>
-                <a href="{% url 'job_manage' %}" class="btn btn-primary">
-                    <i class="bi bi-plus-circle me-2"></i>Add New Job
+                <a href="{% url 'job_manage' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-plus-circle me-2"></i>Create New Job
                 </a>
             </div>
         </div>
-    </div>
+    </header>
 
-    <!-- Filters Card -->
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Filters</h5>
-            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+    <!-- Filters Section -->
+    <section class="card border-0 shadow-sm mb-4" aria-labelledby="filters-heading">
+        <div class="card-header bg-transparent border-bottom-0 d-flex justify-content-between align-items-center py-3">
+            <h2 id="filters-heading" class="h5 mb-0 text-dark fw-semibold">
+                <i class="bi bi-funnel me-2" style="color: var(--primary);"></i>Filters & Search
+            </h2>
+            <button class="btn btn-sm btn-outline-primary" 
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#filterCollapse"
+                    aria-expanded="true"
+                    aria-controls="filterCollapse">
                 <i class="bi bi-funnel"></i>
+                <span class="d-none d-sm-inline">Toggle Filters</span>
             </button>
         </div>
+        
         <div class="collapse show" id="filterCollapse">
-            <div class="card-body">
-                <form method="get" class="row g-3">
+            <div class="card-body pt-0">
+                <form method="get" class="row g-3" id="jobFiltersForm">
                     <div class="col-xl-3 col-md-6">
-                        <label class="form-label">Status</label>
-                        <select name="status" class="form-select">
-                            <option value="">All Status</option>
+                        <label for="statusFilter" class="form-label fw-medium text-dark">Status</label>
+                        <select id="statusFilter" name="status" class="form-select">
+                            <option value="">All Statuses</option>
                             <option value="publish" {% if status_filter == 'publish' %}selected{% endif %}>Published</option>
                             <option value="draft" {% if status_filter == 'draft' %}selected{% endif %}>Draft</option>
                             <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
                         </select>
                     </div>
+                    
                     <div class="col-xl-3 col-md-6">
-                        <label class="form-label">Category</label>
-                        <select name="category" class="form-select">
+                        <label for="categoryFilter" class="form-label fw-medium text-dark">Category</label>
+                        <select id="categoryFilter" name="category" class="form-select">
                             <option value="">All Categories</option>
                             {% for category in categories %}
                             <option value="{{ category.id }}" {% if category_filter == category.id|stringformat:"s" %}selected{% endif %}>
@@ -112,322 +214,425 @@
                             {% endfor %}
                         </select>
                     </div>
+                    
                     <div class="col-xl-3 col-md-6">
-                        <label class="form-label">Search</label>
-                        <input type="text" name="q" class="form-control" placeholder="Search jobs..." value="{{ search_query }}">
+                        <label for="searchInput" class="form-label fw-medium text-dark">Search Jobs</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="bi bi-search text-secondary"></i>
+                            </span>
+                            <input type="text" 
+                                   id="searchInput"
+                                   name="q" 
+                                   class="form-control" 
+                                   placeholder="Search by job title..." 
+                                   value="{{ search_query }}">
+                        </div>
                     </div>
-                    <div class="col-xl-3 col-md-6 align-self-end">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-filter me-2"></i>Apply Filters
-                        </button>
+                    
+                    <div class="col-xl-3 col-md-6 d-flex align-items-end">
+                        <div class="d-flex gap-2 w-100">
+                            <button type="submit" class="btn btn-primary flex-fill">
+                                <i class="bi bi-filter me-2"></i>Apply Filters
+                            </button>
+                            <a href="{% url 'job_list' %}" class="btn btn-outline-secondary" title="Reset filters">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </a>
+                        </div>
                     </div>
                 </form>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- View Toggle -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="mb-0">Job Listings</h5>
-        <div class="btn-group" role="group">
-            <button type="button" class="btn btn-outline-primary active" id="cardViewBtn">
-                <i class="bi bi-grid"></i>
-            </button>
-            <button type="button" class="btn btn-outline-primary" id="tableViewBtn">
-                <i class="bi bi-list"></i>
-            </button>
+    <!-- View Controls -->
+    <section class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <h2 class="h5 mb-0 text-dark fw-semibold">
+            Job Listings <span class="badge bg-primary ms-2">{{ page_obj.paginator.count }}</span>
+        </h2>
+        
+        <div class="btn-group" role="group" aria-label="View toggle">
+            <input type="radio" class="btn-check" name="viewToggle" id="cardViewBtn" autocomplete="off" checked>
+            <label class="btn btn-outline-primary" for="cardViewBtn" title="Card View">
+                <i class="bi bi-grid me-1"></i>
+                <span class="d-none d-sm-inline">Cards</span>
+            </label>
+            
+            <input type="radio" class="btn-check" name="viewToggle" id="tableViewBtn" autocomplete="off">
+            <label class="btn btn-outline-primary" for="tableViewBtn" title="Table View">
+                <i class="bi bi-list me-1"></i>
+                <span class="d-none d-sm-inline">Table</span>
+            </label>
         </div>
-    </div>
+    </section>
 
-    <!-- Jobs Cards View -->
-    <div class="row" id="cardView">
-        {% for job in page_obj %}
-        <div class="col-xl-6 col-lg-6 col-md-6 mb-4">
-            <div class="card job-card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
-                        <h5 class="card-title mb-0 text-truncate pe-3">{{ job.title }}</h5>
-                        <span class="badge {% if job.status == 'publish' %}bg-success{% elif job.status == 'draft' %}bg-warning{% else %}bg-secondary{% endif %}">
-                            {{ job.get_status_display }}
-                        </span>
-                    </div>
-                    
-                    <!-- Job Meta Info -->
-                    <div class="job-meta-info mb-3">
-                        <div class="d-flex flex-wrap align-items-center text-muted small">
-                            <span class="me-2 mb-1">
-                                <i class="bi bi-grid me-1"></i>{{ job.category.name }}
-                            </span>
-                            <span class="separator mx-1 d-none d-md-inline">•</span>
-                            <span class="me-2 mb-1">
-                                <i class="bi bi-briefcase me-1"></i>{{ job.get_job_type_display }}
-                            </span>
-                            <span class="separator mx-1 d-none d-md-inline">•</span>
-                            <span class="mb-1">
-                                <i class="bi bi-geo-alt me-1"></i>{{ job.location }}
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <!-- Salary and Deadline -->
-                    <div class="row mb-3">
-                        {% if job.salary_start %}
-                        <div class="col-6">
-                            <div class="text-primary fw-semibold">
-                                <i class="bi bi-currency-pound"></i> {{ job.salary_start|intcomma }}
-                            </div>
-                            <small class="text-muted">Starting Salary</small>
-                        </div>
-                        {% endif %}
-                        <div class="{% if job.salary_start %}col-6{% else %}col-12{% endif %}">
-                            <div class="{% if job.is_expired %}text-danger{% else %}text-dark{% endif %} fw-semibold">
-                                <i class="bi bi-calendar"></i> {{ job.application_deadline|date:"M d, Y" }}
-                            </div>
-                            <small class="text-muted">Deadline</small>
-                        </div>
-                    </div>
-                    
-                    <!-- Applications Count -->
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <a href="{% url 'admin-job_applications' job.id %}" class="text-decoration-none applications-count">
-                            <i class="bi bi-people me-1"></i>
-                            {{ job.applications_count }} Application{{ job.applications_count|pluralize }}
-                        </a>
-                        {% if job.is_new_job %}
-                        <span class="badge bg-info">New</span>
-                        {% endif %}
-                    </div>
-                </div>
-                
-                <div class="card-footer bg-transparent pt-0">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <small class="text-muted">
-                            <i class="bi bi-clock me-1"></i>
-                            {% if job.is_new_job %}
-                                Created {{ job.created_at|timesince }} ago
-                            {% else %}
-                                Updated {{ job.updated_at|timesince }} ago
-                            {% endif %}
-                        </small>
-                        
-                        <div class="action-buttons">
-                            <a href="{% url 'job_manage_edit' job.id %}" class="btn btn-sm btn-outline-primary" title="Edit" data-bs-toggle="tooltip">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            <a href="{% url "job_detail" job.id %}" class="btn btn-sm btn-outline-warning" title="View" data-bs-toggle="tooltip">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                            <button type="button" class="btn btn-outline-danger" 
-                                data-bs-toggle="modal" 
-                                data-bs-target="#deleteJobModal"
-                                data-job-id="{{ job.id }}"
-                                data-job-title="{{ job.title }}"
-                                data-job-location="{{ job.location }}"
-                                data-job-type="{{ job.get_job_type_display }}">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% empty %}
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body text-center py-5">
-                    <i class="bi bi-briefcase display-4 d-block text-muted mb-3"></i>
-                    <h5 class="text-muted">No jobs found</h5>
-                    <p class="text-muted mb-4">Try adjusting your filters or add a new job</p>
-                    <a href="{% url 'job_manage' %}" class="btn btn-primary">
-                        <i class="bi bi-plus-circle me-2"></i>Add New Job
-                    </a>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-
-    <!-- Table View (Hidden by default) -->
-    <div class="card d-none" id="tableView">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Title</th>
-                            <th>Category</th>
-                            <th>Type</th>
-                            <th>Location</th>
-                            <th>Status</th>
-                            <th>Applications</th>
-                            <th>Deadline</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for job in page_obj %}
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-grow-1">
-                                        <h6 class="mb-0">{{ job.title }}</h6>
-                                        <small class="text-muted">Created: {{ job.created_at|date:"M d, Y" }}</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>{{ job.category }}</td>
-                            <td>
-                                <span class="badge bg-secondary">{{ job.get_job_type_display }}</span>
-                            </td>
-                            <td>{{ job.location }}</td>
-                            <td>
-                                <span class="badge bg-{% if job.status == 'publish' %}success{% elif job.status == 'draft' %}warning{% else %}secondary{% endif %}">
+    <!-- Jobs Content -->
+    <main>
+        <!-- Card View -->
+        <div id="cardView">
+            <div class="row g-4">
+                {% for job in page_obj %}
+                <div class="col-xl-6 col-lg-6 col-md-6">
+                    <article class="card h-100 border-0 shadow-sm job-card">
+                        <div class="card-body d-flex flex-column">
+                            <!-- Header -->
+                            <header class="d-flex justify-content-between align-items-start mb-3">
+                                <h3 class="h5 mb-0 text-dark fw-semibold text-truncate pe-3">
+                                    <a href="{% url 'job_detail' job.id %}" class="text-dark text-decoration-none">
+                                        {{ job.title }}
+                                    </a>
+                                </h3>
+                                <span class="badge {% if job.status == 'publish' %}bg-success{% elif job.status == 'draft' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
                                     {{ job.get_status_display }}
                                 </span>
-                                {% if job.is_expired %}
-                                <span class="badge bg-danger">Expired</span>
+                            </header>
+
+                            <!-- Meta Information -->
+                            <div class="job-meta mb-3">
+                                <div class="d-flex flex-wrap gap-2 text-secondary small">
+                                    <span class="d-flex align-items-center">
+                                        <i class="bi bi-grid me-1" style="color: var(--primary);"></i>
+                                        {{ job.category.name }}
+                                    </span>
+                                    <span class="d-none d-md-inline" style="color: var(--secondary);">•</span>
+                                    <span class="d-flex align-items-center">
+                                        <i class="bi bi-briefcase me-1" style="color: var(--primary);"></i>
+                                        {{ job.get_job_type_display }}
+                                    </span>
+                                    <span class="d-none d-md-inline" style="color: var(--secondary);">•</span>
+                                    <span class="d-flex align-items-center">
+                                        <i class="bi bi-geo-alt me-1" style="color: var(--primary);"></i>
+                                        {{ job.location }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Salary and Deadline -->
+                            <div class="row g-2 mb-3">
+                                {% if job.salary_start %}
+                                <div class="col-6">
+                                    <div class="fw-semibold" style="color: var(--primary);">
+                                        <i class="bi bi-currency-pound me-1"></i>{{ job.salary_start|intcomma }}
+                                    </div>
+                                    <small class="text-secondary">Starting Salary</small>
+                                </div>
                                 {% endif %}
-                            </td>
-                            <td>
-                                <a href="{% url 'admin-job_applications' job.id %}" class="text-decoration-none">
-                                    {{ job.applications_count }}
+                                <div class="{% if job.salary_start %}col-6{% else %}col-12{% endif %}">
+                                    <div class="{% if job.is_expired %}text-danger{% else %}text-dark{% endif %} fw-semibold">
+                                        <i class="bi bi-calendar-event me-1"></i>
+                                        {{ job.application_deadline|date:"M d, Y" }}
+                                    </div>
+                                    <small class="text-secondary">Application Deadline</small>
+                                </div>
+                            </div>
+
+                            <!-- Applications -->
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <a href="{% url 'admin-job_applications' job.id %}" 
+                                   class="text-primary text-decoration-none fw-medium">
+                                    <i class="bi bi-people me-1"></i>
+                                    {{ job.applications_count }} Application{{ job.applications_count|pluralize }}
                                 </a>
-                            </td>
-                            <td>{{ job.application_deadline|date:"M d, Y" }}</td>
-                            <td>
-                                <div class="btn-group">
-                                    <a href="{% url 'job_manage_edit' job.id %}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                {% if job.is_new_job %}
+                                <span class="badge" style="background-color: var(--primary-light); color: var(--primary-dark);">New</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <footer class="card-footer bg-transparent border-top-0 pt-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-secondary">
+                                    <i class="bi bi-clock me-1"></i>
+                                    {% if job.is_new_job %}
+                                        Created {{ job.created_at|timesince }} ago
+                                    {% else %}
+                                        Updated {{ job.updated_at|timesince }} ago
+                                    {% endif %}
+                                </small>
+                                
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{% url 'job_manage_edit' job.id %}" 
+                                       class="btn btn-outline-primary" 
+                                       title="Edit Job"
+                                       data-bs-toggle="tooltip">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <a href="{% url "job_detail" job.id %}" class="btn btn-sm btn-outline-warning" title="View" data-bs-toggle="tooltip">
+                                    <a href="{% url 'job_detail' job.id %}" 
+                                       class="btn btn-outline-secondary" 
+                                       title="View Job"
+                                       data-bs-toggle="tooltip">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    <button type="button" class="btn btn-outline-danger" 
+                                    <button type="button" 
+                                            class="btn btn-outline-danger"
                                             data-bs-toggle="modal" 
-                                            data-bs-target="#deleteJobModal"
+                                            data-bs-target="#deleteModal"
                                             data-job-id="{{ job.id }}"
                                             data-job-title="{{ job.title }}"
-                                            data-job-company="{{ job.company }}">
+                                            title="Delete Job">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="8" class="text-center py-4">
-                                <i class="bi bi-briefcase display-4 d-block mb-2 text-muted"></i>
-                                <h5 class="text-muted">No jobs found</h5>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                            </div>
+                        </footer>
+                    </article>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="card border-0 text-center py-5">
+                        <div class="card-body">
+                            <i class="bi bi-briefcase display-1 text-muted mb-3" style="color: var(--primary-light);"></i>
+                            <h3 class="h5 text-secondary mb-2">No jobs found</h3>
+                            <p class="text-secondary mb-3">Try adjusting your filters or create a new job posting</p>
+                            <a href="{% url 'job_manage' %}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-2"></i>Create New Job
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
         </div>
-    </div>
+
+        <!-- Table View -->
+        <div id="tableView" class="d-none">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" aria-label="Job listings table">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th scope="col">Job Title</th>
+                                    <th scope="col">Category</th>
+                                    <th scope="col">Type</th>
+                                    <th scope="col">Location</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Applications</th>
+                                    <th scope="col">Deadline</th>
+                                    <th scope="col" class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for job in page_obj %}
+                                <tr>
+                                    <td>
+                                        <div>
+                                            <h4 class="h6 mb-1 text-dark fw-semibold">{{ job.title }}</h4>
+                                            <small class="text-secondary">Created: {{ job.created_at|date:"M d, Y" }}</small>
+                                        </div>
+                                    </td>
+                                    <td>{{ job.category.name }}</td>
+                                    <td>
+                                        <span class="badge" style="background-color: var(--primary-light); color: var(--primary-dark); border: 1px solid var(--primary-light);">
+                                            {{ job.get_job_type_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ job.location }}</td>
+                                    <td>
+                                        <span class="badge {% if job.status == 'publish' %}bg-success{% elif job.status == 'draft' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                                            {{ job.get_status_display }}
+                                        </span>
+                                        {% if job.is_expired %}
+                                        <span class="badge bg-danger ms-1">Expired</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'admin-job_applications' job.id %}" class="text-primary text-decoration-none fw-medium">
+                                            {{ job.applications_count }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="{% if job.is_expired %}text-danger{% else %}text-dark{% endif %} fw-medium">
+                                            {{ job.application_deadline|date:"M d, Y" }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex justify-content-end gap-1">
+                                            <a href="{% url 'job_manage_edit' job.id %}" 
+                                               class="btn btn-sm btn-outline-primary" 
+                                               title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="{% url 'job_detail' job.id %}" 
+                                               class="btn btn-sm btn-outline-secondary" 
+                                               title="View">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#deleteModal"
+                                                    data-job-id="{{ job.id }}"
+                                                    data-job-title="{{ job.title }}"
+                                                    title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center py-5">
+                                        <i class="bi bi-briefcase display-1 text-muted mb-3" style="color: var(--primary-light);"></i>
+                                        <h4 class="h6 text-secondary">No jobs found</h4>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 
     <!-- Pagination -->
     {% if page_obj.has_other_pages %}
-    <div class="d-flex justify-content-between align-items-center mt-4">
-        <div class="text-muted">
-            Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} entries
+    <footer class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
+        <div class="text-secondary">
+            Showing <span class="fw-semibold">{{ page_obj.start_index }}-{{ page_obj.end_index }}</span> 
+            of <span class="fw-semibold">{{ page_obj.paginator.count }}</span> jobs
         </div>
-        <nav aria-label="Job pagination">
+        
+        <nav aria-label="Job listings pagination">
             <ul class="pagination mb-0">
                 {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">Previous</a>
-                    </li>
+                <li class="page-item">
+                    <a class="page-link" 
+                       href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}"
+                       aria-label="Previous page">
+                        Previous
+                    </a>
+                </li>
                 {% else %}
-                    <li class="page-item disabled">
-                        <span class="page-link">Previous</span>
-                    </li>
+                <li class="page-item disabled">
+                    <span class="page-link">Previous</span>
+                </li>
                 {% endif %}
 
                 {% for i in page_obj.paginator.page_range %}
                     {% if page_obj.number == i %}
-                        <li class="page-item active" aria-current="page">
-                            <span class="page-link">{{ i }}</span>
-                        </li>
-                    {% else %}
-                        {% if i > page_obj.number|add:-3 and i < page_obj.number|add:3 %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ i }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">{{ i }}</a>
-                            </li>
-                        {% endif %}
+                    <li class="page-item active" aria-current="page">
+                        <span class="page-link" style="background-color: var(--primary); border-color: var(--primary);">{{ i }}</span>
+                    </li>
+                    {% elif i > page_obj.number|add:"-3" and i < page_obj.number|add:"3" %}
+                    <li class="page-item">
+                        <a class="page-link" 
+                           href="?page={{ i }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}"
+                           style="color: var(--primary);">
+                            {{ i }}
+                        </a>
+                    </li>
                     {% endif %}
                 {% endfor %}
 
                 {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">Next</a>
-                    </li>
+                <li class="page-item">
+                    <a class="page-link" 
+                       href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}"
+                       aria-label="Next page"
+                       style="color: var(--primary);">
+                        Next
+                    </a>
+                </li>
                 {% else %}
-                    <li class="page-item disabled">
-                        <span class="page-link">Next</span>
-                    </li>
+                <li class="page-item disabled">
+                    <span class="page-link">Next</span>
+                </li>
                 {% endif %}
             </ul>
         </nav>
-    </div>
+    </footer>
     {% endif %}
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Confirm Delete</h5>
+                <h5 class="modal-title fw-semibold" id="deleteModalLabel">Confirm Deletion</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete the job "<strong id="deleteJobTitle"></strong>"?</p>
-                <p class="text-danger">This action cannot be undone.</p>
+                <p>Are you sure you want to delete the job position <strong id="deleteJobTitle" class="text-danger">""</strong>?</p>
+                <p class="text-secondary small mb-0">This action cannot be undone and will remove all associated data.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form id="deleteJobForm" method="post" action="">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Delete Job</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-2"></i>Delete Job
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
 
 
+{% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize tooltips
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-
+        const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltips.forEach(tooltip => new bootstrap.Tooltip(tooltip));
+        
         // View toggle functionality
-        const cardViewBtn = document.getElementById('cardViewBtn');
-        const tableViewBtn = document.getElementById('tableViewBtn');
         const cardView = document.getElementById('cardView');
         const tableView = document.getElementById('tableView');
-
-        cardViewBtn.addEventListener('click', function() {
-            cardView.classList.remove('d-none');
-            tableView.classList.add('d-none');
-            cardViewBtn.classList.add('active');
-            tableViewBtn.classList.remove('active');
+        const cardViewBtn = document.getElementById('cardViewBtn');
+        const tableViewBtn = document.getElementById('tableViewBtn');
+        
+        function toggleView(view) {
+            if (view === 'card') {
+                cardView.classList.remove('d-none');
+                tableView.classList.add('d-none');
+            } else {
+                cardView.classList.add('d-none');
+                tableView.classList.remove('d-none');
+            }
+            
+            // Save view preference
+            localStorage.setItem('jobListView', view);
+        }
+        
+        cardViewBtn.addEventListener('change', () => toggleView('card'));
+        tableViewBtn.addEventListener('change', () => toggleView('table'));
+        
+        // Load saved view preference
+        const savedView = localStorage.getItem('jobListView') || 'card';
+        if (savedView === 'table') {
+            tableViewBtn.checked = true;
+            toggleView('table');
+        }
+        
+        // Delete modal functionality
+        const deleteModal = document.getElementById('deleteModal');
+        if (deleteModal) {
+            deleteModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const jobId = button.getAttribute('data-job-id');
+                const jobTitle = button.getAttribute('data-job-title');
+                
+                document.getElementById('deleteJobTitle').textContent = jobTitle;
+                document.getElementById('deleteJobForm').action = `/employer/job/${jobId}/delete/`;
+            });
+        }
+        
+        // Auto-submit filters on change (optional)
+        const filterForm = document.getElementById('jobFiltersForm');
+        const filterSelects = filterForm.querySelectorAll('select');
+        
+        filterSelects.forEach(select => {
+            select.addEventListener('change', () => {
+                filterForm.submit();
+            });
         });
-
-        tableViewBtn.addEventListener('click', function() {
-            cardView.classList.add('d-none');
-            tableView.classList.remove('d-none');
-            cardViewBtn.classList.remove('active');
-            tableViewBtn.classList.add('active');
-        });
-
-       
     });
 </script>
 {% endblock %}

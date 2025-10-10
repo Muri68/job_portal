@@ -1,181 +1,575 @@
 {% extends "job/base.html" %}
 {% load static %}
 
-{% block title %}Add Admin User - Dashboard{% endblock %}
+{% block title %}Add Admin User - {{ block.super }}{% endblock %}
 
 {% block content %}
-<div class="main-header">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <h1 class="h3 mb-2">Add Admin User</h1>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{% url 'admin-dashboard' %}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'admin_users_list' %}">Admin Users</a></li>
-                    <li class="breadcrumb-item active">Add Admin</li>
-                </ol>
-            </nav>
-        </div>
-        <a href="{% url 'admin_users_list' %}" class="btn btn-secondary">
-            <i class="bi bi-arrow-left me-1"></i> Back to List
-        </a>
-    </div>
-</div>
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-12">
+            <!-- Header Section -->
+            <header class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                <div>
+                    <h1 class="h2 mb-2 text-dark fw-bold">Add Admin User</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="{% url 'admin-dashboard' %}" class="text-primary text-decoration-none">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'admin_users_list' %}" class="text-primary text-decoration-none">Admin Users</a></li>
+                            <li class="breadcrumb-item active text-secondary">Add Admin</li>
+                        </ol>
+                    </nav>
+                </div>
+                <a href="{% url 'admin_users_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i> Back to List
+                </a>
+            </header>
 
-<div class="row justify-content-center">
-    <div class="col-lg-12">
-        <div class="card">
-            <div class="card-header bg-white">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-person-plus-fill me-2 text-primary"></i>
-                    Create New Admin User
-                </h5>
-            </div>
-            <div class="card-body">
-                <form method="post" novalidate>
-                    {% csrf_token %}
-                    
-                    {% if form.non_field_errors %}
-                    <div class="alert alert-danger">
-                        {% for error in form.non_field_errors %}
-                            {{ error }}
-                        {% endfor %}
-                    </div>
-                    {% endif %}
+            <div class="row">
+                <!-- Main Form Column -->
+                <div class="col-lg-8">
+                    <!-- Create Admin User Card -->
+                    <section class="card shadow-sm border-0 mb-4" aria-labelledby="create-admin-heading">
+                        <div class="card-header bg-transparent border-0 py-3">
+                            <h2 id="create-admin-heading" class="h5 mb-0 fw-bold text-dark">
+                                <i class="bi bi-person-plus-fill text-primary me-2"></i>
+                                Create New Admin User
+                            </h2>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" novalidate id="adminUserForm">
+                                {% csrf_token %}
+                                
+                                {% if form.non_field_errors %}
+                                <div class="alert alert-danger border-0 rounded-3">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    {% for error in form.non_field_errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="{{ form.first_name.id_for_label }}" class="form-label">
-                                First Name <span class="text-danger">*</span>
-                            </label>
-                            {{ form.first_name }}
-                            {% if form.first_name.errors %}
-                            <div class="invalid-feedback d-block">
-                                {% for error in form.first_name.errors %}
-                                    {{ error }}
-                                {% endfor %}
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.first_name.id_for_label }}" class="form-label fw-medium text-dark">
+                                            First Name <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="bi bi-person text-secondary"></i>
+                                            </span>
+                                            {{ form.first_name }}
+                                        </div>
+                                        {% if form.first_name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.first_name.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.last_name.id_for_label }}" class="form-label fw-medium text-dark">
+                                            Last Name <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="bi bi-person text-secondary"></i>
+                                            </span>
+                                            {{ form.last_name }}
+                                        </div>
+                                        {% if form.last_name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.last_name.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.email.id_for_label }}" class="form-label fw-medium text-dark">
+                                        Email Address <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="bi bi-envelope text-secondary"></i>
+                                        </span>
+                                        {{ form.email }}
+                                    </div>
+                                    {% if form.email.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.email.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    <div class="form-text text-secondary">This will be used for login and notifications</div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.password1.id_for_label }}" class="form-label fw-medium text-dark">
+                                            Password <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="bi bi-lock text-secondary"></i>
+                                            </span>
+                                            {{ form.password1 }}
+                                        </div>
+                                        {% if form.password1.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.password1.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.password2.id_for_label }}" class="form-label fw-medium text-dark">
+                                            Confirm Password <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="bi bi-lock-fill text-secondary"></i>
+                                            </span>
+                                            {{ form.password2 }}
+                                        </div>
+                                        {% if form.password2.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.password2.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <div class="form-check">
+                                        {{ form.send_welcome_email }}
+                                        <label class="form-check-label text-dark" for="{{ form.send_welcome_email.id_for_label }}">
+                                            <i class="bi bi-envelope-check me-1 text-primary"></i>
+                                            Send welcome email with login credentials
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <footer class="d-flex justify-content-between align-items-center border-top pt-4 mt-4">
+                                    <a href="{% url 'admin_users_list' %}" class="btn btn-outline-secondary">
+                                        <i class="bi bi-x-circle me-2"></i> Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="bi bi-person-plus me-2"></i> Create Admin User
+                                    </button>
+                                </footer>
+                            </form>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Sidebar Column -->
+                <div class="col-lg-4">
+                    <!-- Permissions Info Card -->
+                    <section class="card shadow-sm border-0" aria-labelledby="permissions-heading">
+                        <div class="card-header bg-transparent border-0 py-3">
+                            <h3 id="permissions-heading" class="h5 mb-0 fw-bold text-dark">
+                                <i class="bi bi-shield-check text-primary me-2"></i>
+                                Admin User Permissions
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="rounded-circle p-2 me-3" style="background-color: var(--primary-light);">
+                                    <i class="bi bi-speedometer2 text-primary"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-medium text-dark">Admin Dashboard</div>
+                                    <small class="text-secondary">Full access to admin panel</small>
+                                </div>
                             </div>
-                            {% endif %}
-                        </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label for="{{ form.last_name.id_for_label }}" class="form-label">
-                                Last Name <span class="text-danger">*</span>
-                            </label>
-                            {{ form.last_name }}
-                            {% if form.last_name.errors %}
-                            <div class="invalid-feedback d-block">
-                                {% for error in form.last_name.errors %}
-                                    {{ error }}
-                                {% endfor %}
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="rounded-circle p-2 me-3" style="background-color: var(--primary-light);">
+                                    <i class="bi bi-briefcase text-primary"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-medium text-dark">Job Management</div>
+                                    <small class="text-secondary">Create, edit, and manage job postings</small>
+                                </div>
                             </div>
-                            {% endif %}
-                        </div>
-                    </div>
 
-                    <div class="mb-3">
-                        <label for="{{ form.email.id_for_label }}" class="form-label">
-                            Email Address <span class="text-danger">*</span>
-                        </label>
-                        {{ form.email }}
-                        {% if form.email.errors %}
-                        <div class="invalid-feedback d-block">
-                            {% for error in form.email.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
-                        {% endif %}
-                        <div class="form-text">This will be used for login</div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="{{ form.password1.id_for_label }}" class="form-label">
-                                Password <span class="text-danger">*</span>
-                            </label>
-                            {{ form.password1 }}
-                            {% if form.password1.errors %}
-                            <div class="invalid-feedback d-block">
-                                {% for error in form.password1.errors %}
-                                    {{ error }}
-                                {% endfor %}
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="rounded-circle p-2 me-3" style="background-color: var(--primary-light);">
+                                    <i class="bi bi-people text-primary"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-medium text-dark">Applicant Management</div>
+                                    <small class="text-secondary">View and manage all applicants</small>
+                                </div>
                             </div>
-                            {% endif %}
-                        </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label for="{{ form.password2.id_for_label }}" class="form-label">
-                                Confirm Password <span class="text-danger">*</span>
-                            </label>
-                            {{ form.password2 }}
-                            {% if form.password2.errors %}
-                            <div class="invalid-feedback d-block">
-                                {% for error in form.password2.errors %}
-                                    {{ error }}
-                                {% endfor %}
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="rounded-circle p-2 me-3" style="background-color: var(--primary-light);">
+                                    <i class="bi bi-graph-up text-primary"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-medium text-dark">Reports & Analytics</div>
+                                    <small class="text-secondary">Access to reports and insights</small>
+                                </div>
                             </div>
-                            {% endif %}
+
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle p-2 me-3" style="background-color: #f8f9fa;">
+                                    <i class="bi bi-gear text-secondary"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-medium text-secondary">System Settings</div>
+                                    <small class="text-secondary">Limited access (superuser only)</small>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    </section>
 
-                    <div class="mb-4">
-                        <div class="form-check">
-                            {{ form.send_welcome_email }}
-                            <label class="form-check-label" for="{{ form.send_welcome_email.id_for_label }}">
-                                Send welcome email with login credentials
-                            </label>
+                    <!-- Quick Tips Card -->
+                    <section class="card shadow-sm border-0 mt-4" aria-labelledby="tips-heading">
+                        <div class="card-header bg-transparent border-0 py-3">
+                            <h3 id="tips-heading" class="h5 mb-0 fw-bold text-dark">
+                                <i class="bi bi-lightbulb text-primary me-2"></i>
+                                Quick Tips
+                            </h3>
                         </div>
-                    </div>
-
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="{% url 'admin_users_list' %}" class="btn btn-secondary me-md-2">
-                            <i class="bi bi-x-circle me-1"></i> Cancel
-                        </a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-person-plus me-1"></i> Create Admin User
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div class="card mt-4">
-            <div class="card-body">
-                <h6 class="card-title">
-                    <i class="bi bi-info-circle me-2 text-primary"></i>
-                    Admin User Permissions
-                </h6>
-                <ul class="list-unstyled mb-0">
-                    <li><i class="bi bi-check-circle text-success me-2"></i> Access to admin dashboard</li>
-                    <li><i class="bi bi-check-circle text-success me-2"></i> Manage job postings</li>
-                    <li><i class="bi bi-check-circle text-success me-2"></i> View and manage applicants</li>
-                    <li><i class="bi bi-check-circle text-success me-2"></i> Access to reports and analytics</li>
-                    <li><i class="bi bi-x-circle text-secondary me-2"></i> Cannot modify system settings (superuser only)</li>
-                </ul>
+                        <div class="card-body">
+                            <div class="alert alert-info border-0 rounded-3 mb-3">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <strong>Strong passwords</strong> should include uppercase, lowercase, numbers, and symbols.
+                            </div>
+                            <div class="alert alert-warning border-0 rounded-3">
+                                <i class="bi bi-envelope me-2"></i>
+                                <strong>Welcome emails</strong> help new admins get started quickly with their credentials.
+                            </div>
+                        </div>
+                    </section>
+                </div>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
 
+{% block extra_css %}
+<style>
+:root {
+    --primary: #257dd4;
+    --primary-light: #257cd491;
+    --primary-dark: #257dd4;
+    --secondary: #546E7A;
+    --accent: #FF9800;
+    --light: #E3F2FD;
+    --dark: #257dd4;
+    --gradient-start: #257dd4;
+    --gradient-end: #257dd4;
+    --sidebar-width: 280px;
+}
+
+/* Button styles using your theme */
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.btn-outline-primary {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.btn-outline-secondary {
+    color: var(--secondary);
+    border-color: var(--secondary);
+}
+
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus {
+    background-color: var(--secondary);
+    border-color: var(--secondary);
+    color: white;
+}
+
+/* Text colors */
+.text-primary {
+    color: var(--primary) !important;
+}
+
+.text-secondary {
+    color: var(--secondary) !important;
+}
+
+.text-dark {
+    color: #2c3e50 !important;
+}
+
+/* Card styles */
+.card {
+    border: none;
+    border-radius: 0.75rem;
+}
+
+/* Form styles */
+.form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 0.2rem rgba(37, 125, 212, 0.15);
+}
+
+.input-group-text {
+    background-color: var(--light);
+    border-color: #dee2e6;
+    transition: all 0.2s ease;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.form-check-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(37, 125, 212, 0.25);
+}
+
+/* Background colors */
+.bg-light {
+    background-color: var(--light) !important;
+}
+
+/* Alert styling */
+.alert-info {
+    background-color: rgba(37, 125, 212, 0.1);
+    border-color: rgba(37, 125, 212, 0.2);
+    color: #055160;
+}
+
+.alert-warning {
+    background-color: rgba(255, 193, 7, 0.1);
+    border-color: rgba(255, 193, 7, 0.2);
+    color: #664d03;
+}
+
+.alert-danger {
+    background-color: rgba(220, 53, 69, 0.1);
+    border-color: rgba(220, 53, 69, 0.2);
+    color: #721c24;
+}
+
+/* Validation styles */
+.is-invalid {
+    border-color: #dc3545;
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 3.6.4.4.4-.4'/%3e%3cpath d='M6 7v2'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.is-valid {
+    border-color: #198754;
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.invalid-feedback {
+    font-size: 0.875rem;
+    color: #dc3545;
+}
+
+/* Form text */
+.form-text {
+    font-size: 0.875rem;
+    color: var(--secondary);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1.25rem;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .d-flex.justify-content-between .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .rounded-circle.p-2 {
+        padding: 0.5rem !important;
+    }
+    
+    .h2 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Animation for form interactions */
+.form-control {
+    transition: all 0.2s ease;
+}
+
+.btn {
+    transition: all 0.2s ease;
+    border-radius: 0.5rem;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Permission icons styling */
+.rounded-circle {
+    border-radius: 50% !important;
+}
+</style>
+{% endblock %}
+
 {% block extra_js %}
 <script>
-    // Add Bootstrap form validation styling
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.querySelector('form');
-        const inputs = form.querySelectorAll('input, select, textarea');
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('adminUserForm');
+    const inputs = form.querySelectorAll('input, select, textarea');
+    
+    // Real-time validation
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            validateField(this);
+        });
         
-        inputs.forEach(input => {
-            input.addEventListener('blur', function() {
-                if (this.value.trim() !== '') {
-                    this.classList.add('is-valid');
-                    this.classList.remove('is-invalid');
-                } else {
-                    this.classList.add('is-invalid');
-                    this.classList.remove('is-valid');
-                }
-            });
+        input.addEventListener('input', function() {
+            if (this.classList.contains('is-invalid')) {
+                validateField(this);
+            }
         });
     });
+
+    // Form submission enhancement
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        const requiredFields = form.querySelectorAll('[required]');
+        
+        requiredFields.forEach(field => {
+            if (!validateField(field)) {
+                isValid = false;
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            // Scroll to first error
+            const firstError = form.querySelector('.is-invalid');
+            if (firstError) {
+                firstError.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+                firstError.focus();
+            }
+            
+            // Show toast notification
+            showNotification('Please fix the errors in the form before submitting.', 'error');
+        } else {
+            // Add loading state to submit button
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split spinner-border spinner-border-sm me-2"></i> Creating...';
+            submitBtn.disabled = true;
+            
+            // Revert after 5 seconds (in case of slow response)
+            setTimeout(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 5000);
+        }
+    });
+    
+    function validateField(field) {
+        const value = field.value.trim();
+        const isValid = field.type === 'checkbox' ? field.checked : value !== '';
+        
+        if (isValid) {
+            field.classList.remove('is-invalid');
+            field.classList.add('is-valid');
+        } else {
+            field.classList.remove('is-valid');
+            field.classList.add('is-invalid');
+        }
+        
+        return isValid;
+    }
+    
+    function showNotification(message, type = 'info') {
+        // Simple notification implementation
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+        alert.style.cssText = 'top: 20px; right: 20px; z-index: 1060; min-width: 300px;';
+        alert.innerHTML = `
+            <i class="bi bi-${type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(alert);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.parentNode.removeChild(alert);
+            }
+        }, 5000);
+    }
+
+    // Password strength indicator (optional enhancement)
+    const password1 = document.getElementById('{{ form.password1.id_for_label }}');
+    if (password1) {
+        password1.addEventListener('input', function() {
+            // Add password strength logic here if needed
+        });
+    }
+});
 </script>
 {% endblock %}

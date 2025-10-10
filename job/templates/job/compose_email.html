@@ -1,335 +1,216 @@
 {% extends "job/base.html" %}
 {% load static %}
 
-{% block title %}Compose Email - {{ application.applicant_name }}{% endblock %}
-
-{% block extra_css %}
-<style>
-    .email-compose-container {
-        background: #f8f9fa;
-        min-height: 100vh;
-    }
-    
-    .email-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 2rem 0;
-    }
-    
-    .compose-card {
-        border: none;
-        border-radius: 16px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        margin-top: -60px;
-        position: relative;
-        z-index: 10;
-        background: white;
-    }
-    
-    .recipient-info {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        color: white;
-        border-radius: 12px 12px 0 0;
-        padding: 1.5rem;
-    }
-    
-    .template-card {
-        border: 2px solid #e9ecef;
-        border-radius: 12px;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        background: white;
-    }
-    
-    .template-card:hover {
-        border-color: #4361ee;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(67, 97, 238, 0.15);
-    }
-    
-    .template-card.active {
-        border-color: #4361ee;
-        background: rgba(67, 97, 238, 0.05);
-    }
-    
-    .email-preview {
-        background: #f8f9fa;
-        border-radius: 8px;
-        padding: 1.5rem;
-        white-space: pre-line;
-        line-height: 1.6;
-        font-family: inherit;
-    }
-    
-    .attachment-item {
-        background: white;
-        border: 1px solid #e9ecef;
-        border-radius: 8px;
-        padding: 0.75rem;
-        margin-bottom: 0.5rem;
-    }
-    
-    .compose-actions {
-        background: white;
-        border-top: 1px solid #e9ecef;
-        padding: 1.5rem;
-        border-radius: 0 0 16px 16px;
-    }
-    
-    .template-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 1rem;
-    }
-    
-    .email-textarea {
-        border: 1px solid #e9ecef;
-        border-radius: 8px;
-        padding: 1rem;
-        min-height: 300px;
-        resize: vertical;
-        width: 100%;
-        font-family: inherit;
-        line-height: 1.6;
-    }
-    
-    .email-textarea:focus {
-        outline: none;
-        border-color: #4361ee;
-        box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
-    }
-
-    @media (max-width: 768px) {
-        .compose-card {
-            margin-top: -30px;
-        }
-        
-        .template-card {
-            margin-bottom: 1rem;
-        }
-    }
-</style>
-{% endblock %}
+{% block title %}Compose Email - {{ application.applicant_name }} - {{ block.super }}{% endblock %}
 
 {% block content %}
-<div class="email-compose-container">
-    <!-- Header -->
-    <div class="email-header">
-        <div class="container">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb breadcrumb-dark mb-2">
-                    <li class="breadcrumb-item"><a href="{% url 'admin-dashboard' %}" class="text-white-50">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="#" class="text-white-50">Applicants</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'applicant_detail' application.id %}" class="text-white-50">{{ application.applicant_name }}</a></li>
-                    <li class="breadcrumb-item active text-white">Compose Email</li>
-                </ol>
-            </nav>
-            
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h1 class="h2 mb-2">Compose Email</h1>
-                    <p class="mb-0 opacity-75">Send a professional email to the applicant</p>
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-12">
+            <!-- Header Section -->
+            <header class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                <div>
+                    <h1 class="h2 mb-2 text-dark fw-bold">Compose Email</h1>
+                    <p class="text-secondary mb-3">Send a professional email to the applicant</p>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-2">
+                            <li class="breadcrumb-item"><a href="{% url 'admin-dashboard' %}" class="text-primary text-decoration-none">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'applicants_list' %}" class="text-primary text-decoration-none">Applicants</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'applicant_detail' application.id %}" class="text-primary text-decoration-none">{{ application.applicant_name }}</a></li>
+                            <li class="breadcrumb-item active text-secondary">Compose Email</li>
+                        </ol>
+                    </nav>
                 </div>
-                <div class="col-md-4 text-md-end">
-                    <div class="d-flex align-items-center justify-content-md-end">
-                        <div class="bg-white bg-opacity-20 rounded-circle p-2 me-3">
-                            <i class="fas fa-paper-plane fs-4"></i>
-                        </div>
-                        <div>
-                            <div class="h4 mb-0">Email</div>
-                            <small class="opacity-75">Ready to send</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+            </header>
 
-    <!-- Compose Form -->
-    <div class="container py-4">
-        <form method="post" id="emailForm">
-            {% csrf_token %}
-            
-            <div class="compose-card">
-                <!-- Recipient Info -->
-                <div class="recipient-info">
-                    <div class="row align-items-center">
-                        <div class="col-md-8">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-white bg-opacity-20 rounded-circle p-2 me-3">
-                                    <i class="fas fa-user"></i>
-                                </div>
-                                <div>
-                                    <h5 class="mb-1">{{ application.applicant_name }}</h5>
-                                    <p class="mb-0 opacity-75">
-                                        <i class="fas fa-envelope me-1"></i>{{ application.applicant_email }}
-                                        {% if application.applicant_phone %}
-                                        <span class="ms-3">
-                                            <i class="fas fa-phone me-1"></i>{{ application.applicant_phone }}
-                                        </span>
-                                        {% endif %}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4 text-md-end">
-                            <span class="badge bg-white bg-opacity-20 text-white fs-6">
-                                <i class="fas fa-briefcase me-1"></i>{{ application.job.title }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Email Templates -->
-                <div class="card-body border-bottom">
-                    <h6 class="fw-bold mb-3 text-dark">
-                        <i class="fas fa-magic me-2 text-primary"></i>Quick Templates
-                    </h6>
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <div class="template-card p-3" data-template="interview_invite">
+            <!-- Compose Form -->
+            <form method="post" id="emailForm">
+                {% csrf_token %}
+                
+                <div class="card shadow-sm border-0">
+                    <!-- Recipient Info -->
+                    <div class="card-header bg-transparent border-0 py-4" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
                                 <div class="d-flex align-items-center">
-                                    <div class="template-icon bg-success bg-opacity-10 text-success">
-                                        <i class="fas fa-handshake"></i>
+                                    <div class="rounded-circle p-2 me-3 bg-white bg-opacity-20">
+                                        <i class="bi bi-person text-dark"></i>
                                     </div>
-                                    <div>
-                                        <h6 class="mb-1">Interview Invite</h6>
-                                        <small class="text-muted">Invite for interview</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="template-card p-3" data-template="application_received">
-                                <div class="d-flex align-items-center">
-                                    <div class="template-icon bg-info bg-opacity-10 text-info">
-                                        <i class="fas fa-check-circle"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-1">Application Received</h6>
-                                        <small class="text-muted">Confirm receipt</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="template-card p-3" data-template="rejection">
-                                <div class="d-flex align-items-center">
-                                    <div class="template-icon bg-warning bg-opacity-10 text-warning">
-                                        <i class="fas fa-times-circle"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-1">Rejection</h6>
-                                        <small class="text-muted">Politely decline</small>
+                                    <div class="text-white">
+                                        <h5 class="mb-1">{{ application.applicant_name }}</h5>
+                                        <p class="mb-0 opacity-75">
+                                            <i class="bi bi-envelope me-1"></i>{{ application.applicant_email }}
+                                            {% if application.applicant_phone %}
+                                            <span class="ms-3">
+                                                <i class="bi bi-telephone me-1"></i>{{ application.applicant_phone }}
+                                            </span>
+                                            {% endif %}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Email Form -->
-                <div class="card-body">
-                    <!-- Subject -->
-                    <div class="mb-4">
-                        <label for="subject" class="form-label fw-bold text-dark">
-                            <i class="fas fa-tag me-2 text-primary"></i>Subject
-                        </label>
-                        <input type="text" 
-                               class="form-control form-control-lg border-0 bg-light rounded-3" 
-                               id="subject" 
-                               name="subject" 
-                               placeholder="Enter email subject..."
-                               value="{{ default_subject }}"
-                               required>
+                    <!-- Email Templates -->
+                    <div class="card-body border-bottom">
+                        <h3 class="h5 mb-3 fw-bold text-dark">
+                            <i class="bi bi-magic me-2 text-primary"></i>Quick Templates
+                        </h3>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="template-card p-3" data-template="interview_invite">
+                                    <div class="d-flex align-items-center">
+                                        <div class="template-icon" style="background-color: rgba(40, 167, 69, 0.1); color: #28a745;">
+                                            <i class="bi bi-handshake"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">Interview Invite</h6>
+                                            <small class="text-secondary">Invite for interview</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="template-card p-3" data-template="application_received">
+                                    <div class="d-flex align-items-center">
+                                        <div class="template-icon" style="background-color: rgba(23, 162, 184, 0.1); color: #17a2b8;">
+                                            <i class="bi bi-check-circle"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">Application Received</h6>
+                                            <small class="text-secondary">Confirm receipt</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="template-card p-3" data-template="rejection">
+                                    <div class="d-flex align-items-center">
+                                        <div class="template-icon" style="background-color: rgba(255, 193, 7, 0.1); color: #ffc107;">
+                                            <i class="bi bi-x-circle"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">Rejection</h6>
+                                            <small class="text-secondary">Politely decline</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Email Type -->
-                    <input type="hidden" name="email_type" id="emailType" value="custom">
+                    <!-- Email Form -->
+                    <div class="card-body">
+                        <!-- Subject -->
+                        <div class="mb-4">
+                            <label for="subject" class="form-label fw-medium text-dark">
+                                <i class="bi bi-tag me-2 text-primary"></i>Subject
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-pencil text-secondary"></i>
+                                </span>
+                                <input type="text" 
+                                       class="form-control border-0 bg-light rounded-3" 
+                                       id="subject" 
+                                       name="subject" 
+                                       placeholder="Enter email subject..."
+                                       value="{{ default_subject }}"
+                                       required>
+                            </div>
+                        </div>
 
-                    <!-- Message Editor -->
-                    <div class="mb-4">
-                        <label class="form-label fw-bold text-dark">
-                            <i class="fas fa-edit me-2 text-primary"></i>Message
-                        </label>
-                        <textarea name="message" id="message" class="email-textarea" placeholder="Write your email message here..." required>Dear {{ application.applicant_name }},
+                        <!-- Email Type -->
+                        <input type="hidden" name="email_type" id="emailType" value="custom">
+
+                        <!-- Message Editor -->
+                        <div class="mb-4">
+                            <label class="form-label fw-medium text-dark">
+                                <i class="bi bi-pen me-2 text-primary"></i>Message
+                            </label>
+                            <textarea name="message" id="message" style="display: none;">
+Dear {{ application.applicant_name }},
+
+Thank you for your application for the {{ application.job.title }} position.
 
 Best regards,
-{{ request.user.get_full_name|default:request.user.email }}</textarea>
-                    </div>
+{{ request.user.get_full_name|default:request.user.email }}
+                            </textarea>
+                            <div id="editor" style="min-height: 300px;"></div>
+                        </div>
 
-                    <!-- Attachments -->
-                    {% if application.resume %}
-                    <div class="mb-4">
-                        <label class="form-label fw-bold text-dark">
-                            <i class="fas fa-paperclip me-2 text-primary"></i>Attachments
-                        </label>
-                        <div class="attachment-item">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="attach_resume" id="attachResume" checked>
-                                <label class="form-check-label d-flex align-items-center" for="attachResume">
-                                    <i class="fas fa-file-pdf text-danger me-2"></i>
-                                    <div>
-                                        <strong>{{ application.resume.name }}</strong>
-                                        <small class="text-muted d-block">Applicant's Resume</small>
-                                    </div>
-                                </label>
+                        <!-- Attachments -->
+                        {% if application.resume %}
+                        <div class="mb-4">
+                            <label class="form-label fw-medium text-dark">
+                                <i class="bi bi-paperclip me-2 text-primary"></i>Attachments
+                            </label>
+                            <div class="attachment-item">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="attach_resume" id="attachResume" checked>
+                                    <label class="form-check-label d-flex align-items-center" for="attachResume">
+                                        <i class="bi bi-file-pdf text-danger me-2 fs-5"></i>
+                                        <div>
+                                            <strong class="text-dark">{{ application.resume.name|slice:"20" }}{% if application.resume.name|length > 20 %}...{% endif %}</strong>
+                                            <small class="text-secondary d-block">Applicant's Resume</small>
+                                        </div>
+                                    </label>
+                                </div>
                             </div>
                         </div>
+                        {% endif %}
                     </div>
-                    {% endif %}
-                </div>
 
-                <!-- Actions -->
-                <div class="compose-actions">
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                        <div>
-                            <button type="button" id="previewBtn" class="btn btn-outline-primary rounded-pill px-4">
-                                <i class="fas fa-eye me-2"></i>Preview
-                            </button>
+                    <!-- Actions -->
+                    <footer class="card-footer bg-transparent border-top-0 pt-0">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <div>
+                                <button type="button" id="previewBtn" class="btn btn-outline-primary rounded-3 px-4">
+                                    <i class="bi bi-eye me-2"></i>Preview
+                                </button>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'applicant_detail' application.id %}" class="btn btn-outline-secondary rounded-3 px-4">
+                                    <i class="bi bi-x-circle me-2"></i>Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary rounded-3 px-4">
+                                    <i class="bi bi-send me-2"></i>Send Email
+                                </button>
+                            </div>
                         </div>
-                        <div>
-                            <a href="{% url 'applicant_detail' application.id %}" class="btn btn-outline-danger rounded-pill px-4 me-2">
-                                <i class="fas fa-times me-2"></i>Cancel
-                            </a>
-                            <button type="submit" class="btn btn-primary rounded-pill px-4">
-                                <i class="fas fa-paper-plane me-2"></i>Send Email
-                            </button>
-                        </div>
-                    </div>
+                    </footer>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </div>
 
 <!-- Preview Modal -->
-<div class="modal fade" id="previewModal" tabindex="-1">
+<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Email Preview</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title fw-bold text-dark" id="previewModalLabel">Email Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <strong>To:</strong> {{ application.applicant_name }} &lt;{{ application.applicant_email }}&gt;
+                    <strong class="text-dark">To:</strong> 
+                    <span class="text-secondary">{{ application.applicant_name }} &lt;{{ application.applicant_email }}&gt;</span>
                 </div>
                 <div class="mb-3">
-                    <strong>Subject:</strong> <span id="previewSubject"></span>
+                    <strong class="text-dark">Subject:</strong> 
+                    <span class="text-secondary" id="previewSubject"></span>
                 </div>
-                <div class="email-preview" id="emailPreview">
+                <div class="email-preview border rounded-3 p-4 bg-light" id="emailPreview">
                     <!-- Preview content will be inserted here -->
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
                 <button type="submit" form="emailForm" class="btn btn-primary">
-                    <i class="fas fa-paper-plane me-2"></i>Send Now
+                    <i class="bi bi-send me-2"></i>Send Now
                 </button>
             </div>
         </div>
@@ -337,73 +218,388 @@ Best regards,
 </div>
 {% endblock %}
 
+{% block extra_css %}
+<!-- TinyMCE CSS is loaded via JS, no additional CSS needed -->
+<style>
+:root {
+    --primary: #257dd4;
+    --primary-light: #257cd491;
+    --primary-dark: #257dd4;
+    --secondary: #546E7A;
+    --accent: #FF9800;
+    --light: #E3F2FD;
+    --dark: #257dd4;
+    --gradient-start: #257dd4;
+    --gradient-end: #257dd4;
+    --sidebar-width: 280px;
+}
+
+/* Button styles using your theme */
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.btn-outline-primary {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.btn-outline-secondary {
+    color: var(--secondary);
+    border-color: var(--secondary);
+}
+
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus {
+    background-color: var(--secondary);
+    border-color: var(--secondary);
+    color: white;
+}
+
+/* Text colors */
+.text-primary {
+    color: var(--primary) !important;
+}
+
+.text-secondary {
+    color: var(--secondary) !important;
+}
+
+.text-dark {
+    color: #2c3e50 !important;
+}
+
+/* Card styles */
+.card {
+    border: none;
+    border-radius: 0.75rem;
+}
+
+/* Template cards */
+.template-card {
+    border: 2px solid rgba(37, 125, 212, 0.1);
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: white;
+}
+
+.template-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(37, 125, 212, 0.15);
+}
+
+.template-card.active {
+    border-color: var(--primary);
+    background-color: rgba(37, 125, 212, 0.05);
+}
+
+.template-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 1.25rem;
+}
+
+/* Email preview */
+.email-preview {
+    background-color: var(--light);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    line-height: 1.6;
+    font-family: inherit;
+    min-height: 200px;
+}
+
+/* Attachment item */
+.attachment-item {
+    background: white;
+    border: 1px solid rgba(37, 125, 212, 0.1);
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+/* Form styles */
+.form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 0.2rem rgba(37, 125, 212, 0.15);
+}
+
+.input-group-text {
+    background-color: var(--light);
+    border-color: #dee2e6;
+    transition: all 0.2s ease;
+}
+
+/* Background colors */
+.bg-light {
+    background-color: var(--light) !important;
+}
+
+/* TinyMCE customization */
+.tox-tinymce {
+    border-radius: 0.5rem !important;
+    border: 1px solid #dee2e6 !important;
+}
+
+.tox .tox-toolbar,
+.tox .tox-menubar,
+.tox .tox-statusbar {
+    background-color: #f8f9fa !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1.25rem;
+    }
+    
+    .template-card {
+        margin-bottom: 1rem;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+    
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .d-flex.gap-2 {
+        gap: 0.5rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .template-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .h2 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Animation for interactions */
+.btn {
+    transition: all 0.2s ease;
+    border-radius: 0.5rem;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Modal styling */
+.modal-header {
+    border-bottom: 1px solid rgba(37, 125, 212, 0.1);
+}
+
+.modal-footer {
+    border-top: 1px solid rgba(37, 125, 212, 0.1);
+}
+</style>
+{% endblock %}
+
 {% block extra_js %}
+<!-- TinyMCE from CDN -->
+<script src="https://cdn.tiny.cloud/1/n119wh9nl0agd5lbow0vs9xppwbs5auujkhbewvtm33ua4g1/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Template selection
-        document.querySelectorAll('.template-card').forEach(card => {
-            card.addEventListener('click', function() {
-                // Remove active class from all cards
-                document.querySelectorAll('.template-card').forEach(c => {
-                    c.classList.remove('active');
-                });
-                
-                // Add active class to clicked card
-                this.classList.add('active');
-                
-                const templateType = this.getAttribute('data-template');
-                document.getElementById('emailType').value = templateType;
-                
-                // Load template content
-                loadTemplate(templateType);
-            });
-        });
+// Replace 'YOUR_API_KEY' with your actual TinyMCE API key
+const TINYMCE_API_KEY = 'your-actual-api-key-here'; // Make sure to replace this!
 
-        // Load template function
-        function loadTemplate(templateType) {
-            const templates = {
-                interview_invite: {
-                    subject: `Interview Invitation - {{ application.job.title }}`,
-                    message: `{{ email_templates.interview_invite.message|escapejs }}`
-                },
-                application_received: {
-                    subject: `Application Received - {{ application.job.title }}`,
-                    message: `{{ email_templates.application_received.message|escapejs }}`
-                },
-                rejection: {
-                    subject: `Update on Your Application - {{ application.job.title }}`,
-                    message: `{{ email_templates.rejection.message|escapejs }}`
-                }
-            };
+document.addEventListener('DOMContentLoaded', function() {
+    let tinymceEditor;
 
-            if (templates[templateType]) {
-                document.getElementById('subject').value = templates[templateType].subject;
-                document.getElementById('message').value = templates[templateType].message;
-            }
+    // Initialize TinyMCE
+    function initializeTinyMCE() {
+        if (typeof tinymce === 'undefined') {
+            console.error('TinyMCE not loaded. Please check the CDN URL and API key.');
+            // Fallback to textarea
+            document.getElementById('editor').style.display = 'none';
+            document.getElementById('message').style.display = 'block';
+            document.getElementById('message').style.minHeight = '300px';
+            document.getElementById('message').style.width = '100%';
+            document.getElementById('message').style.padding = '1rem';
+            document.getElementById('message').style.border = '1px solid #dee2e6';
+            document.getElementById('message').style.borderRadius = '0.5rem';
+            return;
         }
 
-        // Preview functionality
-        document.getElementById('previewBtn').addEventListener('click', function() {
-            const messageContent = document.getElementById('message').value;
-            const subjectContent = document.getElementById('subject').value;
-            
-            // Set preview content
-            document.getElementById('previewSubject').textContent = subjectContent;
-            document.getElementById('emailPreview').textContent = messageContent;
-            
-            // Show modal
-            new bootstrap.Modal(document.getElementById('previewModal')).show();
+        // Initialize TinyMCE
+        tinymce.init({
+            selector: '#editor',
+            plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table help wordcount',
+            toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link | removeformat | help',
+            menubar: 'edit view insert format tools help',
+            height: 300,
+            branding: false,
+            promotion: false,
+            statusbar: true,
+            elementpath: false,
+            content_style: `
+                body { 
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+                    font-size: 14px; 
+                    line-height: 1.6;
+                    color: #2c3e50;
+                }
+                p { margin: 0 0 1em 0; }
+            `,
+            setup: function (editor) {
+                editor.on('init', function () {
+                    // Set initial content
+                    editor.setContent(document.getElementById('message').value);
+                });
+                
+                editor.on('change keyup', function () {
+                    // Update the hidden textarea
+                    document.getElementById('message').value = editor.getContent();
+                });
+                
+                tinymceEditor = editor;
+            }
         });
+    }
 
-        // Form submission loading state
-        document.getElementById('emailForm').addEventListener('submit', function(e) {
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
-            submitBtn.disabled = true;
+    // Initialize TinyMCE
+    initializeTinyMCE();
+
+    // Template selection
+    document.querySelectorAll('.template-card').forEach(card => {
+        card.addEventListener('click', function() {
+            // Remove active class from all cards
+            document.querySelectorAll('.template-card').forEach(c => {
+                c.classList.remove('active');
+            });
             
-            // Allow form to submit normally
+            // Add active class to clicked card
+            this.classList.add('active');
+            
+            const templateType = this.getAttribute('data-template');
+            document.getElementById('emailType').value = templateType;
+            
+            // Load template content
+            loadTemplate(templateType);
         });
     });
+
+    // Load template function
+    function loadTemplate(templateType) {
+        const templates = {
+            interview_invite: {
+                subject: `Interview Invitation - {{ application.job.title }}`,
+                message: `<p>Dear <strong>{{ application.applicant_name }}</strong>,</p>
+<p>We were impressed by your application for the <strong>{{ application.job.title }}</strong> position and would like to invite you for an interview.</p>
+<p>Please let us know your availability for a virtual meeting next week.</p>
+<p>Looking forward to speaking with you.</p>
+<p>Best regards,<br><strong>Tech Recruitment UK</strong></p>`
+            },
+            application_received: {
+                subject: `Application Received - {{ application.job.title }}`,
+                message: `<p>Dear <strong>{{ application.applicant_name }}</strong>,</p>
+<p>Thank you for applying for the <strong>{{ application.job.title }}</strong> position at our company.</p>
+<p>We have successfully received your application and will review it carefully. Our team will be in touch if your qualifications match our requirements.</p>
+<p>We appreciate your interest in joining our team.</p>
+<p>Best regards,<br><strong>Tech Recruitment UK</strong></p>`
+            },
+            rejection: {
+                subject: `Update on Your Application - {{ application.job.title }}`,
+                message: `<p>Dear <strong>{{ application.applicant_name }}</strong>,</p>
+<p>Thank you for your interest in the <strong>{{ application.job.title }}</strong> position and for taking the time to apply.</p>
+<p>After careful consideration, we have decided to move forward with other candidates whose qualifications more closely match our current needs.</p>
+<p>We appreciate your interest in our company and encourage you to apply for future positions that match your skills and experience.</p>
+<p>We wish you the best in your job search.</p>
+<p>Best regards,<br><strong>Tech Recruitment UK</strong></p>`
+            }
+        };
+
+        if (templates[templateType]) {
+            document.getElementById('subject').value = templates[templateType].subject;
+            if (tinymceEditor) {
+                tinymceEditor.setContent(templates[templateType].message);
+                document.getElementById('message').value = templates[templateType].message;
+            } else {
+                // Fallback for textarea
+                document.getElementById('message').value = templates[templateType].message.replace(/<[^>]*>/g, '');
+            }
+        }
+    }
+
+    // Preview functionality
+    document.getElementById('previewBtn').addEventListener('click', function() {
+        let messageContent;
+        let subjectContent = document.getElementById('subject').value;
+        
+        // Get content from editor or textarea
+        if (tinymceEditor) {
+            messageContent = tinymceEditor.getContent();
+        } else {
+            messageContent = document.getElementById('message').value;
+            // Convert line breaks to HTML for preview
+            messageContent = '<p>' + messageContent.replace(/\n/g, '</p><p>') + '</p>';
+        }
+        
+        // Set preview content
+        document.getElementById('previewSubject').textContent = subjectContent;
+        document.getElementById('emailPreview').innerHTML = messageContent;
+        
+        // Show modal
+        const previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
+        previewModal.show();
+    });
+
+    // Form submission loading state
+    document.getElementById('emailForm').addEventListener('submit', function(e) {
+        // Ensure content is synced to textarea
+        if (tinymceEditor) {
+            const editorData = tinymceEditor.getContent();
+            document.getElementById('message').value = editorData;
+        }
+        
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split spinner-border spinner-border-sm me-2"></i>Sending...';
+        submitBtn.disabled = true;
+        
+        // Allow form to submit normally
+    });
+
+    // Auto-focus subject field
+    document.getElementById('subject').focus();
+});
 </script>
 {% endblock %}

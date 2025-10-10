@@ -7,6 +7,7 @@ from django.utils import timezone
 from job.models import Job, JobCategory, JobApplication
 from job.forms import JobForm, SaveJobForm
 from accounts.models import User
+from job.views_pkg.admin_views import get_client_ip
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -97,18 +98,32 @@ def job_listings(request):
     return render(request, 'job_listings.html', context)
 
 
+from django.views.decorators.csrf import ensure_csrf_cookie
+from job.models import SavedJob  # Make sure to import SavedJob
+
+
+@ensure_csrf_cookie
 def job_detail_frontend(request, job_id):
     job = get_object_or_404(Job, id=job_id)
     
     # Check if user has applied
     has_applied = False
     application = None
+    is_saved = False
+    
     if request.user.is_authenticated:
+        # Check application
         application = JobApplication.objects.filter(
             job=job, 
             applicant=request.user
         ).first()
         has_applied = application is not None
+        
+        # Check if job is saved/bookmarked
+        is_saved = SavedJob.objects.filter(
+            job_seeker=request.user,
+            job=job
+        ).exists()
     
     # Get related jobs (same category or similar title)
     related_jobs = Job.objects.filter(
@@ -119,12 +134,17 @@ def job_detail_frontend(request, job_id):
     time_since_posted = timezone.now() - job.created_at
     hours_ago = int(time_since_posted.total_seconds() / 3600)
     
+    # Create share text for social media
+    share_text = f"Check out this job: {job.title}"
+    
     context = {
         'job': job,
         'related_jobs': related_jobs,
         'hours_ago': hours_ago,
         'has_applied': has_applied,
         'application': application,
+        'is_saved': is_saved,
+        'share_text': share_text,
     }
     
     return render(request, 'job_detail.html', context)
@@ -185,18 +205,36 @@ def jobs_by_category(request, category_slug):
     return render(request, 'category_jobs.html', context)
 
 
+from django.shortcuts import render, get_object_or_404
+from .models import AboutUs, OurValue, TeamMember, CompanyStat
+
 def about(request):
     """
     View for the About page
     """
+    # Get the active AboutUs instance or create a default one
+    about_us = AboutUs.objects.filter(is_active=True).first()
+    
+    if not about_us:
+        about_us = AboutUs.objects.create(
+            title="About Our Company",
+            description="We are a passionate team dedicated to delivering exceptional solutions...",
+            mission="Our mission is to provide outstanding services and build lasting relationships with our clients.",
+            vision="To be the leading company in our industry, recognized for innovation and excellence.",
+            is_active=True
+        )
+    
+    # Get all active items
+    our_values = OurValue.objects.filter(is_active=True).order_by('order')
+    team_members = TeamMember.objects.filter(is_active=True).order_by('order')
+    company_stats = CompanyStat.objects.filter(is_active=True).order_by('order')
+
     context = {
-        'page_title': 'About Our Company',
-        'team_members': [
-            {'name': 'John Doe', 'role': 'CEO', 'bio': 'Founder with 10+ years of experience...'},
-            {'name': 'Jane Smith', 'role': 'CTO', 'bio': 'Technology expert specializing in...'},
-            # Add more team members as needed
-        ],
-        'company_history': 'Our company was founded in 2010 with a mission to...',
+        'page_title': about_us.title,
+        'about_us': about_us,
+        'our_values': our_values,
+        'team_members': team_members,
+        'company_stats': company_stats,
     }
     return render(request, 'about-us.html', context)
 
@@ -208,8 +246,47 @@ def blog(request):
     return render(request, 'blogs.html', context)
 
 
+
+
+from job.models import ContactMessage, ContactInfo, FAQ, SiteSetting
+from job.forms import ContactMessageForm, ContactInfoForm, FAQForm, SiteSettingForm
+
 def contact_us(request):
+    """Public contact page"""
+    site_settings = SiteSetting.objects.filter(is_active=True).first()
+    if not site_settings:
+        site_settings = SiteSetting.objects.create()
+    
+    contact_info = ContactInfo.objects.filter(is_active=True).order_by('order')
+    faqs = FAQ.objects.filter(is_active=True).order_by('order')
+    
+    if request.method == 'POST':
+        form = ContactMessageForm(request.POST)
+        if form.is_valid():
+            contact_message = form.save(commit=False)
+            
+            # Capture additional data
+            contact_message.ip_address = get_client_ip(request)
+            contact_message.user_agent = request.META.get('HTTP_USER_AGENT', '')
+            contact_message.save()
+            
+            messages.success(request, 'Thank you for your message! We will get back to you soon.')
+            return render(request, 'contact-us.html', {
+                'form': ContactMessageForm(),
+                'site_settings': site_settings,
+                'contact_info': contact_info,
+                'faqs': faqs,
+                'message_sent': True
+            })
+    else:
+        form = ContactMessageForm()
+    
     context = {
         'page_title': 'Contact Us',
+        'form': form,
+        'site_settings': site_settings,
+        'contact_info': contact_info,
+        'faqs': faqs,
+        'message_sent': False
     }
     return render(request, 'contact-us.html', context)

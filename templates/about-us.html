@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block extra_css %}
+{% block title %} About Us {% endblock %}
 
+{% block extra_css %}
     <style>        
         /* Navigation Styles */
         .navbar {
@@ -88,8 +89,7 @@
         
         /* Hero Section */
         .about-hero {
-            background: linear-gradient(rgba(1, 12, 22, 0.8),   /* #257dd4 with 80% opacity */
-              rgba(2, 13, 23, 0.8)), url('https://images.unsplash.com/photo-1521791136064-7986c2920216?ixlib=rb-4.0.3&auto=format&fit=crop&w=1500&q=80');
+            background: linear-gradient(rgba(37, 125, 212, 0.8), rgba(37, 125, 212, 0.9)), url('https://images.unsplash.com/photo-1521791136064-7986c2920216?ixlib=rb-4.0.3&auto=format&fit=crop&w=1500&q=80');
             background-size: cover;
             background-position: center;
             padding: 120px 0 80px;
@@ -225,7 +225,7 @@
         
         /* Stats Section */
         .stats-section {
-            background: linear-gradient(rgba(25, 118, 210, 0.85), rgba(13, 71, 161, 0.9)), url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=1500&q=80');
+            background: linear-gradient(rgba(37, 125, 212, 0.85), rgba(37, 125, 212, 0.9)), url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=1500&q=80');
             background-size: cover;
             background-position: center;
             color: white;
@@ -316,21 +316,18 @@
             }
         }
     </style>
-
 {% endblock extra_css %}
 
-
 {% block content %}
-
     <!-- Hero Section -->
     <section class="about-hero">
         <div class="container">
             <div class="row">
                 <div class="col-lg-8">
-                    <h1 class="hero-title">About JobBoard</h1>
+                    <h1 class="hero-title">{{ about_us.title }}</h1>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="#">Home</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
                             <li class="breadcrumb-item active" aria-current="page">About</li>
                         </ol>
                     </nav>
@@ -348,106 +345,62 @@
                         <h2>Our Story</h2>
                         <p>How we started our journey to transform the job search process</p>
                     </div>
-                    <p>TECH RECRUITMENT UK was founded in 2015 with a simple mission: to make job searching and hiring more efficient, transparent, and human. What started as a small platform has grown into a comprehensive job marketplace connecting thousands of employers with top talent.</p>
-                    <p>Our team of dedicated professionals works tirelessly to improve our platform, adding new features and functionality to serve both job seekers and employers better. We believe that everyone deserves to find work they're passionate about and that companies should have access to the best talent.</p>
-                    <p>Today, TECH RECRUITMENT UK serves over 1 million users monthly and has helped facilitate more than 100,000 successful job placements across various industries and career levels.</p>
+                    <div class="about-description">
+                        {{ about_us.description|safe }}
+                    </div>
                 </div>
                 <div class="col-lg-6">
-                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Our Team" class="img-fluid story-img">
+                    {% if about_us.image %}
+                        <img src="{{ about_us.image.url }}" alt="{{ about_us.title }}" class="img-fluid story-img">
+                    {% else %}
+                        <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Our Team" class="img-fluid story-img">
+                    {% endif %}
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Stats Section -->
+    {% if company_stats %}
     <section class="stats-section">
         <div class="container">
             <div class="row">
+                {% for stat in company_stats %}
                 <div class="col-md-3 col-6">
                     <div class="stat-item">
-                        <div class="stat-number" data-count="500">0</div>
-                        <div class="stat-text">Companies</div>
+                        <div class="stat-number" data-count="{{ stat.number }}">0</div>
+                        <div class="stat-text">{{ stat.label }}</div>
                     </div>
                 </div>
-                <div class="col-md-3 col-6">
-                    <div class="stat-item">
-                        <div class="stat-number" data-count="12000">0</div>
-                        <div class="stat-text">Jobs Posted</div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6">
-                    <div class="stat-item">
-                        <div class="stat-number" data-count="9500">0</div>
-                        <div class="stat-text">Members</div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6">
-                    <div class="stat-item">
-                        <div class="stat-number" data-count="100">0</div>
-                        <div class="stat-text">Team Members</div>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
         </div>
     </section>
+    {% endif %}
 
-    <!-- Team Section -->
-    <section class="team-section">
+    <!-- Mission & Vision Section -->
+    <section class="values-section">
         <div class="container">
-            <div class="section-title text-center">
-                <h2>Meet Our Team</h2>
-                <p>The passionate people behind TECH RECRUITMENT UK's success</p>
-            </div>
             <div class="row">
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="team-card">
-                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Team Member" class="team-img">
-                        <h4>Michael Chen</h4>
-                        <p class="text-primary">CEO & Founder</p>
-                        <p>With over 15 years in the tech industry, Michael leads our vision and strategy.</p>
-                        <div class="team-social">
-                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                            <a href="#"><i class="fab fa-twitter"></i></a>
-                            <a href="#"><i class="far fa-envelope"></i></a>
+                <div class="col-lg-6 mb-5">
+                    <div class="value-card">
+                        <div class="value-icon">
+                            <i class="bi bi-bullseye"></i>
+                        </div>
+                        <h4>Our Mission</h4>
+                        <div class="mission-content">
+                            {{ about_us.mission|safe }}
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="team-card">
-                        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Team Member" class="team-img">
-                        <h4>Sarah Johnson</h4>
-                        <p class="text-primary">CTO</p>
-                        <p>Sarah oversees our technology stack and leads our development team.</p>
-                        <div class="team-social">
-                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                            <a href="#"><i class="fab fa-twitter"></i></a>
-                            <a href="#"><i class="far fa-envelope"></i></a>
+                <div class="col-lg-6 mb-5">
+                    <div class="value-card">
+                        <div class="value-icon">
+                            <i class="bi bi-eye"></i>
                         </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="team-card">
-                        <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Team Member" class="team-img">
-                        <h4>Emily Rodriguez</h4>
-                        <p class="text-primary">Marketing Director</p>
-                        <p>Emily leads our marketing efforts and brand development strategies.</p>
-                        <div class="team-social">
-                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                            <a href="#"><i class="fab fa-twitter"></i></a>
-                            <a href="#"><i class="far fa-envelope"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="team-card">
-                        <img src="https://randomuser.me/api/portraits/men/75.jpg" alt="Team Member" class="team-img">
-                        <h4>David Wilson</h4>
-                        <p class="text-primary">Product Manager</p>
-                        <p>David ensures our platform meets the needs of both job seekers and employers.</p>
-                        <div class="team-social">
-                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                            <a href="#"><i class="fab fa-twitter"></i></a>
-                            <a href="#"><i class="far fa-envelope"></i></a>
+                        <h4>Our Vision</h4>
+                        <div class="vision-content">
+                            {{ about_us.vision|safe }}
                         </div>
                     </div>
                 </div>
@@ -456,6 +409,7 @@
     </section>
 
     <!-- Values Section -->
+    {% if our_values %}
     <section class="values-section">
         <div class="container">
             <div class="section-title text-center">
@@ -463,63 +417,63 @@
                 <p>The principles that guide everything we do</p>
             </div>
             <div class="row">
+                {% for value in our_values %}
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="value-card">
                         <div class="value-icon">
-                            <i class="fas fa-users"></i>
+                            <i class="bi {{ value.icon }}"></i>
                         </div>
-                        <h4>User Focus</h4>
-                        <p>We prioritize the needs of both job seekers and employers, constantly improving our platform based on user feedback.</p>
+                        <h4>{{ value.title }}</h4>
+                        <p>{{ value.description }}</p>
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="value-card">
-                        <div class="value-icon">
-                            <i class="fas fa-lightbulb"></i>
-                        </div>
-                        <h4>Innovation</h4>
-                        <p>We embrace new technologies and approaches to make job searching and hiring more efficient and effective.</p>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="value-card">
-                        <div class="value-icon">
-                            <i class="fas fa-shield-alt"></i>
-                        </div>
-                        <h4>Trust & Transparency</h4>
-                        <p>We believe in building trust through transparency in our processes, pricing, and communications.</p>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="value-card">
-                        <div class="value-icon">
-                            <i class="fas fa-hand-holding-heart"></i>
-                        </div>
-                        <h4>Inclusion</h4>
-                        <p>We're committed to creating a platform that welcomes and serves people from all backgrounds.</p>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="value-card">
-                        <div class="value-icon">
-                            <i class="fas fa-rocket"></i>
-                        </div>
-                        <h4>Excellence</h4>
-                        <p>We strive for excellence in everything we do, from platform features to customer support.</p>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="value-card">
-                        <div class="value-icon">
-                            <i class="fas fa-balance-scale"></i>
-                        </div>
-                        <h4>Integrity</h4>
-                        <p>We operate with honesty and integrity, ensuring ethical practices in all our business dealings.</p>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
         </div>
     </section>
+    {% endif %}
+
+    <!-- Team Section -->
+    {% if team_members %}
+    <section class="team-section">
+        <div class="container">
+            <div class="section-title text-center">
+                <h2>Meet Our Team</h2>
+                <p>The passionate people behind our success</p>
+            </div>
+            <div class="row">
+                {% for member in team_members %}
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="team-card">
+                        {% if member.image %}
+                            <img src="{{ member.image.url }}" alt="{{ member.name }}" class="team-img">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="{{ member.name }}" class="team-img">
+                        {% endif %}
+                        <h4>{{ member.name }}</h4>
+                        <p class="text-primary">{{ member.position }}</p>
+                        <p>{{ member.bio }}</p>
+                        <div class="team-social">
+                            {% if member.linkedin_url %}
+                                <a href="{{ member.linkedin_url }}" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                            {% endif %}
+                            {% if member.twitter_url %}
+                                <a href="{{ member.twitter_url }}" target="_blank"><i class="fab fa-twitter"></i></a>
+                            {% endif %}
+                            {% if member.github_url %}
+                                <a href="{{ member.github_url }}" target="_blank"><i class="fab fa-github"></i></a>
+                            {% endif %}
+                            {% if member.portfolio_url %}
+                                <a href="{{ member.portfolio_url }}" target="_blank"><i class="fas fa-globe"></i></a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
 
     <!-- CTA Section -->
     <section class="cta-section">
@@ -527,40 +481,50 @@
             <div class="row align-items-center">
                 <div class="col-lg-8 mb-4 mb-lg-0">
                     <h2 class="mb-3">Ready to find your dream job or perfect candidate?</h2>
-                    <p class="mb-0">Join thousands of companies and job seekers already using JobBoard</p>
+                    <p class="mb-0">Join thousands of companies and job seekers already using our platform</p>
                 </div>
                 <div class="col-lg-4 text-lg-end">
-                    <a href="#" class="btn btn-primary me-2">Post a Job</a>
-                    <a href="#" class="btn btn-outline-primary">Create Profile</a>
+                    <a href="{% url 'job_list' %}" class="btn btn-primary me-2">Browse Jobs</a>
+                    {% comment %} <a href="{% url 'register' %}" class="btn btn-outline-primary">Create Profile</a> {% endcomment %}
                 </div>
             </div>
         </div>
     </section>
-
 {% endblock content %}
-
 
 {% block extra_js %}
     <!-- Counter Animation -->
     <script>
-        // Counter animation for stats
         document.addEventListener('DOMContentLoaded', function() {
+            // Counter animation for stats
             const counters = document.querySelectorAll('.stat-number');
             const speed = 200;
             
             counters.forEach(counter => {
                 const target = +counter.getAttribute('data-count');
                 const count = +counter.innerText;
-                const increment = Math.ceil(target / speed);
+                
+                // Handle different number formats (e.g., "100+", "99%", "5000")
+                let numericTarget;
+                if (target.includes('+')) {
+                    numericTarget = parseInt(target) + 1;
+                } else if (target.includes('%')) {
+                    numericTarget = parseInt(target);
+                } else {
+                    numericTarget = parseInt(target);
+                }
+                
+                const increment = Math.ceil(numericTarget / speed);
                 
                 let current = 0;
                 
                 const updateCount = () => {
-                    if (current < target) {
+                    if (current < numericTarget) {
                         current += increment;
                         counter.innerText = current;
                         setTimeout(updateCount, 1);
                     } else {
+                        // Restore original format
                         counter.innerText = target;
                     }
                 };
@@ -569,5 +533,4 @@
             });
         });
     </script>
-
 {% endblock extra_js %}

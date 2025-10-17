@@ -52,13 +52,35 @@ class EmailAuthenticationForm(forms.Form):
 
 
 class TOTPForm(forms.Form):
-    token = forms.IntegerField(
-        widget=forms.NumberInput(attrs={
-            "class": "form-control", 
-            "placeholder": "123456"
-        })
+    token = forms.CharField(
+        max_length=6,
+        min_length=6,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control form-control-lg text-center',
+            'placeholder': '000000',
+            'pattern': '[0-9]{6}',
+            'inputmode': 'numeric',
+            'autocomplete': 'one-time-code',
+            'style': 'font-size: 1.5rem; letter-spacing: 5px; font-weight: 600;'
+        }),
+        help_text="Enter the 6-digit code from your authenticator app"
     )
-    trust_device = forms.BooleanField(required=False)
+    
+    trust_device = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input'
+        }),
+        label="Trust this device for 30 days"
+    )
+    
+    def clean_token(self):
+        token = self.cleaned_data['token'].strip()
+        if not token.isdigit():
+            raise forms.ValidationError("Token must contain only numbers.")
+        if len(token) != 6:
+            raise forms.ValidationError("Token must be exactly 6 digits.")
+        return token
 
 
 class JobSeekerSignupForm(forms.ModelForm):

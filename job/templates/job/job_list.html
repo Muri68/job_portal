@@ -254,14 +254,14 @@
         <div class="btn-group" role="group" aria-label="View toggle">
             <input type="radio" class="btn-check" name="viewToggle" id="cardViewBtn" autocomplete="off" checked>
             <label class="btn btn-outline-primary" for="cardViewBtn" title="Card View">
-                <i class="bi bi-grid me-1"></i>
-                <span class="d-none d-sm-inline">Cards</span>
+                <i class="bi bi-grid-3x3-gap"></i>
+                <span class="d-none d-sm-inline">Grid View</span>
             </label>
             
             <input type="radio" class="btn-check" name="viewToggle" id="tableViewBtn" autocomplete="off">
             <label class="btn btn-outline-primary" for="tableViewBtn" title="Table View">
-                <i class="bi bi-list me-1"></i>
-                <span class="d-none d-sm-inline">Table</span>
+                <i class="bi bi-list-task me-1"></i>
+                <span class="d-none d-sm-inline">Table View</span>
             </label>
         </div>
     </section>
@@ -333,8 +333,8 @@
                                     <i class="bi bi-people me-1"></i>
                                     {{ job.applications_count }} Application{{ job.applications_count|pluralize }}
                                 </a>
-                                {% if job.is_new_job %}
-                                <span class="badge" style="background-color: var(--primary-light); color: var(--primary-dark);">New</span>
+                                {% if forloop.first %}
+                                <span class="badge" style="background-color: var(--primary-light); color: var(--primary-dark);">🌟 LATEST</span>
                                 {% endif %}
                             </div>
                         </div>
@@ -344,11 +344,7 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <small class="text-secondary">
                                     <i class="bi bi-clock me-1"></i>
-                                    {% if job.is_new_job %}
-                                        Created {{ job.created_at|timesince }} ago
-                                    {% else %}
-                                        Updated {{ job.updated_at|timesince }} ago
-                                    {% endif %}
+                                    Created {{ job.created_at|timesince }} ago
                                 </small>
                                 
                                 <div class="btn-group btn-group-sm" role="group">
@@ -403,6 +399,7 @@
                         <table class="table table-hover align-middle mb-0" aria-label="Job listings table">
                             <thead class="bg-light">
                                 <tr>
+                                    <th scope="col">Serial</th>
                                     <th scope="col">Job Title</th>
                                     <th scope="col">Category</th>
                                     <th scope="col">Type</th>
@@ -416,6 +413,7 @@
                             <tbody>
                                 {% for job in page_obj %}
                                 <tr>
+                                    <td class="text-center">{{ forloop.counter }}</td>
                                     <td>
                                         <div>
                                             <h4 class="h6 mb-1 text-dark fw-semibold">{{ job.title }}</h4>

@@ -355,11 +355,22 @@ def job_applications(request, job_id):
     # Status choices for template
     status_choices = JobApplication.STATUS_CHOICES
     
+    # Calculate status counts
+    status_counts = {
+        'total': applications.count(),
+        'pending': applications.filter(status='pending').count(),
+        'reviewed': applications.filter(status='reviewed').count(),
+        'shortlisted': applications.filter(status='shortlisted').count(),
+        'accepted': applications.filter(status='accepted').count(),
+        'rejected': applications.filter(status='rejected').count(),
+    }
+    
     context = {
         'job': job,
         'applications': applications,
         'status_filter': status_filter,
-        'status_choices': status_choices
+        'status_choices': status_choices,
+        'status_counts': status_counts,
     }
     return render(request, 'job/job_applications.html', context)
 

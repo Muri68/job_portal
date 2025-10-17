@@ -14,6 +14,9 @@ urlpatterns = [
     path("otp/verify/", views.otp_verify, name="otp_verify"),
     path("otp/disable/", views.otp_disable, name="otp_disable"),
     path("otp/disable/confirm/", views.otp_disable_confirm, name="otp_disable_confirm"),
+    path('otp/debug/', views.otp_debug, name='otp_debug'),
+    path('otp/reset/', views.otp_reset, name='otp_reset'),
+    path('otp/emergency-fix/', views.otp_emergency_fix, name='otp_emergency_fix'),
     
     # Registration & Activation URLs
     path("signup/", jobseeker_signup, name="jobseeker_signup"),

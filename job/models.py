@@ -177,7 +177,6 @@ class JobApplication(models.Model):
         ('pending', '📝 Pending'),
         ('reviewed', '👀 Reviewed'),
         ('shortlisted', '⭐ Shortlisted'),
-        ('interview', '💼 Interview'),
         ('rejected', '❌ Rejected'),
         ('accepted', '✅ Accepted'),
     ]

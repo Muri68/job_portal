@@ -22,10 +22,23 @@ def index(request):
         job_count=Count('job', filter=Q(job__status='publish'))
     )
     
+    # Get the first category and its jobs
+    first_category = categories.first()
+    if first_category:
+        category_jobs = Job.objects.filter(
+            category=first_category, 
+            status='publish'
+        )[:8]  # Limit to 8 jobs
+    else:
+        category_jobs = []
+    
     context = {
+        'jobs': Job.objects.filter(status='publish')[:6],
         'page_title': 'Career Opportunities',
-        'jobs': jobs,
-        'categories': categories
+        # 'jobs': jobs,
+        'categories': categories,
+        'first_category': first_category,
+        'category_jobs': category_jobs,
     }
     
     return render(request, 'home.html', context)

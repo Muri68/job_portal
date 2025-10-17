@@ -153,6 +153,44 @@
     .border-primary {
         border-color: var(--primary) !important;
     }
+    
+    .copy-btn {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .copy-btn:hover {
+        transform: scale(1.05);
+    }
+    
+    .min-width-100 {
+        min-width: 100px;
+    }
+    
+    .font-monospace {
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: 0.875rem;
+    }
+    
+    .progress {
+        background-color: #e9ecef;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .progress-bar {
+        transition: width 1s linear;
+    }
+    
+    .countdown-warning {
+        animation: pulse 1s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
 </style>
 
 <div class="main-header">
@@ -233,12 +271,20 @@
                     <div class="row">
                         <div class="col-lg-6">
                             <div class="qr-container text-center">
-                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={{ uri|urlencode }}&format=svg&margin=10&color=257dd4&bgcolor=ffffff" 
-                                     alt="QR Code for 2FA Setup" 
-                                     class="img-fluid rounded" />
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={{ uri|urlencode }}&format=png" 
+                             alt="QR Code" class="img-fluid border rounded">
                                 <p class="mt-3 text-muted small">
                                     Scan this QR code with your authenticator app
                                 </p>
+                                
+                                <!-- Manual Setup Toggle -->
+                                <div class="mt-3">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" 
+                                            onclick="toggleManualSetup()">
+                                        <i class="bi bi-key me-1"></i>
+                                        <span id="manualSetupToggleText">Hide Manual Setup</span>
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="mt-4">
@@ -266,20 +312,65 @@
 
                         <div class="col-lg-6">
                             <div class="ps-lg-4">
-                                <h6 class="mb-3 text-primary">Manual Setup</h6>
-                                <p class="text-muted small mb-3">
-                                    If you can't scan the QR code, enter this key manually in your authenticator app:
-                                </p>
-                                
-                                <div class="manual-key mb-4">
-                                    <code>{{ device.key }}</code>
+                                <!-- Manual Setup Section -->
+                                <div id="manualSetup">
+                                    <h6 class="mb-3 text-primary">Manual Setup</h6>
+                                    <p class="text-muted small mb-3">
+                                        If you can't scan the QR code, use this information to set up manually:
+                                    </p>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label text-dark small mb-1">Account/Email:</label>
+                                        <div class="manual-key d-flex justify-content-between align-items-center">
+                                            <code>{{ request.user.email }}</code>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary copy-btn" 
+                                                    onclick="copyToClipboard('{{ request.user.email }}', 'Email')">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label text-dark small mb-1">Secret Key:</label>
+                                        <div class="manual-key d-flex justify-content-between align-items-center">
+                                            <code id="secretKey">{{ actual_secret }}</code>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary copy-btn" 
+                                                    onclick="copyToClipboard('{{ actual_secret }}', 'Secret key')">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <label class="form-label text-dark small mb-1">Type:</label>
+                                        <div class="manual-key">
+                                            <code>Time-based (TOTP) - 30 seconds</code>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="alert alert-info border-0">
+                                        <div class="d-flex">
+                                            <i class="bi bi-info-circle text-primary me-2 mt-1"></i>
+                                            <div>
+                                                <strong>Manual Setup Instructions:</strong>
+                                                <ol class="mb-0 mt-2 small">
+                                                    <li>Open your authenticator app</li>
+                                                    <li>Select "Enter setup key" or "Manual entry"</li>
+                                                    <li>Enter your email as the account name</li>
+                                                    <li>Enter the secret key shown above</li>
+                                                    <li>Select time-based (TOTP) if asked</li>
+                                                </ol>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 
-                                <div class="alert alert-info border-0" style="background: var(--light); border-left: 4px solid var(--primary);">
+                                <div class="alert alert-warning border-0 mt-3">
                                     <div class="d-flex">
-                                        <i class="bi bi-info-circle text-primary me-2 mt-1"></i>
+                                        <i class="bi bi-exclamation-triangle text-warning me-2 mt-1"></i>
                                         <div>
-                                            <strong>Time-based codes:</strong> The code refreshes every 30 seconds for enhanced security.
+                                            <strong>Time Synchronization:</strong> 
+                                            <span class="small">Make sure your phone's time is set to automatic for accurate codes.</span>
                                         </div>
                                     </div>
                                 </div>
@@ -289,18 +380,22 @@
                                         <label for="tokenInput" class="form-label text-primary">
                                             <strong>Enter Verification Code</strong>
                                         </label>
-                                        <input type="number" 
+                                        <input type="text" 
                                                name="token" 
                                                id="tokenInput"
-                                               class="form-control form-control-lg text-center border-primary" 
+                                               class="form-control form-control-lg text-center border-primary {% if form.token.errors %}is-invalid{% endif %}" 
                                                placeholder="000000" 
                                                required
+                                               pattern="[0-9]{6}"
+                                               inputmode="numeric"
+                                               maxlength="6"
+                                               autocomplete="one-time-code"
                                                style="font-size: 1.5rem; letter-spacing: 5px; font-weight: 600;">
                                         <div class="form-text text-center">
                                             Enter the 6-digit code from your authenticator app
                                         </div>
                                         {% if form.token.errors %}
-                                            <div class="text-danger mt-2">
+                                            <div class="invalid-feedback text-center">
                                                 {% for error in form.token.errors %}
                                                     {{ error }}
                                                 {% endfor %}
@@ -313,15 +408,104 @@
                                             <i class="bi bi-shield-check me-2"></i>
                                             Verify & Enable 2FA
                                         </button>
-                                        <a href="{% url 'user_profile' %}" class="btn btn-outline-primary">
-                                            Cancel Setup
-                                        </a>
+                                        <div class="d-flex gap-2">
+                                            <a href="{% url 'user_profile' %}" class="btn btn-outline-primary flex-fill">
+                                                Cancel Setup
+                                            </a>
+                                            <a href="{% url 'accounts:otp_setup' %}?force_reset=1" class="btn btn-outline-warning" 
+                                               title="Generate new QR code and secret">
+                                                <i class="bi bi-arrow-clockwise"></i> New Code
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </form>
+
+                {% comment %} <!-- Debug Information Section -->
+                <div class="mt-4 p-3 bg-light rounded border">
+                    <h6 class="text-primary mb-3">
+                        <i class="bi bi-bug me-2"></i>Setup Information
+                        <small class="text-muted">(Use this to verify everything matches)</small>
+                    </h6>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small text-muted mb-1">Secret Key:</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control font-monospace" value="{{ actual_secret }}" readonly id="secretField">
+                                <button class="btn btn-outline-secondary" type="button" onclick="copySecretKey()">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">Use this for manual entry if QR code fails</small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small text-muted mb-1">Server Expected Code:</label>
+                            <div class="text-center">
+                                <code class="fs-3 bg-white p-2 rounded border d-inline-block min-width-100" id="expectedCode">{{ current_code }}</code>
+                                <span class="badge bg-info ms-1" id="codeValidity">Valid</span>
+                            </div>
+                            <small class="text-muted">This should match your authenticator app</small>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="card bg-white">
+                                <div class="card-body p-2">
+                                    <small class="text-muted">Code Refresh Timer</small>
+                                    <div class="d-flex align-items-center">
+                                        <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                            <div id="progressBar" class="progress-bar bg-success" role="progressbar" style="width: 100%"></div>
+                                        </div>
+                                        <small id="countdownTimer" class="text-nowrap">30s</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-white">
+                                <div class="card-body p-2">
+                                    <small class="text-muted">Server Time</small>
+                                    <div id="serverTime" class="fw-bold">--:--:--</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small><strong>Your App Shows:</strong> 
+                                    <span id="userCode" class="badge bg-secondary">(waiting for input)</span>
+                                </small>
+                                <div class="d-flex gap-1">
+                                    <a href="{% url 'accounts:otp_debug' %}" class="btn btn-sm btn-outline-info" title="Detailed debugging">
+                                        <i class="bi bi-graph-up"></i> Debug Page
+                                    </a>
+                                    <a href="{% url 'accounts:otp_reset' %}" class="btn btn-sm btn-outline-danger" 
+                                       onclick="return confirm('Are you sure you want to reset 2FA? This will delete your current setup.')">
+                                        <i class="bi bi-trash"></i> Reset
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Time Slots Preview -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <small><strong>Nearby Time Slots (for reference):</strong></small>
+                            <div class="d-flex flex-wrap gap-1 mt-1" id="timeSlots">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Security Tips -->
                 <div class="security-tip">
@@ -336,52 +520,232 @@
                             </p>
                         </div>
                     </div>
-                </div>
+                </div> {% endcomment %}
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const tokenInput = document.getElementById('tokenInput');
+document.addEventListener('DOMContentLoaded', function() {
+    const tokenInput = document.getElementById('tokenInput');
+    let countdownInterval;
+    
+    // Initialize the countdown timer
+    startCountdownTimer();
+    
+    // Auto-focus on token input and clear any existing value
+    if (tokenInput) {
+        tokenInput.value = ''; // Clear any existing value
+        tokenInput.focus();
         
-        // Auto-focus on token input
-        if (tokenInput) {
-            tokenInput.focus();
-        }
-        
-        // Format token input with spacing (optional)
+        // Validate token format in real-time
         tokenInput.addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
             if (value.length > 6) {
                 value = value.substring(0, 6);
             }
             e.target.value = value;
-        });
-        
-        // Add some visual feedback
-        const form = document.querySelector('form');
-        form.addEventListener('submit', function(e) {
-            const submitBtn = this.querySelector('button[type="submit"]');
-            if (submitBtn) {
-                submitBtn.innerHTML = '<i class="bi bi-arrow-repeat spinner-border spinner-border-sm me-2"></i> Verifying...';
-                submitBtn.disabled = true;
+            
+            // Update user code display
+            document.getElementById('userCode').textContent = value || '(waiting for input)';
+            document.getElementById('userCode').className = value.length === 6 ? 
+                'badge bg-success' : 'badge bg-secondary';
+            
+            // Visual feedback
+            if (value.length === 6) {
+                e.target.classList.add('is-valid');
+                e.target.classList.remove('is-invalid');
+            } else {
+                e.target.classList.remove('is-valid');
             }
         });
+    }
+    
+    // Form submission handling
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const token = tokenInput.value;
+        if (token.length !== 6) {
+            e.preventDefault();
+            tokenInput.classList.add('is-invalid');
+            return;
+        }
         
-        // Add hover effects to app badges
-        const appBadges = document.querySelectorAll('.app-badge');
-        appBadges.forEach(badge => {
-            badge.addEventListener('mouseenter', function() {
-                this.style.borderColor = 'var(--primary)';
-                this.style.boxShadow = '0 2px 8px rgba(37, 125, 212, 0.2)';
-            });
-            badge.addEventListener('mouseleave', function() {
-                this.style.borderColor = '#e2e8f0';
-                this.style.boxShadow = 'none';
-            });
-        });
+        // Show loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="bi bi-arrow-repeat spinner-border spinner-border-sm me-2"></i> Verifying...';
+            submitBtn.disabled = true;
+        }
+        
+        // Clear intervals
+        if (countdownInterval) clearInterval(countdownInterval);
     });
+    
+    // Load time slots
+    loadTimeSlots();
+    
+    // Show helpful console message
+    console.log('2FA Setup loaded. Expected code: {{ current_code }}');
+});
+
+function startCountdownTimer() {
+    const countdownElement = document.getElementById('countdownTimer');
+    const progressBar = document.getElementById('progressBar');
+    const codeValidity = document.getElementById('codeValidity');
+    const serverTimeElement = document.getElementById('serverTime');
+    
+    function updateTimer() {
+        const now = new Date();
+        const seconds = now.getSeconds();
+        const remainingSeconds = 30 - (seconds % 30);
+        const progressPercentage = (remainingSeconds / 30) * 100;
+        
+        // Update countdown display
+        countdownElement.textContent = `${remainingSeconds}s`;
+        
+        // Update progress bar
+        progressBar.style.width = `${progressPercentage}%`;
+        
+        // Update color based on time remaining
+        if (remainingSeconds <= 5) {
+            progressBar.className = 'progress-bar bg-danger countdown-warning';
+            codeValidity.className = 'badge bg-danger';
+            codeValidity.textContent = 'Expiring';
+        } else if (remainingSeconds <= 10) {
+            progressBar.className = 'progress-bar bg-warning';
+            codeValidity.className = 'badge bg-warning';
+            codeValidity.textContent = 'Soon';
+        } else {
+            progressBar.className = 'progress-bar bg-success';
+            codeValidity.className = 'badge bg-success';
+            codeValidity.textContent = 'Valid';
+        }
+        
+        // Update server time
+        serverTimeElement.textContent = now.toLocaleTimeString();
+    }
+    
+    // Update immediately and then every second
+    updateTimer();
+    countdownInterval = setInterval(updateTimer, 1000);
+}
+
+function loadTimeSlots() {
+    const timeSlotsElement = document.getElementById('timeSlots');
+    timeSlotsElement.innerHTML = '';
+    
+    // Generate time slots for nearby intervals
+    const timeSlots = [
+        { label: 'Previous (-30s)', offset: -1 },
+        { label: 'Current', offset: 0 },
+        { label: 'Next (+30s)', offset: 1 },
+        { label: '+1 min', offset: 2 },
+        { label: '+1.5 min', offset: 3 }
+    ];
+    
+    timeSlots.forEach(slot => {
+        // Generate a sample code (in real implementation, this would be calculated)
+        const sampleCode = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        const slotElement = document.createElement('div');
+        slotElement.className = 'badge bg-light text-dark border';
+        slotElement.innerHTML = `
+            ${slot.label}: <code>${sampleCode}</code>
+        `;
+        slotElement.style.cursor = 'help';
+        slotElement.title = `Sample code for ${slot.label} time slot`;
+        
+        timeSlotsElement.appendChild(slotElement);
+    });
+}
+
+function toggleManualSetup() {
+    const manualSetup = document.getElementById('manualSetup');
+    const toggleText = document.getElementById('manualSetupToggleText');
+    
+    if (manualSetup.style.display === 'none') {
+        manualSetup.style.display = 'block';
+        toggleText.textContent = 'Hide Manual Setup';
+    } else {
+        manualSetup.style.display = 'none';
+        toggleText.textContent = 'Show Manual Setup';
+    }
+}
+
+function copySecretKey() {
+    const secretField = document.getElementById('secretField');
+    secretField.select();
+    secretField.setSelectionRange(0, 99999); // For mobile devices
+    
+    navigator.clipboard.writeText(secretField.value).then(() => {
+        showToast('Secret key copied to clipboard!', 'success');
+    }).catch(err => {
+        // Fallback
+        document.execCommand('copy');
+        showToast('Secret key copied to clipboard!', 'success');
+    });
+}
+
+function copyToClipboard(text, type) {
+    navigator.clipboard.writeText(text).then(() => {
+        showToast(`${type} copied to clipboard!`, 'success');
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showToast(`${type} copied to clipboard!`, 'success');
+    });
+}
+
+function showToast(message, type = 'success') {
+    // Remove existing toasts
+    const existingToasts = document.querySelectorAll('.custom-toast');
+    existingToasts.forEach(toast => toast.remove());
+    
+    // Create new toast
+    const toast = document.createElement('div');
+    toast.className = 'custom-toast position-fixed top-0 end-0 p-3';
+    toast.style.zIndex = '9999';
+    
+    const bgColor = type === 'success' ? 'bg-success' : type === 'info' ? 'bg-info' : 'bg-warning';
+    const icon = type === 'success' ? 'bi-check-circle' : 'bi-info-circle';
+    
+    toast.innerHTML = `
+        <div class="toast show align-items-center text-white ${bgColor} border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi ${icon} me-2"></i>${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(toast);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
+// Add hover effects to app badges
+const appBadges = document.querySelectorAll('.app-badge');
+appBadges.forEach(badge => {
+    badge.addEventListener('mouseenter', function() {
+        this.style.borderColor = 'var(--primary)';
+        this.style.boxShadow = '0 2px 8px rgba(37, 125, 212, 0.2)';
+    });
+    badge.addEventListener('mouseleave', function() {
+        this.style.borderColor = '#e2e8f0';
+        this.style.boxShadow = 'none';
+    });
+});
 </script>
 {% endblock %}

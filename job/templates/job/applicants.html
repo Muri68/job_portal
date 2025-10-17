@@ -47,8 +47,23 @@
                 </div>
             </section>
 
-            <!-- Applicants Grid -->
-            <main>
+            <!-- View Toggle Section -->
+            <div class="d-flex justify-content-end mb-4">
+                <div class="btn-group" role="group" aria-label="View toggle">
+                    <input type="radio" class="btn-check" name="view-option" id="grid-view" autocomplete="off" checked>
+                    <label class="btn btn-outline-primary" for="grid-view" data-bs-toggle="tooltip" title="Grid View">
+                        <i class="bi bi-grid-3x3-gap"></i> Grid View
+                    </label>
+                    
+                    <input type="radio" class="btn-check" name="view-option" id="table-view" autocomplete="off">
+                    <label class="btn btn-outline-primary" for="table-view" data-bs-toggle="tooltip" title="Table View">
+                        <i class="bi bi-list-task"></i> Table View
+                    </label>
+                </div>
+            </div>
+
+            <!-- Grid View -->
+            <main id="grid-view-content">
                 <div class="row g-4">
                     {% for app in applications %}
                     <div class="col-xl-6 col-lg-6 col-md-6">
@@ -169,6 +184,121 @@
                 </div>
             </main>
 
+            <!-- Table View -->
+            <main id="table-view-content" class="d-none">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col">Serial</th>
+                                        <th scope="col" class="ps-4">Applicant</th>
+                                        <th scope="col">Position</th>
+                                        <th scope="col">Contact</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Applied Date</th>
+                                        <th scope="col" class="text-end pe-4">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for app in applications %}
+                                    <tr class="applicant-table-row">
+                                        <td class="text-center">{{ forloop.counter }}</td>
+                                        <td class="ps-4">
+                                            <div class="d-flex align-items-center">
+                                                <img src="https://ui-avatars.com/api/?name={{ app.applicant_name|urlencode }}&background=257dd4&color=fff&size=40" 
+                                                     alt="{{ app.applicant_name }}" 
+                                                     class="applicant-avatar-sm me-3">
+                                                <div>
+                                                    <div class="fw-semibold text-dark">{{ app.applicant_name }}</div>
+                                                    <small class="text-muted">{{ app.applicant_email }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="text-primary fw-medium">
+                                                <i class="bi bi-briefcase me-1"></i>
+                                                {{ app.job.title }}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if app.applicant_phone %}
+                                            <small class="text-muted">
+                                                <i class="bi bi-telephone me-1"></i>{{ app.applicant_phone }}
+                                            </small>
+                                            {% else %}
+                                            <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge 
+                                                {% if app.status == 'pending' %}bg-warning
+                                                {% elif app.status == 'reviewed' %}bg-info
+                                                {% elif app.status == 'accepted' %}bg-success
+                                                {% else %}bg-danger{% endif %}">
+                                                {{ app.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                {{ app.applied_at|date:"M d, Y" }}<br>
+                                                <small>{{ app.applied_at|date:"g:i A" }}</small>
+                                            </small>
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <div class="d-flex justify-content-end gap-1">
+                                                <a href="{% url 'applicant_detail' app.id %}" 
+                                                   class="btn btn-sm btn-outline-primary"
+                                                   title="View Details"
+                                                   data-bs-toggle="tooltip">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                {% if app.resume %}
+                                                <a href="{{ app.resume.url }}" 
+                                                   target="_blank" 
+                                                   class="btn btn-sm btn-outline-secondary"
+                                                   title="View Resume"
+                                                   data-bs-toggle="tooltip">
+                                                    <i class="bi bi-file-earmark-text"></i>
+                                                </a>
+                                                {% endif %}
+                                                <a href="{% url 'compose_email' app.id %}" 
+                                                   class="btn btn-sm btn-outline-secondary"
+                                                   title="Send Email"
+                                                   data-bs-toggle="tooltip">
+                                                    <i class="bi bi-envelope"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5">
+                                            <i class="bi bi-people display-1 text-muted mb-3" style="color: var(--primary-light);"></i>
+                                            <h3 class="h5 text-secondary mb-2">No applicants found</h3>
+                                            <p class="text-secondary mb-3">
+                                                {% if query %}
+                                                No applicants match your search criteria. Try adjusting your search terms.
+                                                {% else %}
+                                                No job applications have been submitted yet.
+                                                {% endif %}
+                                            </p>
+                                            {% if query %}
+                                            <a href="{% url 'applicants_list' %}" class="btn btn-outline-primary">
+                                                <i class="bi bi-arrow-clockwise me-2"></i>Clear Search
+                                            </a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
             <!-- Pagination -->
             {% if applications.has_other_pages %}
             <footer class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
@@ -257,6 +387,15 @@
     box-shadow: 0 2px 8px rgba(37, 125, 212, 0.2);
 }
 
+.applicant-avatar-sm {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid white;
+    box-shadow: 0 1px 4px rgba(37, 125, 212, 0.2);
+}
+
 /* Button styles using your theme */
 .btn-primary {
     background-color: var(--primary);
@@ -323,6 +462,35 @@
     border-color: var(--primary-light);
 }
 
+/* Table styles */
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--secondary);
+    padding: 1rem 0.75rem;
+}
+
+.table td {
+    padding: 1rem 0.75rem;
+    vertical-align: middle;
+    border-color: rgba(37, 125, 212, 0.1);
+}
+
+.applicant-table-row:hover {
+    background-color: rgba(37, 125, 212, 0.02);
+}
+
+.table tbody tr:last-child td {
+    border-bottom: 1px solid rgba(37, 125, 212, 0.1);
+}
+
 /* Background colors */
 .bg-light {
     background-color: var(--light) !important;
@@ -367,11 +535,27 @@
     box-shadow: 0 0 0 0.2rem rgba(37, 125, 212, 0.15);
 }
 
+/* View toggle styles */
+.btn-group .btn {
+    padding: 0.5rem 0.75rem;
+}
+
+.btn-check:checked + .btn-outline-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .applicant-avatar {
         width: 50px;
         height: 50px;
+    }
+    
+    .applicant-avatar-sm {
+        width: 35px;
+        height: 35px;
     }
     
     .btn-sm {
@@ -386,12 +570,27 @@
     .text-truncate-3 {
         -webkit-line-clamp: 2;
     }
+    
+    /* Table responsive adjustments */
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.75rem 0.5rem;
+    }
 }
 
 @media (max-width: 576px) {
     .applicant-avatar {
         width: 40px;
         height: 40px;
+    }
+    
+    .applicant-avatar-sm {
+        width: 30px;
+        height: 30px;
     }
     
     .card-body {
@@ -404,6 +603,12 @@
     
     .h5 {
         font-size: 1rem;
+    }
+    
+    /* Hide some table columns on mobile */
+    .table th:nth-child(3),
+    .table td:nth-child(3) {
+        display: none;
     }
 }
 
@@ -431,6 +636,41 @@ document.addEventListener('DOMContentLoaded', function() {
     if (searchInput && !searchInput.value) {
         searchInput.focus();
     }
+    
+    // View toggle functionality
+    const gridView = document.getElementById('grid-view');
+    const tableView = document.getElementById('table-view');
+    const gridContent = document.getElementById('grid-view-content');
+    const tableContent = document.getElementById('table-view-content');
+    
+    // Load saved view preference
+    const savedView = localStorage.getItem('applicantsView') || 'grid';
+    if (savedView === 'table') {
+        tableView.checked = true;
+        gridContent.classList.add('d-none');
+        tableContent.classList.remove('d-none');
+    } else {
+        gridView.checked = true;
+        gridContent.classList.remove('d-none');
+        tableContent.classList.add('d-none');
+    }
+    
+    // Add event listeners for view toggle
+    gridView.addEventListener('change', function() {
+        if (this.checked) {
+            gridContent.classList.remove('d-none');
+            tableContent.classList.add('d-none');
+            localStorage.setItem('applicantsView', 'grid');
+        }
+    });
+    
+    tableView.addEventListener('change', function() {
+        if (this.checked) {
+            gridContent.classList.add('d-none');
+            tableContent.classList.remove('d-none');
+            localStorage.setItem('applicantsView', 'table');
+        }
+    });
     
     // Add loading state to search form
     const searchForm = document.querySelector('form[method="get"]');

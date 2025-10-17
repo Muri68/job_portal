@@ -220,45 +220,29 @@
                 <div class="card-body">
                     <h3 class="h5 mb-4 text-dark">Application Statistics</h3>
                     <div class="row text-center">
-                        <div class="col-6 col-md-3 mb-3">
-                            <div class="stat-number text-primary">{{ applications.count }}</div>
+                        <div class="col-6 col-md-2 mb-3">
+                            <div class="stat-number text-primary">{{ status_counts.total }}</div>
                             <small class="text-secondary">Total</small>
                         </div>
-                        <div class="col-6 col-md-3 mb-3">
-                            <div class="stat-number text-warning">
-                                {% with applications|length as total %}
-                                    {{ applications|length }}
-                                {% endwith %}
-                            </div>
+                        <div class="col-6 col-md-2 mb-3">
+                            <div class="stat-number text-warning">{{ status_counts.pending }}</div>
                             <small class="text-secondary">Pending</small>
                         </div>
-                        <div class="col-6 col-md-3 mb-3">
-                            <div class="stat-number text-info">
-                                {% with reviewed_count=0 %}
-                                    {% for app in applications %}
-                                        {% if app.status == 'reviewed' %}
-                                            {% with reviewed_count=reviewed_count|add:1 %}
-                                            {% endwith %}
-                                        {% endif %}
-                                    {% endfor %}
-                                    {{ reviewed_count }}
-                                {% endwith %}
-                            </div>
+                        <div class="col-6 col-md-2 mb-3">
+                            <div class="stat-number text-info">{{ status_counts.reviewed }}</div>
                             <small class="text-secondary">Reviewed</small>
                         </div>
-                        <div class="col-6 col-md-3 mb-3">
-                            <div class="stat-number text-success">
-                                {% with accepted_count=0 %}
-                                    {% for app in applications %}
-                                        {% if app.status == 'accepted' %}
-                                            {% with accepted_count=accepted_count|add:1 %}
-                                            {% endwith %}
-                                        {% endif %}
-                                    {% endfor %}
-                                    {{ accepted_count }}
-                                {% endwith %}
-                            </div>
+                        <div class="col-6 col-md-2 mb-3">
+                            <div class="stat-number" style="color: #ff6b35;">{{ status_counts.shortlisted }}</div>
+                            <small class="text-secondary">Shortlisted</small>
+                        </div>
+                        <div class="col-6 col-md-2 mb-3">
+                            <div class="stat-number text-success">{{ status_counts.accepted }}</div>
                             <small class="text-secondary">Accepted</small>
+                        </div>
+                        <div class="col-6 col-md-2 mb-3">
+                            <div class="stat-number text-danger">{{ status_counts.rejected }}</div>
+                            <small class="text-secondary">Rejected</small>
                         </div>
                     </div>
                 </div>

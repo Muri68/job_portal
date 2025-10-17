@@ -1,0 +1,129 @@
+{% extends "job/base.html" %}
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">TOTP Debug Information</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Secret Key -->
+                    <div class="alert alert-info">
+                        <h5>Secret Key</h5>
+                        <code class="fs-5">{{ secret }}</code>
+                        <button class="btn btn-sm btn-outline-primary ms-2" onclick="copyToClipboard('{{ secret }}')">
+                            Copy
+                        </button>
+                    </div>
+                    
+                    <!-- QR Code -->
+                    <div class="text-center mb-4">
+                        <h5>QR Code</h5>
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={{ uri|urlencode }}&format=png" 
+                             alt="QR Code" class="img-fluid border rounded">
+                        <p class="text-muted mt-2">Scan this QR code with your authenticator app</p>
+                    </div>
+                    
+                    <!-- Current Code -->
+                    <div class="alert alert-warning">
+                        <h5>Current Expected Code</h5>
+                        <code class="fs-2">{{ current_code }}</code>
+                        <p class="mb-0 mt-2">If your authenticator shows a different code, the secret key doesn't match.</p>
+                    </div>
+                    
+                    <!-- Manual Setup Instructions -->
+                    <div class="alert alert-success">
+                        <h5>Manual Setup Instructions</h5>
+                        <ol>
+                            <li>Open your authenticator app (Google Authenticator, Authy, etc.)</li>
+                            <li>Select <strong>"Enter a setup key"</strong> or <strong>"Manual entry"</strong></li>
+                            <li>Account: <code>{{ request.user.email }}</code></li>
+                            <li>Key: <code>{{ secret }}</code></li>
+                            <li>Type: <strong>Time-based</strong></li>
+                        </ol>
+                    </div>
+                    
+                    <!-- Time Slots -->
+                    <div class="mt-4">
+                        <h5>Expected Codes (Time Slots)</h5>
+                        <p class="text-muted">These are the codes your server expects for different time periods:</p>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Time Offset</th>
+                                        <th>Code</th>
+                                        <th>Your App Code</th>
+                                        <th>Match?</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for slot in codes %}
+                                    <tr>
+                                        <td>
+                                            {{ slot.offset }} intervals
+                                            <br><small>({{ slot.time_offset_seconds }}s / {{ slot.time_offset_minutes|floatformat:1 }}min)</small>
+                                        </td>
+                                        <td><code class="fs-6">{{ slot.code }}</code></td>
+                                        <td id="userCode{{ forloop.counter }}">-</td>
+                                        <td id="match{{ forloop.counter }}">-</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Test Form -->
+                    <div class="mt-4">
+                        <h5>Test Verification</h5>
+                        <form method="post" action="{% url 'accounts:otp_setup' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="secret" value="{{ secret }}">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label">Enter code from your authenticator app:</label>
+                                    <input type="text" name="token" class="form-control form-control-lg text-center" 
+                                           placeholder="000000" maxlength="6" pattern="[0-9]{6}" required
+                                           style="font-size: 1.5rem; letter-spacing: 5px;">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">&nbsp;</label>
+                                    <div>
+                                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                                            Test Verification
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Secret key copied to clipboard!');
+    });
+}
+
+// Update the table with user's code for comparison
+document.querySelector('input[name="token"]').addEventListener('input', function(e) {
+    const userCode = e.target.value;
+    if (userCode.length === 6) {
+        // Update all rows in the table
+        {% for slot in codes %}
+        const expectedCode{{ forloop.counter }} = '{{ slot.code }}';
+        document.getElementById('userCode{{ forloop.counter }}').textContent = userCode;
+        document.getElementById('match{{ forloop.counter }}').textContent = userCode === expectedCode{{ forloop.counter }} ? '✅' : '❌';
+        document.getElementById('match{{ forloop.counter }}').className = userCode === expectedCode{{ forloop.counter }} ? 'text-success' : 'text-danger';
+        {% endfor %}
+    }
+});
+</script>
+{% endblock %}

@@ -183,81 +183,347 @@ def logout_view(request: HttpRequest) -> HttpResponse:
     messages.info(request, "You have been logged out.")
     return redirect("accounts:login")
 
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.http import HttpRequest, HttpResponse
+from django_otp.plugins.otp_totp.models import TOTPDevice
+from django_otp import login as otp_login
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from .forms import TOTPForm
+import time
+import base64
+import hmac
+import hashlib
+import struct
+import urllib.parse
+import secrets
+
+User = get_user_model()
 
 @login_required
 def otp_setup(request: HttpRequest) -> HttpResponse:
     """Setup TOTP device for 2FA."""
-    # Get or create device
-    device, created = TOTPDevice.objects.get_or_create(
-        user=request.user, 
-        name="default"
-    )
-    
-    if not device.key:
-        device.generate_key()
-        device.save()
-    
-    # Check if device is already confirmed
-    if device.confirmed:
+    # Check for existing confirmed device
+    if TOTPDevice.objects.filter(user=request.user, confirmed=True).exists():
         messages.info(request, "Two-factor authentication is already set up for your account.")
         return redirect('user_profile')
     
-    uri = device.config_url
+    # Handle force reset
+    if request.GET.get('force_reset'):
+        TOTPDevice.objects.filter(user=request.user, confirmed=False).delete()
+        messages.info(request, "🔄 Generated new setup code")
+        return redirect('accounts:otp_setup')
     
-    # Handle verification during setup
+    # Always start fresh - delete any existing unconfirmed devices
+    TOTPDevice.objects.filter(user=request.user, confirmed=False).delete()
+    
+    # Let django_otp generate the device with proper hex key
+    device = TOTPDevice.objects.create(
+        user=request.user,
+        name="default",
+        confirmed=False,
+        digits=6,
+        step=30,
+        tolerance=1
+    )
+    
+    # Extract the base32 secret from the config URL for display
+    parsed_uri = urllib.parse.urlparse(device.config_url)
+    query_params = urllib.parse.parse_qs(parsed_uri.query)
+    base32_secret = query_params.get('secret', [''])[0]
+    
+    print(f"=== OTP SETUP ===")
+    print(f"Device hex key: {device.key}")
+    print(f"Base32 secret: {base32_secret}")
+    print(f"Config URL: {device.config_url}")
+    
+    # Build clean URI for QR code
+    issuer = "YourAppName"
+    account_name = request.user.email
+    uri = f"otpauth://totp/{issuer}:{account_name}?secret={base32_secret}&issuer={issuer}&algorithm=SHA1&digits=6&period=30"
+    
+    # Generate current expected code
+    current_code = generate_totp_token(base32_secret)
+    
+    print(f"Expected token right now: {current_code}")
+    
     if request.method == "POST":
         form = TOTPForm(request.POST)
         if form.is_valid():
-            token = form.cleaned_data["token"]
+            token = form.cleaned_data["token"].strip()
             
-            if device.verify_token(token):
-                # Confirm the device
+            print(f"Token received: {token}")
+            print(f"Verifying with device...")
+            
+            # Use device's built-in verification (uses hex key internally)
+            device_valid = device.verify_token(token)
+            print(f"Device verification result: {device_valid}")
+            
+            # Also try manual verification as backup with tolerance
+            manual_valid = False
+            match_offset = None
+            
+            if not device_valid:
+                # Try with tolerance for time sync issues
+                for tolerance in [1, 2, 5]:  # Try different tolerances
+                    manual_valid = verify_totp_with_tolerance(base32_secret, token, tolerance)
+                    if manual_valid:
+                        match_offset = tolerance
+                        break
+            
+            if device_valid or manual_valid:
                 device.confirmed = True
                 device.save()
-                
-                messages.success(request, "Two-factor authentication has been successfully set up!")
+                messages.success(request, "🎉 Two-factor authentication enabled successfully!")
+                if match_offset:
+                    messages.info(request, f"⏰ Time offset detected: {match_offset * 30} seconds")
                 return redirect('user_profile')
             else:
-                messages.error(request, "Invalid verification code. Please try again.")
+                messages.error(request, "❌ Invalid verification code.")
+                messages.info(request, f"💡 Expected code: {current_code}")
+                
+                # Show nearby codes for debugging
+                print("=== NEARBY CODES ===")
+                for i in range(-3, 4):
+                    code = generate_totp_token(base32_secret, i)
+                    status = "CURRENT" if i == 0 else "PAST" if i < 0 else "FUTURE"
+                    print(f"{status:6} (offset {i:2d}): {code}")
+    
     else:
         form = TOTPForm()
     
     return render(request, "accounts/otp_setup.html", {
         "uri": uri, 
         "device": device,
-        "form": form
+        "form": form,
+        "actual_secret": base32_secret,
+        "current_code": current_code,
     })
 
 
+@login_required
+def otp_debug(request: HttpRequest) -> HttpResponse:
+    """Debug TOTP setup to see what's happening"""
+    # Delete any existing unconfirmed devices
+    TOTPDevice.objects.filter(user=request.user, confirmed=False).delete()
+    
+    # Let django_otp generate the proper hex key
+    device = TOTPDevice.objects.create(
+        user=request.user,
+        name="default", 
+        confirmed=False,
+        digits=6,
+        step=30,
+        tolerance=1
+    )
+    
+    # Extract the base32 secret from the config URL (for display and manual entry)
+    parsed_uri = urllib.parse.urlparse(device.config_url)
+    query_params = urllib.parse.parse_qs(parsed_uri.query)
+    base32_secret = query_params.get('secret', [''])[0]
+    
+    print(f"=== OTP DEBUG ===")
+    print(f"Device hex key: {device.key}")
+    print(f"Base32 secret: {base32_secret}")
+    print(f"Config URL: {device.config_url}")
+    
+    # Build a clean URI for QR code generation
+    issuer = "YourAppName"
+    account_name = request.user.email
+    uri = f"otpauth://totp/{issuer}:{account_name}?secret={base32_secret}&issuer={issuer}&algorithm=SHA1&digits=6&period=30"
+    
+    # Generate codes for different time periods using the base32 secret
+    codes = []
+    for i in range(-10, 11):  # -5 minutes to +5 minutes
+        code = generate_totp_token(base32_secret, i)
+        time_offset = i * 30
+        codes.append({
+            'offset': i,
+            'time_offset_seconds': time_offset,
+            'time_offset_minutes': time_offset / 60,
+            'code': code
+        })
+    
+    current_code = generate_totp_token(base32_secret)
+    
+    # Test device verification with current code
+    device_verifies = device.verify_token(current_code)
+    print(f"Device verifies current code {current_code}: {device_verifies}")
+    
+    context = {
+        'secret': base32_secret,
+        'uri': uri,
+        'codes': codes,
+        'current_code': current_code,
+        'device': device,
+        'device_verifies': device_verifies,
+    }
+    
+    return render(request, "accounts/otp_debug.html", context)
+
+
+def generate_totp_token(secret: str, offset: int = 0) -> str:
+    """Generate TOTP token from base32 secret"""
+    try:
+        # Ensure proper base32 format
+        secret = secret.upper().replace(' ', '')
+        # Add padding if needed
+        padding = 8 - (len(secret) % 8)
+        if padding != 8:
+            secret += '=' * padding
+        
+        # Decode base32 secret
+        secret_bytes = base64.b32decode(secret)
+        
+        # Get timestamp with offset
+        timestamp = (int(time.time()) // 30) + offset
+        
+        # Convert timestamp to bytes (big-endian)
+        timestamp_bytes = struct.pack('>Q', timestamp)
+        
+        # Generate HMAC-SHA1
+        hmac_result = hmac.new(secret_bytes, timestamp_bytes, hashlib.sha1).digest()
+        
+        # Dynamic truncation
+        offset_byte = hmac_result[-1] & 0xf
+        binary_code = hmac_result[offset_byte:offset_byte + 4]
+        binary = struct.unpack('>I', binary_code)[0] & 0x7fffffff
+        
+        # Generate 6-digit code
+        totp_code = binary % 1000000
+        return f"{totp_code:06d}"
+        
+    except Exception as e:
+        print(f"Error generating TOTP: {e}")
+        return "000000"
+
+
+def verify_totp_with_tolerance(secret: str, token: str, tolerance: int = 1) -> bool:
+    """Verify TOTP token with tolerance for clock skew"""
+    for i in range(-tolerance, tolerance + 1):
+        expected = generate_totp_token(secret, i)
+        if token == expected:
+            print(f"Manual match found with offset {i} ({(i*30)//60} minutes)")
+            return True
+    return False
+
+
 def otp_verify(request: HttpRequest) -> HttpResponse:
-    """Verify TOTP token for 2FA."""
+    """Verify TOTP token for 2FA login."""
     user_id = request.session.get("otp_user_id")
     if not user_id:
+        messages.error(request, "Session expired. Please login again.")
         return redirect("accounts:login")
 
-    form = TOTPForm(request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        try:
-            user = User.objects.get(pk=user_id)
-            device = TOTPDevice.objects.filter(user=user, confirmed=True).first()
-            
-            if device and device.verify_token(form.cleaned_data["token"]):
-                otp_login(request, device)
-                response = redirect(settings.LOGIN_REDIRECT_URL)
-                
-                if form.cleaned_data.get("trust_device"):
-                    _set_trusted_device(response, user)
-                
-                messages.success(request, "2FA verified.")
-                request.session.pop("otp_user_id", None)
-                return response
-            
-            messages.error(request, "Invalid token. Please try again.")
-        except User.DoesNotExist:
-            messages.error(request, "User not found.")
+    try:
+        user = User.objects.get(pk=user_id)
+        
+        # Get the confirmed TOTP device
+        device = TOTPDevice.objects.filter(user=user, confirmed=True).first()
+        
+        if not device:
+            messages.error(request, "No 2FA device found. Please contact administrator.")
             return redirect("accounts:login")
+        
+        print(f"=== OTP VERIFY ===")
+        print(f"User: {user}")
+        print(f"Device key: {device.key}")
+        print(f"Device confirmed: {device.confirmed}")
+        
+        form = TOTPForm(request.POST or None)
+        if request.method == "POST" and form.is_valid():
+            token = form.cleaned_data["token"].strip()
+            
+            print(f"Token received: {token}")
+            
+            # Verify the token using the device (uses hex key internally)
+            if device.verify_token(token):
+                print("✅ Token verified successfully")
+                
+                # Use django_otp's login function
+                otp_login(request, device)
+                
+                # Clear the session
+                request.session.pop("otp_user_id", None)
+                
+                messages.success(request, "Login successful!")
+                return redirect(settings.LOGIN_REDIRECT_URL)
+            else:
+                print("❌ Token verification failed")
+                messages.error(request, "Invalid verification code. Please try again.")
+                
+        return render(request, "accounts/otp_verify.html", {"form": form})
+        
+    except User.DoesNotExist:
+        messages.error(request, "User not found.")
+        return redirect("accounts:login")
+    except Exception as e:
+        print(f"Error in otp_verify: {e}")
+        messages.error(request, f"Authentication error: {str(e)}")
+        return redirect("accounts:login")
 
-    return render(request, "accounts/otp_verify.html", {"form": form})
+
+@login_required
+def otp_reset(request: HttpRequest) -> HttpResponse:
+    """Reset TOTP device for 2FA."""
+    # Delete all TOTP devices for this user
+    deleted_count, _ = TOTPDevice.objects.filter(user=request.user).delete()
+    
+    if deleted_count > 0:
+        messages.success(request, "2FA has been reset. You can now set it up again.")
+    else:
+        messages.info(request, "No 2FA setup found to reset.")
+    
+    return redirect('accounts:otp_setup')
+
+
+def _set_trusted_device(response, user):
+    """Set trusted device cookie (30 days)"""
+    import hashlib
+    from datetime import datetime, timedelta
+    
+    # Create a hash of user email + secret salt
+    secret_salt = "your-secret-salt-here"  # Change this in production
+    trust_token = hashlib.sha256(f"{user.email}{secret_salt}".encode()).hexdigest()
+    
+    # Set cookie for 30 days
+    expires = datetime.now() + timedelta(days=30)
+    response.set_cookie(
+        'trusted_device',
+        trust_token,
+        expires=expires,
+        httponly=True,
+        secure=not settings.DEBUG
+    )
+
+
+# Emergency fix for existing devices
+@login_required
+def otp_emergency_fix(request: HttpRequest) -> HttpResponse:
+    """Emergency fix for Non-hexadecimal digit error"""
+    fixed_count = 0
+    deleted_count = 0
+    
+    for device in TOTPDevice.objects.filter(user=request.user):
+        try:
+            # Test if the key is valid hex
+            int(device.key, 16)
+            print(f"✅ Device {device.id} has valid hex key")
+            fixed_count += 1
+        except (ValueError, TypeError):
+            print(f"❌ Device {device.id} has invalid key: {device.key}")
+            # Delete invalid devices
+            device.delete()
+            deleted_count += 1
+    
+    if deleted_count > 0:
+        messages.success(request, f"Deleted {deleted_count} invalid devices. You can now set up 2FA again.")
+    else:
+        messages.info(request, f"All {fixed_count} devices are valid.")
+    
+    return redirect('accounts:otp_setup')
 
 
 

@@ -567,57 +567,55 @@
         </div>
     </section>
 
-    <!-- Categories Section -->
+    <!-- Single Categories Section -->
+    {% if categories.count == 1 %}
     <section class="bg-light">
+        <div class="container">
+            <div class="section-title">
+                {% if first_category %}
+                <h2>Browse Job Opportunities in AI & IT</h2>
+                <p>Find the perfect job category that matches your skills and expertise</p>
+            </div>
+            
+            <!-- Show spotlight layout when only one category exists -->
+            <div class="category-spotlight">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-12 col-xl-12">
+                        <div class="category-card text-center">
+                            <div class="d-flex flex-column align-items-center">
+                                <div class="w-100">
+                                    <h3>{{ first_category.name }}</h3>
+                                    <p class="mb-2"><span class="badge bg-primary">{{ first_category.job_count }} Available Job{{ first_category.job_count|pluralize }}</span></p>
+                                    <p class="text-muted mx-auto" style="max-width: 600px;">Explore opportunities in {{ first_category.name }} with these available positions.</p>
+                                    
+                                    <!-- Show actual job titles from this category -->
+                                    <div class="ai-specialties mt-3 d-flex justify-content-center flex-wrap">
+                                        {% for job in category_jobs %}
+                                        <span class="badge bg-light text-dark me-2 mb-2">{{ job.title }}</span>
+                                        {% empty %}
+                                        <p class="text-muted">No jobs available in this category yet.</p>
+                                        {% endfor %}
+                                    </div>
+                                    
+                                    <a href="{% url 'jobs_by_category' first_category.slug %}" class="btn btn-primary mt-3">Browse All {{ first_category.job_count }} Jobs</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    {% else %}
+    <!-- Multiple Categories Section -->
+    <section class="bg-light categories-section">
         <div class="container">
             <div class="section-title">
                 <h2>Browse Job Categories</h2>
                 <p>Find the perfect job category that matches your skills and expertise</p>
             </div>
-            
-            {% if categories.count == 1 %}
-            <!-- Show spotlight layout when only one category exists -->
-            <div class="category-spotlight">
-                <div class="row align-items-center">
-                    <div class="col-md-8">
-                        <div class="category-card">
-                            <div class="d-flex align-items-center">
-                                <div>
-                                    {% with category=categories.0 %}
-                                    <h3>{{ category.name }}</h3>
-                                    <p class="mb-2"><span class="badge bg-primary">{{ category.job_count }} Available Job{{ category.job_count|pluralize }}</span></p>
-                                    <p class="text-muted">Explore opportunities in machine learning, deep learning, computer vision, natural language processing, and AI research roles.</p>
-                                    <div class="ai-specialties mt-3">
-                                        <span class="badge bg-light text-dark me-1 mb-1">Machine Learning</span>
-                                        <span class="badge bg-light text-dark me-1 mb-1">AI Ethics & Governance</span>
-                                        <span class="badge bg-light text-dark me-1 mb-1">AI Software Engineering</span>
-                                        <span class="badge bg-light text-dark me-1 mb-1">ML Infrastructure</span>
-                                        <span class="badge bg-light text-dark me-1 mb-1">Computer Vision</span>
-                                        <span class="badge bg-light text-dark me-1 mb-1">NLP</span>
-                                        <span class="badge bg-light text-dark me-1 mb-1">AI Research</span>
-                                    </div>
-                                    <a href="{% url 'jobs_by_category' category.slug %}" class="btn btn-primary mt-3">Browse Job Opportunities in AI & IT</a>
-                                    {% endwith %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="category-upcoming">
-                            <h4>AI Specializations Coming Soon</h4>
-                            <ul class="list-unstyled">
-                                <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Development</li>
-                                <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Marketing</li>
-                                <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Business</li>
-                                <li class="mb-2"><i class="fas fa-arrow-right text-primary me-2"></i>Customer Support</li>
-                            </ul>
-                            <p class="small text-muted">We're expanding our categories to serve you better</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% else %}
-            <!-- Show grid layout when multiple categories exist -->
             <div class="row">
                 {% for category in categories %}
                 <div class="col-md-4 mb-4">
@@ -646,13 +644,13 @@
                 </div>
                 {% endfor %}
             </div>
-            {% endif %}
             
             <div class="text-center mt-4">
                 <a href="#" class="btn btn-outline-primary">View All Categories</a>
             </div>
         </div>
     </section>
+    {% endif %}
 
     <!-- Featured Jobs Section -->
     <section>
@@ -691,7 +689,9 @@
                             </div>
                             {% if job.salary_start %}
                             <div class="job-detail job-salary">
-                                <i class="bi bi-currency-pound"></i>Salary starting from {{ job.salary_start|intcomma }} per annum
+                                <span class="salary-text">
+                                    From <i class="bi bi-currency-pound"></i>{{ job.salary_start|intcomma }}/Year
+                                </span>
                             </div>
                             {% endif %}
                         </div>

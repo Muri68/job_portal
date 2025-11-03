@@ -175,7 +175,7 @@ from django.conf import settings
 class JobApplication(models.Model):
     STATUS_CHOICES = [
         ('pending', '📝 Pending'),
-        ('reviewed', '👀 Reviewed'),
+        #('reviewed', '👀 Reviewed'),
         ('shortlisted', '⭐ Shortlisted'),
         ('rejected', '❌ Rejected'),
         ('accepted', '✅ Accepted'),

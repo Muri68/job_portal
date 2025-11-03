@@ -927,3 +927,129 @@ class SiteSettingUpdateView(UpdateView):
     def form_valid(self, form):
         messages.success(self.request, 'Site settings updated successfully!')
         return super().form_valid(form)
+    
+    
+
+from django.contrib import messages
+from django.core.paginator import Paginator
+from django.db.models import Q
+from blog.models import BlogPost, Category, Tag
+from blog.forms import BlogPostForm
+
+
+@login_required
+@admin_required
+def admin_blog_list(request):
+    """Admin view to manage all blog posts"""
+    # Get filter parameters
+    status_filter = request.GET.get('status', '')
+    category_filter = request.GET.get('category', '')
+    search_query = request.GET.get('q', '')
+    
+    # Start with all posts
+    posts = BlogPost.objects.all().order_by('-created_at')
+    
+    # Apply filters
+    if status_filter:
+        posts = posts.filter(status=status_filter)
+    
+    if category_filter:
+        posts = posts.filter(category_id=category_filter)
+    
+    if search_query:
+        posts = posts.filter(
+            Q(title__icontains=search_query) |
+            Q(excerpt__icontains=search_query) |
+            Q(content__icontains=search_query)
+        )
+    
+    # Pagination
+    paginator = Paginator(posts, 12)  # 12 posts per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Get categories for filter dropdown
+    categories = Category.objects.all()
+    
+    context = {
+        'page_obj': page_obj,
+        'categories': categories,
+        'status_filter': status_filter,
+        'category_filter': category_filter,
+        'search_query': search_query,
+    }
+    
+    return render(request, 'job/blog/admin_blog_list.html', context)
+
+@login_required
+@admin_required
+def admin_blog_create(request):
+    """Admin view to create new blog post"""
+    if request.method == 'POST':
+        form = BlogPostForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            post.save()
+            form.save_m2m()  # Save many-to-many relationships (tags)
+            
+            messages.success(request, 'Blog post created successfully!')
+            return redirect('admin_blog_list')
+    else:
+        form = BlogPostForm()
+    
+    context = {
+        'form': form,
+        'title': 'Create New Blog Post'
+    }
+    return render(request, 'job/blog/admin_blog_form.html', context)
+
+@login_required
+@admin_required
+def admin_blog_edit(request, pk):
+    """Admin view to edit blog post"""
+    post = get_object_or_404(BlogPost, pk=pk)
+    
+    if request.method == 'POST':
+        form = BlogPostForm(request.POST, request.FILES, instance=post)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Blog post updated successfully!')
+            return redirect('admin_blog_list')
+    else:
+        form = BlogPostForm(instance=post)
+    
+    context = {
+        'form': form,
+        'post': post,
+        'title': 'Edit Blog Post'
+    }
+    return render(request, 'job/blog/admin_blog_form.html', context)
+
+@login_required
+@admin_required
+def admin_blog_delete(request, pk):
+    """Admin view to delete blog post"""
+    post = get_object_or_404(BlogPost, pk=pk)
+    
+    if request.method == 'POST':
+        post_title = post.title
+        post.delete()
+        messages.success(request, f'Blog post "{post_title}" deleted successfully!')
+        return redirect('admin_blog_list')
+    
+    context = {
+        'post': post
+    }
+    return render(request, 'job/blog/admin_blog_confirm_delete.html', context)
+
+@login_required
+@admin_required
+def admin_blog_preview(request, pk):
+    """Admin view to preview blog post"""
+    post = get_object_or_404(BlogPost, pk=pk)
+    
+    context = {
+        'post': post
+    }
+    return render(request, 'job/blog/admin_blog_preview.html', context)

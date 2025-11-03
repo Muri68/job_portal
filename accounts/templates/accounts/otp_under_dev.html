@@ -1,0 +1,157 @@
+{% extends "job/base.html" %}
+{% load static %}
+
+{% block title %}Two-Factor Authentication - Under Development{% endblock %}
+
+{% block content %}
+<style>
+    .development-container {
+        min-height: 60vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+    }
+    
+    .development-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(37, 125, 212, 0.15);
+        border: 1px solid #e2e8f0;
+        max-width: 900px;
+        width: 100%;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .development-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #257dd4 0%, #1a68b7 100%);
+    }
+    
+    .development-icon {
+        font-size: 4rem;
+        color: #257dd4;
+        margin-bottom: 1.5rem;
+    }
+    
+    .beta-badge {
+        background: linear-gradient(135deg, #257dd4 0%, #1a68b7 100%);
+        color: white;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        display: inline-block;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 12px rgba(37, 125, 212, 0.3);
+    }
+    
+    .btn-primary {
+        background: #257dd4;
+        border-color: #257dd4;
+    }
+    
+    .btn-primary:hover {
+        background: #1a68b7;
+        border-color: #1a68b7;
+    }
+    
+    .btn-outline-primary {
+        color: #257dd4;
+        border-color: #257dd4;
+    }
+    
+    .btn-outline-primary:hover {
+        background: #257dd4;
+        border-color: #257dd4;
+        color: white;
+    }
+    
+    .text-primary {
+        color: #257dd4 !important;
+    }
+    
+    .alert-info {
+        background: rgba(37, 125, 212, 0.08);
+        border: 1px solid rgba(37, 125, 212, 0.2);
+        color: #1a68b7;
+    }
+</style>
+
+<div class="development-container">
+    <div class="development-card p-5">
+        <div class="development-icon">
+            <i class="bi bi-tools"></i>
+        </div>
+        
+        <div class="beta-badge">
+            <i class="bi bi-hammer me-1"></i>
+            UNDER DEVELOPMENT
+        </div>
+        
+        <h2 class="h3 mb-3 text-primary">Two-Factor Authentication</h2>
+        <p class="text-muted mb-4">
+            We're currently working on implementing Two-Factor Authentication to enhance your account security. 
+            This feature will be available soon with enhanced protection for your account.
+        </p>
+        
+        <div class="alert alert-info border-0 mb-4">
+            <div class="d-flex align-items-start">
+                <i class="bi bi-info-circle me-2 mt-1 text-primary"></i>
+                <div class="text-start">
+                    <small>
+                        <strong class="text-primary">What's coming:</strong><br>
+                        • QR code setup with authenticator apps<br>
+                        • Manual backup codes for recovery<br>
+                        • Enhanced account security protection<br>
+                        • Support for multiple authenticator apps
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-grid gap-2">
+            <a href="{% url 'user_profile' %}" class="btn btn-primary btn-lg">
+                <i class="bi bi-arrow-left me-2"></i>
+                Back to Profile Settings
+            </a>
+            <a href="{% url 'admin-dashboard' %}" class="btn btn-outline-primary">
+                <i class="bi bi-house me-2"></i>
+                Return to Dashboard
+            </a>
+        </div>
+        
+        <div class="mt-4 pt-3 border-top">
+            <small class="text-muted">
+                <i class="bi bi-clock-history me-1 text-primary"></i>
+                Estimated completion: Coming Soon
+            </small>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔧 2FA Setup - Feature under development');
+    
+    // Add a subtle pulsing animation to the icon
+    const icon = document.querySelector('.development-icon');
+    if (icon) {
+        setInterval(() => {
+            icon.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                icon.style.transform = 'scale(1)';
+            }, 500);
+        }, 2000);
+    }
+});
+</script>
+{% endblock %}

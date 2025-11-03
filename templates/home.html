@@ -736,45 +736,50 @@
                 <p>Stay updated with the latest career advice and industry insights</p>
             </div>
             <div class="row">
+                {% for blog in blogs %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="news-card">
+                        {% if blog.featured_image %}
+                            <img src="{{ blog.featured_image.url }}" alt="{{ blog.title }}" class="news-img">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" alt="{{ blog.title }}" class="news-img">
+                        {% endif %}
+                        <div class="news-content">
+                            <span class="news-date">
+                                <i class="far fa-calendar me-2"></i>
+                                {{ blog.published_date|date:"F j, Y" }}
+                            </span>
+                            <span class="news-category">
+                                {{ blog.category.get_name_display }}
+                            </span>
+                            <h4 class="news-title">{{ blog.title }}</h4>
+                            <p class="news-excerpt">
+                                {{ blog.excerpt|truncatewords:20 }}
+                            </p>
+                            <a href="{% url 'post_detail' blog.slug %}" class="news-link">
+                                Read More <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <!-- Fallback content if no blogs exist -->
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="news-card">
                         <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" alt="News" class="news-img">
                         <div class="news-content">
-                            <span class="news-date"><i class="far fa-calendar me-2"></i>June 15, 2023</span>
+                            <span class="news-date"><i class="far fa-calendar me-2"></i>Coming Soon</span>
                             <span class="news-category">Career Tips</span>
-                            <h4 class="news-title">How to Prepare for Remote Job Interviews</h4>
-                            <p class="news-excerpt">Remote interviews require different preparation than in-person meetings. Here's how to make a great impression...</p>
+                            <h4 class="news-title">Exciting Content Coming Soon</h4>
+                            <p class="news-excerpt">We're preparing valuable career insights and advice to help you succeed...</p>
                             <a href="#" class="news-link">Read More <i class="fas fa-arrow-right"></i></a>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="news-card">
-                        <img src="https://images.unsplash.com/photo-1579389083078-4e7018379f7e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" alt="News" class="news-img">
-                        <div class="news-content">
-                            <span class="news-date"><i class="far fa-calendar me-2"></i>June 10, 2023</span>
-                            <span class="news-category">Industry News</span>
-                            <h4 class="news-title">Top 10 In-Demand Tech Skills for 2023</h4>
-                            <p class="news-excerpt">The tech industry is evolving rapidly. Discover which skills are most sought after by employers this year...</p>
-                            <a href="#" class="news-link">Read More <i class="fas fa-arrow-right"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="news-card">
-                        <img src="https://images.unsplash.com/photo-1580894894513-541e068a3e2b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80" alt="News" class="news-img">
-                        <div class="news-content">
-                            <span class="news-date"><i class="far fa-calendar me-2"></i>June 5, 2023</span>
-                            <span class="news-category">Resume Writing</span>
-                            <h4 class="news-title">7 Resume Mistakes That Are Costing You Interviews</h4>
-                            <p class="news-excerpt">Avoid these common resume mistakes that could be preventing you from landing your dream job...</p>
-                            <a href="#" class="news-link">Read More <i class="fas fa-arrow-right"></i></a>
-                        </div>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
             <div class="text-center mt-4">
-                <a href="#" class="btn btn-outline-primary">View All News</a>
+                <a href="{% url 'blog_list' %}" class="btn btn-outline-primary">View All News</a>
             </div>
         </div>
     </section>

@@ -21,7 +21,7 @@
                         <a class="nav-link text-white" href="{% url 'about' %}">About</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-white" href="{% url 'blog' %}">Blog</a>
+                        <a class="nav-link text-white" href="{% url 'blog_list' %}">Blog</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-white" href="{% url 'contact_us' %}">Contact Us</a>
@@ -63,7 +63,7 @@
                         <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'about' %}">About</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'blog' %}active{% endif %}" href="{% url 'blog' %}">Blog</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'blog_list' or request.resolver_match.url_name == 'post_detail' %}active{% endif %}" href="{% url 'blog_list' %}">Blog</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'contact_us' %}active{% endif %}" href="{% url 'contact_us' %}">Contact Us</a>

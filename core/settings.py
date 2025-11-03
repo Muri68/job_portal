@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 from decouple import config
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,8 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=True, cast=bool)
-
+DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = [
     'dev.techrecruitmentuk.com',
@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     # Local Apps
     "accounts",
     'job',
+    'blog',
 ]
 
 MIDDLEWARE = [
@@ -66,7 +67,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    # Optional Axes (place before AuthenticationMiddleware if enabled)
+    # Axes middleware should be at the beginning
     "axes.middleware.AxesMiddleware",
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     # OTP middleware must come after AuthenticationMiddleware
@@ -109,19 +110,29 @@ DATABASES = {
     }
 }
 
-
 # Custom user model
 AUTH_USER_MODEL = "accounts.User"
 
-# Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
+# OTP settings
+OTP_TOTP_ISSUER = "Tech Recruitment UK"
+OTP_TOTP_THROTTLING_FACTOR = 1  # Allow more attempts
+
+# Session settings - FIXED: Remove duplicate definitions
+SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_SAVE_EVERY_REQUEST = True  # sliding expiration
+
+# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 9,
+        }
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -131,66 +142,45 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Authentication backends (Axes optional)
+# Authentication backends (Axes should come first)
 AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",  # Axes should be first
     "accounts.backends.EmailBackend",  
-    "axes.backends.AxesStandaloneBackend", # if using Axes
     "django.contrib.auth.backends.ModelBackend",
 ]
-
 
 # CSRF Settings
 CSRF_TRUSTED_ORIGINS = [
     'https://dev.techrecruitmentuk.com',
-    'http://dev.techrecruitmentuk.com',
     'https://www.dev.techrecruitmentuk.com',
-    'http://www.dev.techrecruitmentuk.com',
     "http://localhost:8000",
     "http://127.0.0.1:8000"
 ]
 
-# Cookie settings for production
-CSRF_COOKIE_SECURE = False  # Set to False if not using HTTPS yet
+# Security settings - FIXED: Use proper values based on DEBUG mode
+if DEBUG:
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
+else:
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+
 CSRF_COOKIE_HTTPONLY = True
-CSRF_USE_SESSIONS = False  # Set to True if you want to use sessions instead of cookies
-
-SESSION_COOKIE_SECURE = False  # Set to False if not using HTTPS yet
 SESSION_COOKIE_HTTPONLY = True
-
-# For development (if you're still testing without HTTPS)
-# CSRF_COOKIE_SECURE = False
-# SESSION_COOKIE_SECURE = False
-
-# CSRF failure view (optional)
-CSRF_FAILURE_VIEW = 'django.views.csrf.csrf_failure'
 
 # If you're behind a proxy, make sure these are set
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
 
-
-# Sessions
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False
-SESSION_COOKIE_AGE = 60 * 60 * 12 # 12 hours
-SESSION_SAVE_EVERY_REQUEST = True # sliding expiration
-
+# CSRF failure view (optional)
+CSRF_FAILURE_VIEW = 'django.views.csrf.csrf_failure'
 
 LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "accounts:login"
 
-# Password validation
-AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', 'OPTIONS': {'min_length': 9}},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-]
-
-# Axes (if enabled)
-from datetime import timedelta
-
+# Axes configuration
 AXES_ENABLED = True
 AXES_FAILURE_LIMIT = 5           # Default: 3
 AXES_COOLOFF_TIME = 1            # in hours, can be timedelta
@@ -199,31 +189,17 @@ AXES_LOCK_OUT_AT_FAILURE = True  # Actually lock after failures
 AXES_RESET_ON_SUCCESS = True     # Reset count after successful login
 AXES_LOCKOUT_PARAMETERS = ["username", "ip_address"]
 
-import logging
-
-logging.getLogger('axes').setLevel(logging.WARNING)
-
-
 # Trusted device cookie for 2FA bypass
 TRUSTED_DEVICE_COOKIE = "tdid"
-TRUSTED_DEVICE_MAX_AGE = 60 * 60 * 24 * 30 # 30 days
-
+TRUSTED_DEVICE_MAX_AGE = 60 * 60 * 24 * 30  # 30 days
 
 # Internationalization
-# https://docs.djangoproject.com/en/5.1/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
+TIME_ZONE = 'Africa/Lagos'
 USE_I18N = True
-
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
@@ -239,43 +215,36 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Optional: Cache static files forever
 WHITENOISE_MAX_AGE = 31536000  # 1 year in seconds
-
-# Optional: Use gzip/brotli compression
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_MANIFEST_STRICT = False
 WHITENOISE_ALLOW_ALL_ORIGINS = True
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+# Email configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = config('EMAIL_HOST', default='localhost')
-EMAIL_PORT = config('EMAIL_PORT', default=25, cast=int)
-EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = 'noreply@techrecruitmentuk.com'
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)  # Changed default to 587
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@techrecruitmentuk.com')
 
 # Admin contact information
-ADMIN_EMAIL = config('ADMIN_EMAIL')
-SUPPORT_PHONE = config('SUPPORT_PHONE')
-COMPANY_NAME = config('COMPANY_NAME')
-
-
-
+ADMIN_EMAIL = config('ADMIN_EMAIL', default='admin@techrecruitmentuk.com')
+SUPPORT_PHONE = config('SUPPORT_PHONE', default='')
+COMPANY_NAME = config('COMPANY_NAME', default='Tech Recruitment UK')
 
 # Ensure caching works for rate-limiting
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
     }
 }
 
-
-
+# CKEditor 5 configuration
 CKEDITOR_5_UPLOAD_FILE_TYPES = ['jpeg', 'png', 'jpg'] 
 
 customColorPalette = [
@@ -364,5 +333,24 @@ CKEDITOR_5_CONFIGS = {
     }
 }
 
-
-#bbqvccusklnusxgl
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+    'loggers': {
+        'axes': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
+}

@@ -1,0 +1,80 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}Setup OTP{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Setup Two-Factor Authentication</h4>
+            </div>
+            <div class="card-body">
+                {% if form.errors %}
+                <div class="alert alert-warning">
+                    <h6>⚠️ Having trouble?</h6>
+                    <ul class="mb-0">
+                        <li>Make sure your phone's time is set to <strong>automatic</strong></li>
+                        <li>Try entering the code immediately after it refreshes</li>
+                        <li>If using manual entry, ensure no spaces in the secret key</li>
+                    </ul>
+                </div>
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Step 1: Scan QR Code</h5>
+                        <p>Use an authenticator app (Google Authenticator, Authy, etc.) to scan this QR code:</p>
+                        <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="img-fluid mb-3">
+                        
+                        <div class="alert alert-info">
+                            <strong>Tip:</strong> Make sure your authenticator app shows the correct account name: <strong>{{ user.email }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Step 2: Manual Setup (Optional)</h5>
+                        <p>If you can't scan the QR code, enter this secret key manually:</p>
+                        <div class="alert alert-info">
+                            <strong>Secret Key:</strong> 
+                            <code id="secretKey">{{ secret_key }}</code>
+                            <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="copySecretKey()">Copy</button>
+                        </div>
+                        
+                        <h5>Step 3: Verify OTP</h5>
+                        <p>Enter the 6-digit code from your authenticator app:</p>
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="id_otp_token" class="form-label">OTP Code</label>
+                                {{ form.otp_token }}
+                                {% if form.otp_token.errors %}
+                                    <div class="text-danger">{{ form.otp_token.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Verify and Enable OTP</button>
+                        </form>
+                        
+                        <div class="mt-3 text-center">
+                            <a href="#" class="text-muted">Skip for now</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copySecretKey() {
+    const secretKey = document.getElementById('secretKey').textContent;
+    navigator.clipboard.writeText(secretKey).then(function() {
+        const button = event.target;
+        const originalText = button.textContent;
+        button.textContent = 'Copied!';
+        setTimeout(() => {
+            button.textContent = originalText;
+        }, 2000);
+    });
+}
+</script>
+{% endblock %}

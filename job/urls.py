@@ -73,6 +73,13 @@ admin_urls = [
     path('dashboard/contact/info/<int:pk>/delete/', admin_views.ContactInfoDeleteView.as_view(), name='contact_info_delete'),
     
     path('dashboard/contact/settings/', admin_views.SiteSettingUpdateView.as_view(), name='contact_settings'),
+    
+    
+    path('dashboard/blog/', admin_views.admin_blog_list, name='admin_blog_list'),
+    path('dashboard/blog/create/', admin_views.admin_blog_create, name='admin_blog_create'),
+    path('dashboard/blog/<int:pk>/edit/', admin_views.admin_blog_edit, name='admin_blog_edit'),
+    path('dashboard/blog/<int:pk>/delete/', admin_views.admin_blog_delete, name='admin_blog_delete'),
+    path('dashboard/blog/<int:pk>/preview/', admin_views.admin_blog_preview, name='admin_blog_preview'),
 ]
 
 
@@ -84,7 +91,8 @@ urlpatterns = [
     # Frontend URLs
     path('', views.index, name='index'),
     path('about/', views.about, name='about'),
-    path('blog/', views.blog, name='blog'),
+    path('blog/', views.blog, name='blog_list'),
+    path('blog/<slug:slug>/', views.blog_detail, name='post_detail'),
     path('contact/', views.contact_us, name='contact_us'),
     path('job-listings/', views.job_listings, name='job_listings'),
     path('job/<int:job_id>/detail/', views.job_detail_frontend, name='job_detail_frontend'),

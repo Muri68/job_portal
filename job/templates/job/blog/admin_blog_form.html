@@ -1,0 +1,401 @@
+{% extends 'job/base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+    <style>
+        :root {
+            --primary: #257dd4;
+            --primary-light: #257cd491;
+            --primary-dark: #257dd4;
+            --secondary: #546E7A;
+            --accent: #FF9800;
+            --light: #E3F2FD;
+            --dark: #257dd4;
+            --gradient-start: #257dd4;
+            --gradient-end: #257dd4;
+        }
+
+        .required-field::after {
+            content: " *";
+            color: #dc3545;
+        }
+
+        .form-control:focus, 
+        .form-select:focus,
+        .ck-editor__editable:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 0.2rem rgba(37, 125, 212, 0.15);
+        }
+
+        .ck-editor__editable {
+            min-height: 400px;
+            border-radius: 0.375rem;
+            border: 1px solid #ced4da;
+            font-family: inherit;
+        }
+
+        .card {
+            border: none;
+            border-radius: 0.75rem;
+        }
+
+        .btn {
+            border-radius: 0.5rem;
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+        }
+
+        .bg-light {
+            background-color: var(--light) !important;
+        }
+
+        /* Button styles using your theme */
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-outline-primary:hover,
+        .btn-outline-primary:focus {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        /* Section header icons */
+        .bg-primary {
+            background-color: var(--primary) !important;
+        }
+
+        /* Text colors */
+        .text-primary {
+            color: var(--primary) !important;
+        }
+
+        .text-secondary {
+            color: var(--secondary) !important;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-12">
+            <!-- Header Section -->
+            <header class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-2 text-dark fw-bold">
+                        <i class="bi bi-file-text me-2"></i>
+                        {{ title }}
+                    </h1>
+                    <p class="text-secondary mb-0">
+                        {% if post %}Update the blog post details below{% else %}Fill in the blog post details to create a new article{% endif %}
+                    </p>
+                </div>
+                <a href="{% url 'admin_blog_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Blog Posts
+                </a>
+            </header>
+            
+            <!-- Form Card -->
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <form method="post" id="blogForm" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        {{ form.media }}  <!-- This is crucial for CKEditor 5 -->
+                        
+                        <div class="row">
+                            <!-- Main Content Column -->
+                            <div class="col-lg-8">
+                                <!-- Basic Information Section -->
+                                <section class="mb-5" aria-labelledby="basic-info-heading">
+                                    <h2 id="basic-info-heading" class="h5 mb-4 text-dark d-flex align-items-center">
+                                        <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                            <i class="bi bi-info-lg"></i>
+                                        </span>
+                                        Basic Information
+                                    </h2>
+                                    
+                                    <div class="mb-3">
+                                        <label for="{{ form.title.id_for_label }}" class="form-label required-field">Blog Title</label>
+                                        <div class="input-group has-validation">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="bi bi-pencil" aria-hidden="true"></i>
+                                            </span>
+                                            {{ form.title }}
+                                            {% if form.title.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.title.errors }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="{{ form.excerpt.id_for_label }}" class="form-label">Excerpt</label>
+                                        <div class="input-group has-validation">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="bi bi-text-paragraph" aria-hidden="true"></i>
+                                            </span>
+                                            {{ form.excerpt }}
+                                            {% if form.excerpt.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.excerpt.errors }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="form-text">
+                                            Brief summary of your blog post (max 300 characters)
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="{{ form.content.id_for_label }}" class="form-label required-field">Content</label>
+                                        {{ form.content }}
+                                        {% if form.content.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.content.errors }}
+                                        </div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            Write your blog post content using the rich text editor
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                            
+                            <!-- Sidebar Column -->
+                            <div class="col-lg-4">
+                                <!-- Settings Section -->
+                                <section class="mb-5" aria-labelledby="settings-heading">
+                                    <h2 id="settings-heading" class="h5 mb-4 text-dark d-flex align-items-center">
+                                        <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                            <i class="bi bi-gear"></i>
+                                        </span>
+                                        Settings
+                                    </h2>
+                                    
+                                    <div class="mb-3">
+                                        <label for="{{ form.category.id_for_label }}" class="form-label required-field">Category</label>
+                                        <div class="input-group has-validation">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="bi bi-grid" aria-hidden="true"></i>
+                                            </span>
+                                            {{ form.category }}
+                                            {% if form.category.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.category.errors }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="{{ form.tags.id_for_label }}" class="form-label">Tags</label>
+                                        <div class="input-group has-validation">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="bi bi-tags" aria-hidden="true"></i>
+                                            </span>
+                                            {{ form.tags }}
+                                            {% if form.tags.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.tags.errors }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="{{ form.status.id_for_label }}" class="form-label required-field">Status</label>
+                                        <div class="input-group has-validation">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="bi bi-eye" aria-hidden="true"></i>
+                                            </span>
+                                            {{ form.status }}
+                                            {% if form.status.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.status.errors }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="{{ form.featured_image.id_for_label }}" class="form-label">Featured Image</label>
+                                        <div class="input-group has-validation">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="bi bi-image" aria-hidden="true"></i>
+                                            </span>
+                                            {{ form.featured_image }}
+                                            {% if form.featured_image.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.featured_image.errors }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        {% if post.featured_image %}
+                                        <div class="mt-2">
+                                            <small class="text-muted">Current: {{ post.featured_image.name }}</small>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="form-check form-switch mb-3">
+                                        {{ form.featured }}
+                                        <label class="form-check-label fw-medium text-dark" for="{{ form.featured.id_for_label }}">
+                                            Featured Post
+                                        </label>
+                                    </div>
+                                </section>
+                                
+                                <!-- SEO Section -->
+                                <section aria-labelledby="seo-heading">
+                                    <h2 id="seo-heading" class="h5 mb-4 text-dark d-flex align-items-center">
+                                        <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                            <i class="bi bi-search"></i>
+                                        </span>
+                                        SEO Settings
+                                    </h2>
+                                    
+                                    <div class="mb-3">
+                                        <label for="{{ form.meta_description.id_for_label }}" class="form-label">Meta Description</label>
+                                        <div class="input-group has-validation">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="bi bi-text-left" aria-hidden="true"></i>
+                                            </span>
+                                            {{ form.meta_description }}
+                                            {% if form.meta_description.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.meta_description.errors }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="form-text">Optional SEO meta description</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="{{ form.meta_keywords.id_for_label }}" class="form-label">Meta Keywords</label>
+                                        <div class="input-group has-validation">
+                                            <span class="input-group-text bg-light border-end-0">
+                                                <i class="bi bi-tag" aria-hidden="true"></i>
+                                            </span>
+                                            {{ form.meta_keywords }}
+                                            {% if form.meta_keywords.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.meta_keywords.errors }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="form-text">Optional SEO keywords</div>
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                        
+                        <!-- Form Actions Footer -->
+                        <footer class="d-flex justify-content-between align-items-center border-top pt-4 mt-4">
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'admin_blog_list' %}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left me-2"></i>Back to Blog Posts
+                                </a>
+                                <button type="reset" class="btn btn-outline-danger">
+                                    <i class="bi bi-arrow-clockwise me-2"></i>Reset Form
+                                </button>
+                            </div>
+                            <div class="d-flex gap-2">
+                                {% if post %}
+                                <a href="{% url 'admin_blog_preview' post.pk %}" class="btn btn-outline-primary">
+                                    <i class="bi bi-eye me-2"></i>Preview
+                                </a>
+                                {% endif %}
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-check-circle me-2"></i>
+                                    {% if post %}Update Post{% else %}Create Post{% endif %}
+                                </button>
+                            </div>
+                        </footer>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    const form = document.getElementById('blogForm');
+    if (form) {
+        // Real-time validation
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                validateField(this);
+            });
+        });
+
+        // Form submission validation
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            const requiredFields = form.querySelectorAll('[required]');
+            
+            requiredFields.forEach(field => {
+                if (!validateField(field)) {
+                    isValid = false;
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+                // Scroll to first error
+                const firstError = form.querySelector('.is-invalid');
+                if (firstError) {
+                    firstError.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                    firstError.focus();
+                }
+            }
+        });
+    }
+    
+    function validateField(field) {
+        const value = field.value.trim();
+        const isValid = field.type === 'checkbox' ? field.checked : value !== '';
+        
+        if (field.type !== 'checkbox') {
+            if (isValid) {
+                field.classList.remove('is-invalid');
+                field.classList.add('is-valid');
+            } else {
+                field.classList.remove('is-valid');
+                field.classList.add('is-invalid');
+            }
+        }
+        
+        return isValid;
+    }
+    
+    // Debug: Check if CKEditor is loading
+    console.log('Blog form loaded');
+    console.log('Form content field:', document.querySelector('#{{ form.content.id_for_label }}'));
+});
+</script>
+{% endblock %}

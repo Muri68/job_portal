@@ -8,6 +8,7 @@ from job.models import Job, JobCategory, JobApplication
 from job.forms import JobForm, SaveJobForm
 from accounts.models import User
 from job.views_pkg.admin_views import get_client_ip
+from blog.models import BlogPost, Category
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -34,6 +35,7 @@ def index(request):
     
     context = {
         'jobs': Job.objects.filter(status='publish')[:6],
+        'blogs': BlogPost.objects.filter(status='published')[:3],
         'page_title': 'Career Opportunities',
         # 'jobs': jobs,
         'categories': categories,
@@ -252,12 +254,150 @@ def about(request):
     return render(request, 'about-us.html', context)
 
 
+
+
 def blog(request):
+    # Get all published blogs ordered by publish date (newest first)
+    blog_list = BlogPost.objects.filter(status='published').order_by('-published_date')
+    
+    # Pagination - 6 posts per page
+    paginator = Paginator(blog_list, 6)
+    page = request.GET.get('page')
+    
+    try:
+        blogs = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page
+        blogs = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range, deliver last page of results
+        blogs = paginator.page(paginator.num_pages)
+    
+    # Get categories with their blog post counts
+    categories = Category.objects.annotate(
+        blog_count=Count('blog_posts', filter=Q(blog_posts__status='published'))
+    )
+    
+    # Get recent posts for sidebar (exclude current page posts)
+    recent_posts = BlogPost.objects.filter(status='published').order_by('-published_date')[:5]
+    
     context = {
         'page_title': 'Our Blog',
+        'blogs': blogs,
+        'categories': categories,
+        'recent_posts': recent_posts,
     }
     return render(request, 'blogs.html', context)
 
+
+
+def blog_detail(request, slug):
+    # Get the blog post or return 404
+    blog = get_object_or_404(
+        BlogPost.objects.select_related('author', 'category')
+                       .prefetch_related('tags'),
+        slug=slug, 
+        status='published'
+    )
+    
+    # Increment view count
+    blog.view_count += 1
+    blog.save(update_fields=['view_count'])
+    
+    # Get related posts (same category, excluding current post)
+    related_posts = BlogPost.objects.filter(
+        category=blog.category,
+        status='published'
+    ).exclude(id=blog.id).order_by('-published_date')[:3]
+    
+    # Get categories with counts for sidebar
+    categories = Category.objects.annotate(
+        blog_count=Count('blog_posts', filter=Q(blog_posts__status='published'))
+    )
+    
+    # Get recent posts for sidebar
+    recent_posts = BlogPost.objects.filter(status='published').order_by('-published_date')[:5]
+    
+    # Get next and previous posts
+    next_post = BlogPost.objects.filter(
+        status='published',
+        published_date__gt=blog.published_date
+    ).order_by('published_date').first()
+    
+    previous_post = BlogPost.objects.filter(
+        status='published',
+        published_date__lt=blog.published_date
+    ).order_by('-published_date').first()
+    
+    context = {
+        'blog': blog,
+        'related_posts': related_posts,
+        'categories': categories,
+        'recent_posts': recent_posts,
+        'next_post': next_post,
+        'previous_post': previous_post,
+        'page_title': blog.title,
+        'meta_description': blog.meta_description or blog.excerpt,
+    }
+    
+    return render(request, 'blog/blog_detail.html', context)
+def blog_detail(request, slug):
+    # Get the blog post or return 404
+    blog = get_object_or_404(
+        BlogPost.objects.select_related('author', 'category')
+                       .prefetch_related('tags'),
+        slug=slug, 
+        status='published'
+    )
+    
+    # Increment view count
+    blog.view_count += 1
+    blog.save(update_fields=['view_count'])
+    
+    # Calculate reading time (approx 200 words per minute)
+    import re
+    content_text = re.sub(r'<[^>]+>', '', blog.content)
+    word_count = len(content_text.split())
+    reading_time = max(1, word_count // 200)  # At least 1 minute
+    
+    # Get related posts (same category, excluding current post)
+    related_posts = BlogPost.objects.filter(
+        category=blog.category,
+        status='published'
+    ).exclude(id=blog.id).order_by('-published_date')[:3]
+    
+    # Get categories with counts for sidebar
+    categories = Category.objects.annotate(
+        blog_count=Count('blog_posts', filter=Q(blog_posts__status='published'))
+    )
+    
+    # Get recent posts for sidebar
+    recent_posts = BlogPost.objects.filter(status='published').order_by('-published_date')[:5]
+    
+    # Get next and previous posts
+    next_post = BlogPost.objects.filter(
+        status='published',
+        published_date__gt=blog.published_date
+    ).order_by('published_date').first()
+    
+    previous_post = BlogPost.objects.filter(
+        status='published',
+        published_date__lt=blog.published_date
+    ).order_by('-published_date').first()
+    
+    context = {
+        'blog': blog,
+        'related_posts': related_posts,
+        'categories': categories,
+        'recent_posts': recent_posts,
+        'next_post': next_post,
+        'previous_post': previous_post,
+        'reading_time': reading_time,
+        'page_title': blog.title,
+        'meta_description': blog.meta_description or blog.excerpt,
+    }
+    
+    return render(request, 'blog_detail.html', context)
 
 
 

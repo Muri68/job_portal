@@ -282,3 +282,42 @@ class CustomPasswordChangeForm(PasswordChangeForm):
             'placeholder': 'Confirm new password',
             'id': 'id_new_password2'
         })
+        
+        
+        
+from django import forms
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import authenticate
+
+
+
+class OTPVerificationForm(forms.Form):
+    otp_token = forms.CharField(
+        max_length=6,
+        min_length=6,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter 6-digit OTP',
+            'autocomplete': 'off'
+        })
+    )
+    
+    
+
+class DisableOTPForm(forms.Form):
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your password to confirm'
+        })
+    )
+
+    def __init__(self, user=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+
+    def clean_password(self):
+        password = self.cleaned_data.get('password')
+        if not self.user.check_password(password):
+            raise forms.ValidationError("Invalid password. Please try again.")
+        return password

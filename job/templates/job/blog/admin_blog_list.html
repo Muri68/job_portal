@@ -1,0 +1,646 @@
+{% extends 'job/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Blog Management - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary: #257dd4;
+        --primary-light: #257cd491;
+        --primary-dark: #257dd4;
+        --secondary: #546E7A;
+        --accent: #FF9800;
+        --light: #E3F2FD;
+        --dark: #257dd4;
+        --gradient-start: #257dd4;
+        --gradient-end: #257dd4;
+    }
+
+    /* Blog Card Styles */
+    .blog-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(37, 125, 212, 0.1);
+        margin-bottom: 30px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid rgba(37, 125, 212, 0.1);
+        height: 100%;
+    }
+    
+    .blog-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(37, 125, 212, 0.15);
+        border-color: var(--primary-light);
+    }
+    
+    .blog-img {
+        position: relative;
+        overflow: hidden;
+        height: 200px;
+    }
+    
+    .blog-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    
+    .blog-card:hover .blog-img img {
+        transform: scale(1.05);
+    }
+    
+    .blog-date {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background: var(--primary);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .blog-status {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+    }
+    
+    .blog-content-wrap {
+        padding: 20px;
+    }
+    
+    .blog-meta {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        font-size: 0.85rem;
+        color: var(--secondary);
+    }
+    
+    .blog-meta div {
+        display: flex;
+        align-items: center;
+        margin-right: 15px;
+    }
+    
+    .blog-meta i {
+        margin-right: 5px;
+        color: var(--primary);
+        font-size: 0.8rem;
+    }
+    
+    .blog-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+        color: var(--dark);
+        line-height: 1.4;
+    }
+    
+    .blog-title a {
+        color: inherit;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+    
+    .blog-title a:hover {
+        color: var(--primary);
+    }
+    
+    .blog-excerpt {
+        color: var(--secondary);
+        margin-bottom: 15px;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    
+    .blog-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: auto;
+    }
+    
+    .blog-read-more {
+        color: var(--primary);
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+    
+    .blog-read-more:hover {
+        color: var(--primary-dark);
+    }
+    
+    .blog-read-more i {
+        margin-left: 5px;
+        transition: transform 0.3s ease;
+        font-size: 0.8rem;
+    }
+    
+    .blog-read-more:hover i {
+        transform: translateX(3px);
+    }
+    
+    .blog-action-buttons {
+        display: flex;
+        gap: 8px;
+    }
+    
+    /* Status badges */
+    .status-draft {
+        background-color: #f59e0b;
+        color: white;
+    }
+    
+    .status-published {
+        background-color: #10b981;
+        color: white;
+    }
+    
+    .status-archived {
+        background-color: #6b7280;
+        color: white;
+    }
+    
+    /* Custom button styles */
+    .btn-primary {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+    
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+    }
+    
+    .btn-outline-primary {
+        color: var(--primary);
+        border-color: var(--primary);
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        color: white;
+    }
+    
+    /* Table styles for list view */
+    .table th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        color: var(--secondary);
+        background-color: var(--light);
+    }
+    
+    /* View toggle */
+    .btn-check:checked + .btn-outline-primary {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        color: white;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .blog-img {
+            height: 160px;
+        }
+        
+        .blog-content-wrap {
+            padding: 15px;
+        }
+        
+        .blog-meta {
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <header class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h1 class="h2 text-dark fw-bold mb-2">Blog Management</h1>
+                    <p class="text-secondary mb-0">Manage all blog posts and content</p>
+                </div>
+                <a href="{% url 'admin_blog_create' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-plus-circle me-2"></i>Create New Post
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Filters Section -->
+    <section class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent border-bottom-0 d-flex justify-content-between align-items-center py-3">
+            <h2 class="h5 mb-0 text-dark fw-semibold">
+                <i class="bi bi-funnel me-2" style="color: var(--primary);"></i>Filters & Search
+            </h2>
+            <button class="btn btn-sm btn-outline-primary" 
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#filterCollapse"
+                    aria-expanded="true"
+                    aria-controls="filterCollapse">
+                <i class="bi bi-funnel"></i>
+                <span class="d-none d-sm-inline">Toggle Filters</span>
+            </button>
+        </div>
+        
+        <div class="collapse show" id="filterCollapse">
+            <div class="card-body pt-0">
+                <form method="get" class="row g-3" id="blogFiltersForm">
+                    <div class="col-xl-3 col-md-6">
+                        <label for="statusFilter" class="form-label fw-medium text-dark">Status</label>
+                        <select id="statusFilter" name="status" class="form-select">
+                            <option value="">All Statuses</option>
+                            <option value="published" {% if status_filter == 'published' %}selected{% endif %}>Published</option>
+                            <option value="draft" {% if status_filter == 'draft' %}selected{% endif %}>Draft</option>
+                            <option value="archived" {% if status_filter == 'archived' %}selected{% endif %}>Archived</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-xl-3 col-md-6">
+                        <label for="categoryFilter" class="form-label fw-medium text-dark">Category</label>
+                        <select id="categoryFilter" name="category" class="form-select">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}" {% if category_filter == category.id|stringformat:"s" %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-xl-3 col-md-6">
+                        <label for="searchInput" class="form-label fw-medium text-dark">Search Posts</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="bi bi-search text-secondary"></i>
+                            </span>
+                            <input type="text" 
+                                   id="searchInput"
+                                   name="q" 
+                                   class="form-control" 
+                                   placeholder="Search by title or content..." 
+                                   value="{{ search_query }}">
+                        </div>
+                    </div>
+                    
+                    <div class="col-xl-3 col-md-6 d-flex align-items-end">
+                        <div class="d-flex gap-2 w-100">
+                            <button type="submit" class="btn btn-primary flex-fill">
+                                <i class="bi bi-filter me-2"></i>Apply Filters
+                            </button>
+                            <a href="{% url 'admin_blog_list' %}" class="btn btn-outline-secondary" title="Reset filters">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- View Controls -->
+    <section class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <h2 class="h5 mb-0 text-dark fw-semibold">
+            Blog Posts <span class="badge bg-primary ms-2">{{ page_obj.paginator.count }}</span>
+        </h2>
+        
+        <div class="btn-group" role="group" aria-label="View toggle">
+            <input type="radio" class="btn-check" name="viewToggle" id="cardViewBtn" autocomplete="off" checked>
+            <label class="btn btn-outline-primary" for="cardViewBtn" title="Card View">
+                <i class="bi bi-grid-3x3-gap"></i>
+                <span class="d-none d-sm-inline">Grid View</span>
+            </label>
+            
+            <input type="radio" class="btn-check" name="viewToggle" id="tableViewBtn" autocomplete="off">
+            <label class="btn btn-outline-primary" for="tableViewBtn" title="Table View">
+                <i class="bi bi-list-task me-1"></i>
+                <span class="d-none d-sm-inline">Table View</span>
+            </label>
+        </div>
+    </section>
+
+    <!-- Blog Posts Content -->
+    <main>
+        <!-- Card View -->
+        <div id="cardView">
+            <div class="row g-4">
+                {% for post in page_obj %}
+                <div class="col-xl-4 col-lg-6 col-md-6">
+                    <article class="blog-card">
+                        <div class="blog-img">
+                            {% if post.featured_image %}
+                                <img src="{{ post.featured_image.url }}" alt="{{ post.title }}">
+                            {% else %}
+                                <img src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Default blog image">
+                            {% endif %}
+                            <div class="blog-date">
+                                {{ post.created_at|date:"M d, Y" }}
+                            </div>
+                            <div class="blog-status">
+                                <span class="badge status-{{ post.status }}">
+                                    {{ post.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="blog-content-wrap">
+                            <div class="blog-meta">
+                                <div>
+                                    <i class="bi bi-person"></i>
+                                    {{ post.author.get_full_name|default:post.author.email }}
+                                </div>
+                                <div>
+                                    <i class="bi bi-folder"></i>
+                                    {{ post.category.get_name_display }}
+                                </div>
+                            </div>
+                            <h3 class="blog-title">
+                                <a href="{% url 'admin_blog_preview' post.pk %}">
+                                    {{ post.title }}
+                                </a>
+                            </h3>
+                            <p class="blog-excerpt">
+                                {{ post.excerpt|truncatewords:20 }}
+                            </p>
+                            <div class="blog-actions">
+                                <a href="{% url 'admin_blog_preview' post.pk %}" class="blog-read-more">
+                                    Read More <i class="bi bi-arrow-right"></i>
+                                </a>
+                                <div class="blog-action-buttons">
+                                    <a href="{% url 'admin_blog_edit' post.pk %}" 
+                                       class="btn btn-sm btn-outline-primary" 
+                                       title="Edit Post">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <button type="button" 
+                                            class="btn btn-sm btn-outline-danger"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#deleteModal"
+                                            data-post-id="{{ post.pk }}"
+                                            data-post-title="{{ post.title }}"
+                                            title="Delete Post">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="card border-0 text-center py-5">
+                        <div class="card-body">
+                            <i class="bi bi-file-text display-1 text-muted mb-3" style="color: var(--primary-light);"></i>
+                            <h3 class="h5 text-secondary mb-2">No blog posts found</h3>
+                            <p class="text-secondary mb-3">Try adjusting your filters or create a new blog post</p>
+                            <a href="{% url 'admin_blog_create' %}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-2"></i>Create New Post
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Table View -->
+        <div id="tableView" class="d-none">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th scope="col">Title</th>
+                                    <th scope="col">Author</th>
+                                    <th scope="col">Category</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Created</th>
+                                    <th scope="col">Views</th>
+                                    <th scope="col" class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for post in page_obj %}
+                                <tr>
+                                    <td>
+                                        <div>
+                                            <h4 class="h6 mb-1 text-dark fw-semibold">{{ post.title }}</h4>
+                                            <small class="text-secondary">{{ post.excerpt|truncatewords:10 }}</small>
+                                        </div>
+                                    </td>
+                                    <td>{{ post.author.get_full_name|default:post.author.email }}</td>
+                                    <td>{{ post.category.get_name_display }}</td>
+                                    <td>
+                                        <span class="badge status-{{ post.status }}">
+                                            {{ post.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ post.created_at|date:"M d, Y" }}</td>
+                                    <td>{{ post.view_count }}</td>
+                                    <td>
+                                        <div class="d-flex justify-content-end gap-1">
+                                            <a href="{% url 'admin_blog_preview' post.pk %}" 
+                                               class="btn btn-sm btn-outline-primary" 
+                                               title="Preview">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{% url 'admin_blog_edit' post.pk %}" 
+                                               class="btn btn-sm btn-outline-primary" 
+                                               title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#deleteModal"
+                                                    data-post-id="{{ post.pk }}"
+                                                    data-post-title="{{ post.title }}"
+                                                    title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-5">
+                                        <i class="bi bi-file-text display-1 text-muted mb-3" style="color: var(--primary-light);"></i>
+                                        <h4 class="h6 text-secondary">No blog posts found</h4>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <footer class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
+        <div class="text-secondary">
+            Showing <span class="fw-semibold">{{ page_obj.start_index }}-{{ page_obj.end_index }}</span> 
+            of <span class="fw-semibold">{{ page_obj.paginator.count }}</span> posts
+        </div>
+        
+        <nav aria-label="Blog posts pagination">
+            <ul class="pagination mb-0">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" 
+                       href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}"
+                       aria-label="Previous page">
+                        Previous
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Previous</span>
+                </li>
+                {% endif %}
+
+                {% for i in page_obj.paginator.page_range %}
+                    {% if page_obj.number == i %}
+                    <li class="page-item active" aria-current="page">
+                        <span class="page-link" style="background-color: var(--primary); border-color: var(--primary);">{{ i }}</span>
+                    </li>
+                    {% elif i > page_obj.number|add:"-3" and i < page_obj.number|add:"3" %}
+                    <li class="page-item">
+                        <a class="page-link" 
+                           href="?page={{ i }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}"
+                           style="color: var(--primary);">
+                            {{ i }}
+                        </a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" 
+                       href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}"
+                       aria-label="Next page"
+                       style="color: var(--primary);">
+                        Next
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Next</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </footer>
+    {% endif %}
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-semibold" id="deleteModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the blog post <strong id="deletePostTitle" class="text-danger">""</strong>?</p>
+                <p class="text-secondary small mb-0">This action cannot be undone and will remove all associated data.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deletePostForm" method="post" action="">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-2"></i>Delete Post
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltips.forEach(tooltip => new bootstrap.Tooltip(tooltip));
+        
+        // View toggle functionality
+        const cardView = document.getElementById('cardView');
+        const tableView = document.getElementById('tableView');
+        const cardViewBtn = document.getElementById('cardViewBtn');
+        const tableViewBtn = document.getElementById('tableViewBtn');
+        
+        function toggleView(view) {
+            if (view === 'card') {
+                cardView.classList.remove('d-none');
+                tableView.classList.add('d-none');
+            } else {
+                cardView.classList.add('d-none');
+                tableView.classList.remove('d-none');
+            }
+            
+            // Save view preference
+            localStorage.setItem('blogListView', view);
+        }
+        
+        cardViewBtn.addEventListener('change', () => toggleView('card'));
+        tableViewBtn.addEventListener('change', () => toggleView('table'));
+        
+        // Load saved view preference
+        const savedView = localStorage.getItem('blogListView') || 'card';
+        if (savedView === 'table') {
+            tableViewBtn.checked = true;
+            toggleView('table');
+        }
+        
+        // Delete modal functionality
+        const deleteModal = document.getElementById('deleteModal');
+        if (deleteModal) {
+            deleteModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const postId = button.getAttribute('data-post-id');
+                const postTitle = button.getAttribute('data-post-title');
+                
+                document.getElementById('deletePostTitle').textContent = postTitle;
+                document.getElementById('deletePostForm').action = `/administrator/dashboard/blog/${postId}/delete/`;
+            });
+        }
+        
+        // Auto-submit filters on change (optional)
+        const filterForm = document.getElementById('blogFiltersForm');
+        const filterSelects = filterForm.querySelectorAll('select');
+        
+        filterSelects.forEach(select => {
+            select.addEventListener('change', () => {
+                filterForm.submit();
+            });
+        });
+    });
+</script>
+{% endblock %}

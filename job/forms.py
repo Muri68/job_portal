@@ -540,3 +540,11 @@ class SiteSettingForm(forms.ModelForm):
             'map_embed_code': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
+    
+    def save(self, commit=True):
+        # Always set is_active to True before saving
+        instance = super().save(commit=False)
+        instance.is_active = True
+        if commit:
+            instance.save()
+        return instance

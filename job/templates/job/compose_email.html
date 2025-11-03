@@ -132,10 +132,10 @@
                             <textarea name="message" id="message" style="display: none;">
 Dear {{ application.applicant_name }},
 
-Thank you for your application for the {{ application.job.title }} position.
+Thank you for your application for the {{ application.job.title }} position. <br><br>
 
 Best regards,
-{{ request.user.get_full_name|default:request.user.email }}
+<b>Tech Recruitment UK</b>
                             </textarea>
                             <div id="editor" style="min-height: 300px;"></div>
                         </div>

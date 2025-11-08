@@ -22,3 +22,5 @@ six==1.17.0
 sqlparse==0.5.3
 typing_extensions==4.15.0
 whitenoise==6.11.0
+mysql-connector-python==9.5.0
+mysqlclient==2.2.7

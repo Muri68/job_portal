@@ -308,6 +308,7 @@
                                 </section>
 
                                 <!-- Compensation & Timeline Section -->
+                                <!-- Add this to your template in the Compensation & Timeline section -->
                                 <section class="mb-4" aria-labelledby="compensation-heading">
                                     <h2 id="compensation-heading" class="h5 mb-4 text-dark d-flex align-items-center">
                                         <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
@@ -326,10 +327,9 @@
                                                 {{ form.salary_start }}
                                                 <span class="input-group-text bg-light">/ year</span>
                                             </div>
-                                            {% if form.salary_start.errors or form.salary_end.errors %}
+                                            {% if form.salary_start.errors %}
                                             <div class="invalid-feedback d-block">
                                                 {{ form.salary_start.errors }}
-                                                {{ form.salary_end.errors }}
                                             </div>
                                             {% endif %}
                                             <div class="form-text">Leave empty if salary is not specified</div>
@@ -348,6 +348,25 @@
                                                 </div>
                                                 {% endif %}
                                             </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Add the created_at field here -->
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="{{ form.created_at.id_for_label }}" class="form-label">Creation Date</label>
+                                            <div class="input-group has-validation">
+                                                <span class="input-group-text bg-light border-end-0">
+                                                    <i class="bi bi-clock" aria-hidden="true"></i>
+                                                </span>
+                                                {{ form.created_at }}
+                                                {% if form.created_at.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.created_at.errors }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="form-text">{{ form.created_at.help_text }}</div>
                                         </div>
                                     </div>
                                 </section>
@@ -486,6 +505,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     showNotification('Starting salary should be less than ending salary.', 'warning');
                 }
             });
+        });
+    }
+
+    const createdAtField = document.getElementById('{{ form.created_at.id_for_label }}');
+    if (createdAtField) {
+        // Set max to current datetime to prevent future dates if desired
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        createdAtField.max = now.toISOString().slice(0, 16);
+        
+        createdAtField.addEventListener('change', function() {
+            if (this.value) {
+                const selectedDate = new Date(this.value);
+                const currentDate = new Date();
+                if (selectedDate > currentDate) {
+                    showNotification('Creation date cannot be in the future. Using current date instead.', 'warning');
+                    this.value = '';
+                }
+            }
         });
     }
 });

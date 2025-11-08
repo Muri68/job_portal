@@ -283,6 +283,34 @@ def job_list(request):
     return render(request, 'job/job_list.html', context)
 
 
+# @login_required
+# @admin_required
+# def job_manage(request, job_id=None):
+#     # Get job instance if editing
+#     job = None
+#     if job_id:
+#         job = get_object_or_404(Job, id=job_id)
+    
+#     categories = JobCategory.objects.all()
+    
+#     if request.method == 'POST':
+#         form = JobForm(request.POST, instance=job)
+#         if form.is_valid():
+#             form.save()
+#             action = "updated" if job else "created"
+#             messages.success(request, f'Job {action} successfully!')
+#             return redirect('job_list')
+#     else:
+#         form = JobForm(instance=job)
+    
+#     context = {
+#         'form': form,
+#         'job': job,
+#         'categories': categories,
+#     }
+    
+#     return render(request, 'job/job_manage.html', context)
+
 @login_required
 @admin_required
 def job_manage(request, job_id=None):
@@ -296,7 +324,21 @@ def job_manage(request, job_id=None):
     if request.method == 'POST':
         form = JobForm(request.POST, instance=job)
         if form.is_valid():
-            form.save()
+            job_instance = form.save(commit=False)
+            
+            # Handle created_at logic
+            created_at = form.cleaned_data.get('created_at')
+            if created_at:
+                # Use the provided created_at date
+                job_instance.created_at = created_at
+            elif not job_instance.pk:  # Only for new jobs
+                # Use current time if no created_at provided for new job
+                job_instance.created_at = timezone.now()
+            # For existing jobs, if no created_at provided, keep the existing one
+            
+            job_instance.save()
+            form.save_m2m()  # Save many-to-many relationships if any
+            
             action = "updated" if job else "created"
             messages.success(request, f'Job {action} successfully!')
             return redirect('job_list')

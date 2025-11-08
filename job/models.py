@@ -61,7 +61,8 @@ class Job(models.Model):
     status = models.CharField(max_length=50, choices=JOB_STATUS_CHOICES, default='publish')
     
     # Timestamps
-    created_at = models.DateTimeField(auto_now_add=True)
+    # created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     application_deadline = models.DateField()
     

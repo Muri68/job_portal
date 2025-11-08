@@ -5,12 +5,24 @@ import os
 
 
 class JobForm(forms.ModelForm):
+    created_at = forms.DateTimeField(
+        required=False,
+        widget=forms.DateTimeInput(
+            attrs={
+                'type': 'datetime-local',
+                'class': 'form-control',
+                'placeholder': 'Leave empty to use current date/time'
+            }
+        ),
+        help_text="Leave empty to use current date/time"
+    )
+    
     class Meta:
         model = Job
         fields = [
             'title', 'category', 'description', 'location', 
             'job_type', 'workplace_type', 'salary_start', 
-            'status', 'application_deadline'
+            'status', 'application_deadline', 'created_at'  # Added created_at
         ]
         widgets = {
             'application_deadline': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
@@ -22,6 +34,32 @@ class JobForm(forms.ModelForm):
             'workplace_type': forms.Select(attrs={'class': 'form-select'}),
             'status': forms.Select(attrs={'class': 'form-select'}),
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Format the datetime for the input field if editing existing job
+        if self.instance and self.instance.created_at:
+            self.initial['created_at'] = self.instance.created_at.strftime('%Y-%m-%dT%H:%M')
+
+
+# class JobForm(forms.ModelForm):
+#     class Meta:
+#         model = Job
+#         fields = [
+#             'title', 'category', 'description', 'location', 
+#             'job_type', 'workplace_type', 'salary_start', 
+#             'status', 'application_deadline'
+#         ]
+#         widgets = {
+#             'application_deadline': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+#             'salary_start': forms.NumberInput(attrs={'step': '0.01', 'min': '0', 'class': 'form-control'}),
+#             'title': forms.TextInput(attrs={'class': 'form-control'}),
+#             'location': forms.TextInput(attrs={'class': 'form-control'}),
+#             'category': forms.Select(attrs={'class': 'form-select'}),
+#             'job_type': forms.Select(attrs={'class': 'form-select'}),
+#             'workplace_type': forms.Select(attrs={'class': 'form-select'}),
+#             'status': forms.Select(attrs={'class': 'form-select'}),
+#         }
 
     
 

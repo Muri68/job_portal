@@ -109,6 +109,24 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+    
+    
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'techr_db',
+#         'USER': 'techr_dbusr',
+#         'PASSWORD': 'dj5wH<3a=6R_G8^^',
+#         'HOST': '199.192.16.138',
+#         'PORT': '3306',
+#         'OPTIONS': {
+#             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+#         },
+#         'CONN_MAX_AGE': 300,  # Keep connections alive for 5 minutes
+#     }
+# }
+
+
 
 # Custom user model
 AUTH_USER_MODEL = "accounts.User"

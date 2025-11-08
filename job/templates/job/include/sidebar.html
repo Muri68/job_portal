@@ -59,15 +59,21 @@
         </h6>
         <ul class="nav flex-column mb-2">
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'contact_settings' %}">
+                <a class="nav-link {% if request.resolver_match.url_name == 'contact_settings' %}active{% endif %}" href="{% url 'contact_settings' %}">
                     <i class="bi bi-person"></i>
                     Site Settings
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'contact_messages_list' %}">
+                <a class="nav-link {% if request.resolver_match.url_name == 'contact_messages_list' %}active{% endif %}" href="{% url 'contact_messages_list' %}">
                     <i class="bi bi-envelope"></i>
                     Messages
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.resolver_match.url_name == 'admin_blog_list' %}active{% endif %}" href="{% url 'admin_blog_list' %}">
+                    <i class="bi bi-pencil-square"></i>
+                    Blog
                 </a>
             </li>
         </ul>

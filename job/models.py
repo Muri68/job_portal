@@ -180,6 +180,7 @@ class JobApplication(models.Model):
         ('shortlisted', '⭐ Shortlisted'),
         ('rejected', '❌ Rejected'),
         ('accepted', '✅ Accepted'),
+        ('withdrawn', '↩️ Withdrawn'),
     ]
     
     SOURCE_CHOICES = [
@@ -322,6 +323,30 @@ class JobApplication(models.Model):
                 return f"{months} month{'s' if months != 1 else ''} ago"
         return "Never"
     
+    @property
+    def can_be_withdrawn(self):
+        """Check if application can be withdrawn"""
+        return self.status in ['pending', 'shortlisted']
+    
+    def withdraw_application(self, user=None):
+        """Withdraw the application"""
+        if self.can_be_withdrawn:
+            self.status = 'withdrawn'
+            self.status_changed_at = timezone.now()
+            self.last_status_change = f"{self.get_status_display()} → Withdrawn"
+            self.status_change_notification_sent = False
+            self.status_change_read = False
+            
+            # Add a note about who withdrew it
+            if user:
+                self.notes += f"\n\nApplication withdrawn by applicant on {timezone.now().strftime('%Y-%m-%d %H:%M')}"
+            else:
+                self.notes += f"\n\nApplication withdrawn on {timezone.now().strftime('%Y-%m-%d %H:%M')}"
+            
+            self.save()
+            return True
+        return False
+    
     def get_status_badge_class(self):
         """Return Bootstrap badge class for status"""
         status_classes = {
@@ -331,8 +356,10 @@ class JobApplication(models.Model):
             'interview': 'bg-primary',
             'rejected': 'bg-danger',
             'accepted': 'bg-success',
+            'withdrawn': 'bg-dark',
         }
         return status_classes.get(self.status, 'bg-secondary')
+    
     
     def mark_notification_read(self):
         """Mark status change notification as read"""

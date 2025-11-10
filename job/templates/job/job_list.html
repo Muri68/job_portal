@@ -618,7 +618,7 @@
                 const jobTitle = button.getAttribute('data-job-title');
                 
                 document.getElementById('deleteJobTitle').textContent = jobTitle;
-                document.getElementById('deleteJobForm').action = `/employer/job/${jobId}/delete/`;
+                document.getElementById('deleteJobForm').action = `/administrator/jobs/delete/${jobId}/delete/`;
             });
         }
         

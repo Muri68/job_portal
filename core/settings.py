@@ -92,6 +92,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'accounts.context_processors.user_roles',
                 'accounts.context_processors.notification_count',
+                'job.context_processors.contact_info',
             ],
         },
     },

@@ -37,7 +37,7 @@
                     {% else %}
                         <a href="{% url 'accounts:login' %}" class="btn btn-outline-light me-2">Sign In</a>
                     {% endif %}
-                    <a href="#" class="btn btn-light" style="color: #1976D2;">Post a Job</a>
+                    <button class="btn btn-light ms-2" data-bs-toggle="modal" data-bs-target="#postJobModal" style="color: #1976D2;">Post Job</button>
                 </div>
             </div>
         </div>
@@ -79,7 +79,7 @@
                     {% else %}
                         <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary me-2">Sign In</a>
                     {% endif %}
-                    <a href="{% url "accounts:login" %}" class="btn btn-primary">Post a Job</a>
+                    <button class="btn btn-primary ms-2" data-bs-toggle="modal" data-bs-target="#postJobModal">Post Job</button>
                 </div>
             </div>
         </div>

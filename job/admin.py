@@ -7,6 +7,7 @@ admin.site.register(Job)
 admin.site.register(JobApplication)
 admin.site.register(SavedJob)
 admin.site.register(SiteSetting)
+admin.site.register(ContactInfo)
 
 
 from django.contrib import admin

@@ -13,7 +13,7 @@ admin_urls = [
     path('jobs/manage/', admin_views.job_manage, name='job_manage'),
     path('jobs/<int:job_id>/', admin_views.job_detail, name='job_detail'),
     path('jobs/manage/<int:job_id>/', admin_views.job_manage, name='job_manage_edit'),
-    path('jobs/delete/<int:job_id>/', admin_views.job_delete, name='job_delete'),
+    path('jobs/delete/<int:job_id>/delete/', admin_views.job_delete, name='job_delete'),
     
     # Applicant management URLs
     path('applicants/', admin_views.applicants_list, name='applicants_list'),
@@ -105,6 +105,7 @@ urlpatterns = [
     path('application/<int:application_id>/', jobseeker_views.application_detail, name='application_detail'),
     path('job/<int:job_id>/check-status/', jobseeker_views.check_application_status, name='check_application_status'),
     path('job/<int:job_id>/quick-apply/', jobseeker_views.quick_apply, name='quick_apply'),
+    path('application/<int:application_id>/withdraw/', jobseeker_views.withdraw_application, name='withdraw_application'),
     
     path('dashboard/notification/', jobseeker_views.job_seeker_notification, name='job_seeker_notification'),
     path('notifications/mark-all-read/', jobseeker_views.mark_all_notifications_read, name='mark_all_notifications_read'),

@@ -275,6 +275,30 @@ def check_application_status(request, job_id):
     return JsonResponse({'has_applied': False})
 
 
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+from django.views.decorators.http import require_POST
+
+@login_required
+@require_POST
+def withdraw_application(request, application_id):
+    application = get_object_or_404(JobApplication, id=application_id)
+    
+    # Check if the logged-in user owns this application
+    if application.applicant != request.user:
+        messages.error(request, "You don't have permission to withdraw this application.")
+        return redirect('application_detail', application_id=application_id)
+    
+    if application.withdraw_application(user=request.user):
+        messages.success(request, "Your application has been successfully withdrawn.")
+    else:
+        messages.error(request, "This application cannot be withdrawn at this stage.")
+    
+    return redirect('application_detail', application_id=application_id)
+
+
 @require_http_methods(["POST"])
 @login_required
 @job_seeker_required

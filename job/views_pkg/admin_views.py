@@ -284,33 +284,9 @@ def job_list(request):
     return render(request, 'job/job_list.html', context)
 
 
-# @login_required
-# @admin_required
-# def job_manage(request, job_id=None):
-#     # Get job instance if editing
-#     job = None
-#     if job_id:
-#         job = get_object_or_404(Job, id=job_id)
-    
-#     categories = JobCategory.objects.all()
-    
-#     if request.method == 'POST':
-#         form = JobForm(request.POST, instance=job)
-#         if form.is_valid():
-#             form.save()
-#             action = "updated" if job else "created"
-#             messages.success(request, f'Job {action} successfully!')
-#             return redirect('job_list')
-#     else:
-#         form = JobForm(instance=job)
-    
-#     context = {
-#         'form': form,
-#         'job': job,
-#         'categories': categories,
-#     }
-    
-#     return render(request, 'job/job_manage.html', context)
+
+from django.utils import timezone
+from datetime import datetime
 
 @login_required
 @admin_required
@@ -327,18 +303,28 @@ def job_manage(request, job_id=None):
         if form.is_valid():
             job_instance = form.save(commit=False)
             
-            # Handle created_at logic
-            created_at = form.cleaned_data.get('created_at')
-            if created_at:
-                # Use the provided created_at date
-                job_instance.created_at = created_at
+            # Handle created_at logic with separate date and time
+            creation_date = form.cleaned_data.get('creation_date')
+            creation_time = form.cleaned_data.get('creation_time')
+            
+            if creation_date and creation_time:
+                # Combine date and time
+                job_instance.created_at = datetime.combine(creation_date, creation_time)
+            elif creation_date:
+                # Use provided date with current time
+                current_time = timezone.now().time()
+                job_instance.created_at = datetime.combine(creation_date, current_time)
+            elif creation_time:
+                # Use provided time with current date
+                current_date = timezone.now().date()
+                job_instance.created_at = datetime.combine(current_date, creation_time)
             elif not job_instance.pk:  # Only for new jobs
-                # Use current time if no created_at provided for new job
+                # Use current datetime if no custom values provided
                 job_instance.created_at = timezone.now()
-            # For existing jobs, if no created_at provided, keep the existing one
+            # For existing jobs, if no custom values provided, keep the existing created_at
             
             job_instance.save()
-            form.save_m2m()  # Save many-to-many relationships if any
+            form.save_m2m()
             
             action = "updated" if job else "created"
             messages.success(request, f'Job {action} successfully!')

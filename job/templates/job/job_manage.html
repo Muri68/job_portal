@@ -308,7 +308,6 @@
                                 </section>
 
                                 <!-- Compensation & Timeline Section -->
-                                <!-- Add this to your template in the Compensation & Timeline section -->
                                 <section class="mb-4" aria-labelledby="compensation-heading">
                                     <h2 id="compensation-heading" class="h5 mb-4 text-dark d-flex align-items-center">
                                         <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
@@ -354,19 +353,35 @@
                                     <!-- Add the created_at field here -->
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
-                                            <label for="{{ form.created_at.id_for_label }}" class="form-label">Creation Date</label>
+                                            <label for="{{ form.creation_date.id_for_label }}" class="form-label">Creation Date</label>
+                                            <div class="input-group has-validation">
+                                                <span class="input-group-text bg-light border-end-0">
+                                                    <i class="bi bi-calendar" aria-hidden="true"></i>
+                                                </span>
+                                                {{ form.creation_date }}
+                                                {% if form.creation_date.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.creation_date.errors }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="form-text">{{ form.creation_date.help_text }}</div>
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-3">
+                                            <label for="{{ form.creation_time.id_for_label }}" class="form-label">Creation Time</label>
                                             <div class="input-group has-validation">
                                                 <span class="input-group-text bg-light border-end-0">
                                                     <i class="bi bi-clock" aria-hidden="true"></i>
                                                 </span>
-                                                {{ form.created_at }}
-                                                {% if form.created_at.errors %}
+                                                {{ form.creation_time }}
+                                                {% if form.creation_time.errors %}
                                                 <div class="invalid-feedback d-block">
-                                                    {{ form.created_at.errors }}
+                                                    {{ form.creation_time.errors }}
                                                 </div>
                                                 {% endif %}
                                             </div>
-                                            <div class="form-text">{{ form.created_at.help_text }}</div>
+                                            <div class="form-text">{{ form.creation_time.help_text }}</div>
                                         </div>
                                     </div>
                                 </section>
